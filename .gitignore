@@ -16,9 +16,32 @@ pnpm-debug.log*
 # environment variables
 .env
 .env.production
+.env.local
 
 # macOS-specific files
 .DS_Store
 
 # jetbrains setting folder
 .idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+.pytest_cache/
+
+# Backend specific
+backend/__pycache__/
+backend/routes/__pycache__/
+backend/*.pyc
+backend/.env
+
+# Backup files
+*_backup.*
+*.bak
