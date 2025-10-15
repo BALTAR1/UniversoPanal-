@@ -1,0 +1,33 @@
+---
+import Sidebar from '../ui/Sidebar.jsx';
+import Layout from '../../layouts/Layout.astro';
+
+const { title = "Dashboard" } = Astro.props;
+---
+
+<Layout title={`${title} - Admin Dashboard`}>
+    <div class="flex min-h-screen">
+        <!-- Sidebar -->
+        <Sidebar client:load />
+        
+        <!-- Main Content -->
+        <main class="flex-1 p-8 bg-gray-100">
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-gray-800">{title}</h1>
+                <p class="text-gray-600 mt-2">Gestiona tu tienda desde aquí</p>
+            </div>
+            
+            <!-- Content -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <slot />
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Verificar autenticación al cargar la página
+        import { requireAuth } from '../../utils/auth.js';
+        requireAuth();
+    </script>
+</Layout>

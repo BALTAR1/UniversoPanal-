@@ -1,0 +1,52 @@
+---
+import FlipCard from '../ui/FlipCard.jsx';
+const servicios = [
+	{
+		titulo: 'Mayorista',
+		items: [
+			'Precios exclusivos por volumen',
+			'Atención personalizada B2B',
+			'Envíos a todo el país',
+			'Facturación a empresas',
+		],
+	},
+	{
+		titulo: 'Minorista',
+		items: [
+			'Ofertas semanales',
+			'Envíos rápidos',
+			'Soporte post-venta',
+			'Compra 100% online',
+		],
+	},
+];
+---
+
+<section class="w-full py-8 bg-[#f6fbff] mb-20">
+	<div class="max-w-5xl mx-auto px-4">
+		<h1 class="text-4xl md:text-5xl font-black text-blue-900 mb-4 text-center">Nuestros Servicios</h1>
+		<p class="text-lg md:text-x max-w-2xl mx-auto text-center mb-12 font-semibold">
+			Ofrecemos soluciones tanto para clientes mayoristas como minoristas, adaptándonos a cada necesidad con atención y beneficios exclusivos.
+		</p>
+		<div class="flex flex-col md:flex-row gap-8 justify-center items-center">
+					<FlipCard
+						frontTitle={servicios[0].titulo}
+						backTitle="¿Qué incluye?"
+						backItems={servicios[0].items}
+						size="xl"
+						buttonLabel="Contactar"
+						buttonHref="#contacto"
+						buttonColor="blue"
+					/>
+					<FlipCard
+						frontTitle={servicios[1].titulo}
+						backTitle="¿Qué incluye?"
+						backItems={servicios[1].items}
+						size="xl"
+						buttonLabel="Catálogo"
+						buttonHref="#catalogo"
+						buttonColor="cyan"
+					/>
+		</div>
+	</div>
+</section>

@@ -1,0 +1,80 @@
+---
+// Productos destacados de ejemplo
+const productos = [
+  { id: 1, nombre: 'Auriculares Bluetooth', precio: 12999, imagen: '/images/desta.png', desc: 'Sonido HD, batería 24h' },
+  { id: 2, nombre: 'Smartwatch Pro', precio: 24999, imagen: '/images/desta.png', desc: 'Monitor de salud, resistente al agua' },
+  { id: 3, nombre: 'Parlante Portátil', precio: 8999, imagen: '/images/desta.png', desc: 'Bass potente, bluetooth 5.0' },
+  { id: 4, nombre: 'Teclado Mecánico', precio: 15999, imagen: '/images/desta.png', desc: 'RGB, switches blue' },
+  { id: 5, nombre: 'Mouse Gamer', precio: 7999, imagen: '/images/desta.png', desc: 'Sensor óptico, 7 botones' },
+  { id: 6, nombre: 'Cámara Web HD', precio: 10999, imagen: '/images/desta.png', desc: '1080p, micrófono integrado' },
+  { id: 7, nombre: 'Cargador Rápido', precio: 4999, imagen: '/images/desta.png', desc: 'USB-C, 30W' },
+  { id: 8, nombre: 'Lámpara LED', precio: 5999, imagen: '/images/desta.png', desc: 'Regulable, bajo consumo' },
+];
+---
+
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div class="text-center mb-10">
+    <h1 class="text-3xl md:text-4xl font-black text-blue-900 mb-2">Productos Destacados</h1>
+    <p class="text-gray-600 text-lg max-w-xl mx-auto">Descubrí los productos más elegidos y con mejor relación precio/calidad de nuestra tienda.</p>
+  </div>
+
+  <!-- Slider horizontal -->
+  <div class="relative">
+    <div id="sliderDestacados" class="flex gap-6 overflow-x-auto scroll-smooth pb-4 hide-scrollbar">
+      {productos.map((producto) => (
+        <div class="min-w-[260px] max-w-xs w-full bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col items-center p-6 transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
+          <img src={producto.imagen} alt={producto.nombre} class="w-28 h-28 object-contain mb-4" />
+          <h2 class="text-lg font-bold text-gray-900 mb-1 text-center">{producto.nombre}</h2>
+          <p class="text-sm text-gray-500 mb-3 text-center">{producto.desc}</p>
+          <div class="text-2xl font-extrabold text-blue-600 mb-4">${producto.precio.toLocaleString('es-AR')}</div>
+          <button class="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-colors">Comprar</button>
+        </div>
+      ))}
+    </div>
+    <!-- Flechas -->
+    <button id="prevDestacados" class="hidden md:flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+    </button>
+    <button id="nextDestacados" class="hidden md:flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+    </button>
+  </div>
+    <!-- Botón Explorar Catálogo -->
+    <div class="mt-10 flex justify-center">
+      <a href="/productos" class="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg">
+        Explorar catálogo
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+        </svg>
+      </a>
+    </div>
+</section>
+
+<style>
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>
+
+<script>
+// Slider funcionalidad básica para flechas
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    const slider = document.getElementById('sliderDestacados');
+    const prev = document.getElementById('prevDestacados');
+    const next = document.getElementById('nextDestacados');
+    if (slider && prev && next) {
+      prev.addEventListener('click', () => {
+        slider.scrollBy({ left: -slider.offsetWidth, behavior: 'smooth' });
+      });
+      next.addEventListener('click', () => {
+        slider.scrollBy({ left: slider.offsetWidth, behavior: 'smooth' });
+      });
+    }
+  }, 100);
+}
+</script>
