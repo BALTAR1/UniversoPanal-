@@ -11,7 +11,7 @@ export default function Sidebar() {
         <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col">
             {/* Header */}
             <div className="p-6 border-b border-gray-700">
-                <h1 className="text-2xl font-bold">🍼 Mundo Pañal</h1>
+                <h1 className="text-2xl font-bold">🍼 Universo Pañal</h1>
                 <p className="text-sm text-gray-400 mt-1">Panel Administrativo</p>
             </div>
 

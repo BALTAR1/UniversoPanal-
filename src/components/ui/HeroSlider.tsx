@@ -9,8 +9,10 @@ interface Banner {
 
 const banners: Banner[] = [
   { id: 1, image: '/images/B1.svg', alt: 'Banner 1 - Mundo Pañal' },
-  { id: 2, image: '/images/B2.svg', alt: 'Banner 2 - Ofertas Especiales' },
-  { id: 3, image: '/images/B1.svg', alt: 'Banner 3 - Mundo Pañal' },
+  { id: 2, image: '/images/ban-hero2.jpg', alt: 'Banner 2 - Pampers' },
+  { id: 3, image: '/images/ban-hero3.jpg', alt: 'Banner 3 - Babyseck' },
+  { id: 4, image: '/images/ban-hero4.jpg', alt: 'Banner 4 - huggies' },
+  { id: 5, image: '/images/ban-hero5.png', alt: 'Banner 5 - johmsons' },
 ];
 
 export default function HeroSlider() {
@@ -40,7 +42,7 @@ export default function HeroSlider() {
 
   return (
     <section 
-      className="relative w-screen overflow-hidden bg-yellow-300 h-[320px] md:h-[600px] left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
+      className="relative w-screen overflow-hidden bg-amber-500 h-[320px] md:h-[600px] left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]"
       style={{ left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw' }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -55,7 +57,8 @@ export default function HeroSlider() {
             <img
               src={banner.image}
               alt={banner.alt}
-              className="w-screen h-full object-cover"
+              className="w-screen h-full object-contain md:object-cover md:object-center"
+              style={{objectPosition: 'center top'}}
             />
           </div>
         ))}

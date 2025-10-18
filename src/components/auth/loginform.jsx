@@ -89,55 +89,56 @@ export default function LoginForm() {
 			}
 		}
 
-	return (
-		<div className="flex flex-col items-center w-full max-w-xs sm:max-w-sm bg-white shadow-2xl rounded-2xl px-4 py-6 sm:p-8 mx-auto">
-			{/* Icono usuario */}
-			<div className="flex justify-center mb-6">
-				<svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="#2563eb" strokeWidth="1.5" className="bg-blue-100 rounded-full p-2">
-					<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 7.5a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 19.25a7.75 7.75 0 0115.5 0v.25a.75.75 0 01-.75.75H5.25a.75.75 0 01-.75-.75v-.25z" />
-				</svg>
+		return (
+			<div className="flex flex-col items-center w-full max-w-xs sm:max-w-sm bg-white/70 shadow-xl rounded-2xl px-3 py-4 sm:px-5 sm:py-6 mx-auto backdrop-blur-md border border-[#e0f2fe]/60">
+				<form onSubmit={handleSubmit} className="w-full space-y-4 sm:space-y-6">
+					{/* Campo de email */}
+					<div className="relative">
+						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#7be3f7]">
+							<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 8l9 6 9-6" /><rect x="3" y="6" width="18" height="12" rx="2" strokeWidth="1.5" /></svg>
+						</span>
+						<input
+							className="w-full border border-[#b6f0fa] rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#7be3f7] bg-[#fafdff] text-gray-900 placeholder-gray-400 text-base transition shadow-sm"
+							type="email"
+							required
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
+							placeholder="Correo electrónico"
+							autoComplete="username"
+						/>
+					</div>
+					{/* Campo de contraseña */}
+					<div className="relative">
+						<span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#f7b6d2]">
+							<svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="6" y="10" width="12" height="8" rx="2" strokeWidth="1.5" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 14v2" /><circle cx="12" cy="13" r="1" /></svg>
+						</span>
+						<input
+							className="w-full border border-[#f7b6d2] rounded-lg pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#f7b6d2] bg-[#fdf6fa] text-gray-900 placeholder-gray-400 text-base transition shadow-sm"
+							type="password"
+							minLength={6}
+							required
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
+							placeholder="Contraseña"
+							autoComplete="current-password"
+						/>
+					</div>
+					{/* Mensaje de error o éxito */}
+					{mensaje && <p className="text-sm text-red-600 text-center font-medium px-2">{mensaje}</p>}
+					{/* Botón principal: login o registro */}
+							<button
+								type="submit"
+								disabled={loading}
+								className="w-full btn-responsive rounded-lg bg-[#2563eb] text-white font-bold text-base shadow-md hover:scale-105 hover:shadow-xl transition disabled:opacity-60 tracking-widest touch-target py-2.5"
+							>
+								{loading ? "Procesando..." : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
+							</button>
+					{/* Enlace de recuperación de contraseña */}
+							<div className="text-center mt-2">
+								<a href="#" className="text-sm text-[#2563eb] hover:underline font-medium touch-target px-2 py-1 transition-colors">¿Olvidaste tu contraseña?</a>
+							</div>
+					
+				</form>
 			</div>
-			<form onSubmit={handleSubmit} className="w-full space-y-4 sm:space-y-6">
-				{/* Campo de email */}
-				<div>
-					<input
-						className="w-full border border-blue-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-gray-900 placeholder-gray-400 text-base transition shadow-sm"
-						type="email"
-						required
-						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						placeholder="Correo electrónico"
-						autoComplete="username"
-					/>
-				</div>
-				{/* Campo de contraseña */}
-				<div>
-					<input
-						className="w-full border border-blue-300 rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 bg-blue-50 text-gray-900 placeholder-gray-400 text-base transition shadow-sm"
-						type="password"
-						minLength={6}
-						required
-						value={password}
-						onChange={(e) => setPassword(e.target.value)}
-						placeholder="Contraseña"
-						autoComplete="current-password"
-					/>
-				</div>
-				{/* Mensaje de error o éxito */}
-				{mensaje && <p className="text-sm text-red-600 text-center font-medium px-2">{mensaje}</p>}
-				{/* Botón principal: login o registro */}
-				<button
-					type="submit"
-					disabled={loading}
-					className="w-full btn-responsive rounded-lg bg-blue-600 text-white font-bold text-base shadow-md hover:bg-blue-700 transition disabled:opacity-60 tracking-widest touch-target"
-				>
-					{loading ? "Procesando..." : mode === "login" ? "Iniciar sesión" : "Crear cuenta"}
-				</button>
-				{/* Enlace de recuperación de contraseña */}
-				<div className="text-center mt-2">
-					<a href="#" className="text-sm text-blue-700 hover:text-blue-900 font-medium touch-target px-2 py-1">¿Olvidaste tu contraseña?</a>
-				</div>
-			</form>
-		</div>
-	);
+		);
 }
