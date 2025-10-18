@@ -18,9 +18,12 @@ export default function FilterSidebar({
     const [precioMin, setPrecioMin] = useState(filtrosActuales.precioMin || '');
     const [precioMax, setPrecioMax] = useState(filtrosActuales.precioMax || '');
     const [ordenamiento, setOrdenamiento] = useState(filtrosActuales.ordenar || 'relevancia');
+    const [soloOfertas, setSoloOfertas] = useState(filtrosActuales.soloOfertas || false);
+    const [soloCombos, setSoloCombos] = useState(filtrosActuales.soloCombos || false);
 
     // Estado para secciones colapsables
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
+        promociones: true,
         categorias: true,
         marcas: true,
         precio: true
@@ -35,6 +38,8 @@ export default function FilterSidebar({
             precioMin: precioMin !== '' ? Number(precioMin) : null,
             precioMax: precioMax !== '' ? Number(precioMax) : null,
             ordenar: ordenamiento,
+            soloOfertas: soloOfertas,
+            soloCombos: soloCombos,
             pagina: 1
         };
         
@@ -49,6 +54,8 @@ export default function FilterSidebar({
         setPrecioMin('');
         setPrecioMax('');
         setOrdenamiento('relevancia');
+        setSoloOfertas(false);
+        setSoloCombos(false);
         
         onFiltrosChange({
             busqueda: '',
@@ -57,6 +64,8 @@ export default function FilterSidebar({
             precioMin: null,
             precioMax: null,
             ordenar: 'relevancia',
+            soloOfertas: false,
+            soloCombos: false,
             pagina: 1
         });
     };
@@ -87,7 +96,7 @@ export default function FilterSidebar({
                 </button>
             </div>
 
-            <div className="p-4 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="p-4 space-y-5">
                 {/* Búsqueda */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -106,6 +115,75 @@ export default function FilterSidebar({
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                         </svg>
                     </div>
+                </div>
+
+                {/* Promociones - NUEVO */}
+                <div className="border-t border-gray-200 pt-4">
+                    <button
+                        onClick={() => toggleSeccion('promociones')}
+                        className="w-full flex items-center justify-between text-sm font-medium text-gray-900 mb-3"
+                    >
+                        <span className="flex items-center gap-2">
+                            <span>🎉</span>
+                            <span>Promociones</span>
+                        </span>
+                        <svg 
+                            className={`w-4 h-4 transition-transform ${seccionesAbiertas.promociones ? 'rotate-180' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    
+                    {seccionesAbiertas.promociones && (
+                        <div className="space-y-3">
+                            {/* Filtro Solo Ofertas */}
+                            <label className="flex items-center cursor-pointer group p-2 rounded hover:bg-red-50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={soloOfertas}
+                                    onChange={(e) => {
+                                        setSoloOfertas(e.target.checked);
+                                        if (e.target.checked) {
+                                            setSoloCombos(false); // Desactivar combos si se activa ofertas
+                                        }
+                                    }}
+                                    className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-2 focus:ring-red-500"
+                                />
+                                <div className="ml-3 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-gray-900">Solo Ofertas</span>
+                                        <span className="bg-red-500 text-white text-xs px-1.5 py-0.5 rounded font-bold">%OFF</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-0.5">Productos con descuento activo</p>
+                                </div>
+                            </label>
+
+                            {/* Filtro Solo Combos */}
+                            <label className="flex items-center cursor-pointer group p-2 rounded hover:bg-purple-50 transition-colors">
+                                <input
+                                    type="checkbox"
+                                    checked={soloCombos}
+                                    onChange={(e) => {
+                                        setSoloCombos(e.target.checked);
+                                        if (e.target.checked) {
+                                            setSoloOfertas(false); // Desactivar ofertas si se activa combos
+                                        }
+                                    }}
+                                    className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-500"
+                                />
+                                <div className="ml-3 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-gray-900">Solo Combos</span>
+                                        <span className="bg-purple-500 text-white text-xs px-1.5 py-0.5 rounded font-bold">🎁</span>
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-0.5">Packs promocionales con descuento</p>
+                                </div>
+                            </label>
+                        </div>
+                    )}
                 </div>
 
                 {/* Categorías */}

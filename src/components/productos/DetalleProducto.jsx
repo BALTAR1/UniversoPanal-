@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { productosPublicosService } from '../../services/productosPublicos.js';
 
 /**
@@ -15,6 +15,13 @@ export default function DetalleProducto({ productoId }) {
 
     // Tallas disponibles (esto debería venir de la BD en el futuro)
     const tallasDisponibles = ['P', 'M', 'G', 'XG', 'XXG'];
+
+    // Definir todasImagenes arriba para evitar errores de referencia
+    const imagenes = producto?.imagenes || [];
+    const todasImagenes = [
+        producto?.imagen_url,
+        ...imagenes.map(img => img.url)
+    ].filter(Boolean);
 
     useEffect(() => {
         cargarProducto();
@@ -73,6 +80,27 @@ export default function DetalleProducto({ productoId }) {
         alert(`${producto.nombre} (Talla ${tallaSeleccionada}) x${cantidad} agregado al carrito`);
     };
 
+    const intervaloRef = useRef(null);
+
+    // Autoplay: cambia la imagen cada 5 segundos
+    useEffect(() => {
+        if (todasImagenes.length <= 1) return;
+        intervaloRef.current = setInterval(() => {
+            setImagenSeleccionada((prev) => (prev + 1) % todasImagenes.length);
+        }, 5000);
+        return () => clearInterval(intervaloRef.current);
+    }, [todasImagenes.length]);
+
+    // Funciones para flechas
+    const handlePrev = () => {
+        setImagenSeleccionada((prev) => (prev - 1 + todasImagenes.length) % todasImagenes.length);
+        clearInterval(intervaloRef.current);
+    };
+    const handleNext = () => {
+        setImagenSeleccionada((prev) => (prev + 1) % todasImagenes.length);
+        clearInterval(intervaloRef.current);
+    };
+
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-12">
@@ -99,25 +127,22 @@ export default function DetalleProducto({ productoId }) {
 
     const sinStock = producto.stock === 0;
     const stockBajo = producto.stock > 0 && producto.stock <= 5;
-    const imagenes = producto.imagenes || [];
-    const todasImagenes = [
-        producto.imagen_url,
-        ...imagenes.map(img => img.url)
-    ].filter(Boolean);
 
     return (
         <div className="container mx-auto px-4 py-6">
             {/* Breadcrumb */}
-            <nav className="text-sm text-gray-600 mb-4">
-                <a href="/" className="hover:text-blue-600">Inicio</a>
-                <span className="mx-2">›</span>
-                <a href="/productos" className="hover:text-blue-600">Productos</a>
-                {producto.categoria?.nombre && (
-                    <>
-                        <span className="mx-2">›</span>
-                        <span>{producto.categoria.nombre}</span>
-                    </>
-                )}
+            <nav className="flex items-center gap-2 text-sm mb-6" aria-label="Breadcrumb">
+                <a href="/" className="text-blue-600 hover:text-blue-700 hover:underline">
+                    Inicio
+                </a>
+                <span className="text-gray-400">›</span>
+                <a href="/productos" className="text-blue-600 hover:text-blue-700 hover:underline">
+                    Productos
+                </a>
+                <span className="text-gray-400">›</span>
+                <span className="text-gray-700 font-medium">
+                    {producto.nombre}
+                </span>
             </nav>
 
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
@@ -125,32 +150,55 @@ export default function DetalleProducto({ productoId }) {
                     {/* Columna izquierda - Imágenes */}
                     <div>
                         {/* Imagen principal */}
-                        <div className="bg-gray-50 rounded-lg overflow-hidden mb-4 flex items-center justify-center" style={{ height: '320px', maxHeight: '40vh', minHeight: '200px' }}>
+                        <div className="relative bg-gray-50 rounded-lg overflow-hidden mb-8 flex items-center justify-center" style={{ height: '400px', maxHeight: '50vh', minHeight: '220px' }}>
+                            {/* Flecha izquierda */}
+                            {todasImagenes.length > 1 && (
+                                <button
+                                    onClick={handlePrev}
+                                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-blue-100 rounded-full p-2 shadow transition-all z-20"
+                                    aria-label="Imagen anterior"
+                                >
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                            )}
                             <img
                                 src={todasImagenes[imagenSeleccionada] || '/images/placeholder.svg'}
                                 alt={producto.nombre}
-                                className="max-h-72 w-auto object-contain mx-auto"
+                                className="max-h-96 w-auto object-contain mx-auto transition-all duration-300"
                             />
+                            {/* Flecha derecha */}
+                            {todasImagenes.length > 1 && (
+                                <button
+                                    onClick={handleNext}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-blue-100 rounded-full p-2 shadow transition-all z-20"
+                                    aria-label="Imagen siguiente"
+                                >
+                                    <svg width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                            )}
                         </div>
 
-                        {/* Miniaturas */}
+                        {/* Slider de miniaturas */}
                         {todasImagenes.length > 1 && (
-                            <div className="grid grid-cols-6 gap-2">
+                            <div className="flex gap-4 justify-center items-center mt-4 mb-8">
                                 {todasImagenes.map((img, index) => (
                                     <button
                                         key={index}
                                         onClick={() => setImagenSeleccionada(index)}
-                                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                                            imagenSeleccionada === index
-                                                ? 'border-blue-600'
-                                                : 'border-gray-200 hover:border-gray-400'
-                                        }`}
+                                        className={`relative flex-shrink-0 border-2 rounded-lg overflow-hidden transition-all duration-300
+                                            ${imagenSeleccionada === index ? 'border-blue-600 scale-110 shadow-lg z-10' : 'border-gray-200 hover:border-blue-400 scale-100'}
+                                        `}
+                                        style={{ width: '80px', height: '80px' }}
+                                        aria-label={`Ver imagen ${index + 1}`}
                                     >
                                         <img
                                             src={img}
                                             alt={`${producto.nombre} - Vista ${index + 1}`}
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-cover transition-all duration-300"
                                         />
+                                        {/* Indicador de posición (punto animado) */}
+                                        <span className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-3 h-3 rounded-full transition-all duration-300
+                                            ${imagenSeleccionada === index ? 'bg-blue-600 scale-125 shadow-md' : 'bg-gray-300 scale-75 opacity-60'}`}></span>
                                     </button>
                                 ))}
                             </div>
@@ -159,24 +207,6 @@ export default function DetalleProducto({ productoId }) {
 
                     {/* Columna derecha - Información */}
                     <div className="flex flex-col">
-                        {/* Badges */}
-                        <div className="flex gap-2 mb-3">
-                            {sinStock && (
-                                <span className="bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full font-bold">
-                                    Sin stock
-                                </span>
-                            )}
-                            {stockBajo && !sinStock && (
-                                <span className="bg-orange-100 text-orange-700 text-xs px-3 py-1 rounded-full font-bold">
-                                    ¡Últimas {producto.stock} unidades!
-                                </span>
-                            )}
-                            {producto.stock > 10 && (
-                                <span className="bg-yellow-100 text-yellow-700 text-xs px-3 py-1 rounded-full font-bold">
-                                    OFERTA
-                                </span>
-                            )}
-                        </div>
 
                         {/* Título */}
                         <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
@@ -189,51 +219,38 @@ export default function DetalleProducto({ productoId }) {
                             {producto.modelo && <span className="text-gray-500"> - {producto.modelo}</span>}
                         </p>
 
-                        {/* Rating (placeholder) */}
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="flex text-yellow-400">
-                                ★★★★★
-                            </div>
-                            <span className="text-sm text-gray-600">(sin calificaciones)</span>
-                        </div>
-
                         {/* Precio */}
                         <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                            <div className="text-3xl font-black text-gray-900 mb-1">
-                                {formatearPrecio(producto.precio)}
-                            </div>
-                            <p className="text-green-700 text-sm font-medium mb-1">
-                                o hasta 4 cuotas sin interés de {formatearPrecio(producto.precio / 4)}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                                Precio sin impuestos nacionales: {formatearPrecio(producto.precio * 0.79)}
-                            </p>
-                        </div>
-
-                        {/* Selector de talla */}
-                        <div className="mb-4">
-                            <label className="block text-sm font-semibold text-gray-900 mb-2">
-                                Seleccioná un talle
-                            </label>
-                            <div className="flex flex-wrap gap-2">
-                                {tallasDisponibles.map((talla) => (
-                                    <button
-                                        key={talla}
-                                        onClick={() => setTallaSeleccionada(talla)}
-                                        disabled={sinStock}
-                                        className={`
-                                            px-4 py-2 border-2 rounded-lg font-medium transition-all
-                                            ${tallaSeleccionada === talla
-                                                ? 'border-blue-600 bg-blue-50 text-blue-700'
-                                                : 'border-gray-300 hover:border-gray-400 text-gray-700'
-                                            }
-                                            ${sinStock ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                                        `}
-                                    >
-                                        {talla}
-                                    </button>
-                                ))}
-                            </div>
+                            {producto.descuento && producto.precio_con_descuento ? (
+                                <>
+                                    <div className="flex items-center gap-3 mb-2">
+                                        <span className="text-xl text-gray-500 line-through">
+                                            {formatearPrecio(producto.precio_original || producto.precio)}
+                                        </span>
+                                        <span className="bg-green-500 text-white text-sm font-bold px-3 py-1 rounded-full">
+                                            {producto.descuento}% OFF
+                                        </span>
+                                    </div>
+                                    <div className="text-4xl font-black text-green-700 mb-1">
+                                        {formatearPrecio(producto.precio_con_descuento)}
+                                    </div>
+                                    <p className="text-green-700 text-sm font-medium mb-1">
+                                        o hasta 4 cuotas sin interés de {formatearPrecio(producto.precio_con_descuento / 4)}
+                                    </p>
+                                    <p className="text-xs text-gray-500">
+                                        ¡Ahorrás {formatearPrecio((producto.precio_original || producto.precio) - producto.precio_con_descuento)}!
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="text-3xl font-black text-gray-900 mb-1">
+                                        {formatearPrecio(producto.precio)}
+                                    </div>
+                                    <p className="text-xs text-gray-500">
+                                        Precio sin impuestos nacionales: {formatearPrecio(producto.precio * 0.79)}
+                                    </p>
+                                </>
+                            )}
                         </div>
 
                         {/* Cantidad */}
@@ -265,9 +282,6 @@ export default function DetalleProducto({ productoId }) {
                                 >
                                     +
                                 </button>
-                                <span className="text-sm text-gray-600">
-                                    ({producto.stock} disponibles)
-                                </span>
                             </div>
                         </div>
 
@@ -276,15 +290,12 @@ export default function DetalleProducto({ productoId }) {
                             <button
                                 onClick={agregarAlCarrito}
                                 disabled={sinStock}
-                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed text-lg"
+                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed text-lg"
                             >
-                                {sinStock ? 'Sin stock' : 'Agregar al carrito'}
-                            </button>
-                            <button
-                                disabled={sinStock}
-                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                            >
-                                Comprar ahora
+                                {sinStock
+                                    ? 'Sin stock'
+                                    : `🛒 Agregar al carrito - ${formatearPrecio((producto.precio_con_descuento || producto.precio) * cantidad)}`
+                                }
                             </button>
                         </div>
 
@@ -348,12 +359,6 @@ export default function DetalleProducto({ productoId }) {
                                     <span className="text-gray-900">{producto.modelo}</span>
                                 </div>
                             )}
-                            {producto.sku && (
-                                <div className="flex justify-between py-2 border-b border-gray-200">
-                                    <span className="font-medium text-gray-700">SKU</span>
-                                    <span className="text-gray-900">{producto.sku}</span>
-                                </div>
-                            )}
                             {producto.peso_kg && (
                                 <div className="flex justify-between py-2 border-b border-gray-200">
                                     <span className="font-medium text-gray-700">Peso</span>
@@ -369,19 +374,6 @@ export default function DetalleProducto({ productoId }) {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Botón volver */}
-            <div className="mt-6">
-                <a 
-                    href="/productos"
-                    className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"/>
-                    </svg>
-                    Volver al catálogo
-                </a>
             </div>
         </div>
     );

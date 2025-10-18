@@ -90,22 +90,7 @@ export default function HeroSlider() {
       >
         <ChevronRight className="w-6 h-6 text-gray-800" />
       </button>
-
-      {/* Indicadores */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-2">
-        {banners.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`w-2.5 h-2.5 rounded-full transition-all duration-300 
-                       ${index === currentIndex 
-                         ? 'bg-white w-8' 
-                         : 'bg-white/60 hover:bg-white/80'
-                       }`}
-            aria-label={`Ir a slide ${index + 1}`}
-          />
-        ))}
-      </div>
+      
     </section>
   );
 }

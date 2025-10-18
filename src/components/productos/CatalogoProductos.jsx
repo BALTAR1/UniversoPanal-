@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import FilterSidebar from './FilterSidebar.jsx';
 import ProductCard from './ProductCard.jsx';
+import ComboCard from '../combos/ComboCard.jsx';
 import Pagination from './Pagination.jsx';
-import { productosPublicosService, categoriasPublicasService } from '../../services/productosPublicos.js';
+import { productosPublicosService, categoriasPublicasService, combosPublicosService } from '../../services/productosPublicos.js';
 
 /**
  * Componente principal del catálogo de productos
@@ -11,6 +12,8 @@ import { productosPublicosService, categoriasPublicasService } from '../../servi
 export default function CatalogoProductos() {
     // Estados
     const [productos, setProductos] = useState([]);
+    const [combos, setCombos] = useState([]);
+    const [items, setItems] = useState([]); // Items mezclados (productos o combos)
     const [categorias, setCategorias] = useState([]);
     const [marcas, setMarcas] = useState([]);
     const [rangoPrecios, setRangoPrecios] = useState({ min: 0, max: 0 });
@@ -32,7 +35,9 @@ export default function CatalogoProductos() {
         precioMin: null,
         precioMax: null,
         ordenar: 'relevancia',
-        ordenAsc: true
+        ordenAsc: true,
+        soloOfertas: false,
+        soloCombos: false
     });
 
     // Carga inicial de categorías, marcas y rango de precios
@@ -68,37 +73,54 @@ export default function CatalogoProductos() {
             setLoading(true);
             setError(null);
 
-            // Prepara las opciones de consulta
-            const opciones = {
-                pagina: paginacion.paginaActual,
-                porPagina: paginacion.porPagina,
-                busqueda: filtros.busqueda,
-                categoria_id: filtros.categoria_id,
-                marca: filtros.marca,
-                precioMin: filtros.precioMin,
-                precioMax: filtros.precioMax,
-                ordenar: filtros.ordenar === 'precio_asc' || filtros.ordenar === 'precio_desc' 
-                    ? 'precio' 
-                    : filtros.ordenar === 'recientes' 
-                    ? 'created_at' 
-                    : filtros.ordenar === 'relevancia'
-                    ? 'nombre'
-                    : 'nombre',
-                ordenAsc: filtros.ordenar === 'precio_desc' ? false : true
-            };
+            if (filtros.soloCombos) {
+                // Cargar solo combos
+                const resultadoCombos = await combosPublicosService.obtenerActivos({
+                    pagina: paginacion.paginaActual,
+                    porPagina: paginacion.porPagina
+                });
+                
+                setCombos(resultadoCombos.combos);
+                setItems(resultadoCombos.combos.map(c => ({ ...c, tipo: 'combo' })));
+                setPaginacion(prev => ({
+                    ...prev,
+                    totalPaginas: resultadoCombos.paginas,
+                    total: resultadoCombos.total
+                }));
+            } else {
+                // Cargar productos normalmente
+                const opciones = {
+                    pagina: paginacion.paginaActual,
+                    porPagina: paginacion.porPagina,
+                    busqueda: filtros.busqueda,
+                    categoria_id: filtros.categoria_id,
+                    marca: filtros.marca,
+                    precioMin: filtros.precioMin,
+                    precioMax: filtros.precioMax,
+                    ordenar: filtros.ordenar === 'precio_asc' || filtros.ordenar === 'precio_desc' 
+                        ? 'precio' 
+                        : filtros.ordenar === 'recientes' 
+                        ? 'created_at' 
+                        : filtros.ordenar === 'relevancia'
+                        ? 'nombre'
+                        : 'nombre',
+                    ordenAsc: filtros.ordenar === 'precio_desc' ? false : true,
+                    soloOfertas: filtros.soloOfertas
+                };
 
-            // Obtiene los productos
-            const resultado = await productosPublicosService.obtenerConFiltros(opciones);
-            
-            setProductos(resultado.productos);
-            setPaginacion(prev => ({
-                ...prev,
-                totalPaginas: resultado.paginas,
-                total: resultado.total
-            }));
+                const resultado = await productosPublicosService.obtenerConFiltros(opciones);
+                
+                setProductos(resultado.productos);
+                setItems(resultado.productos.map(p => ({ ...p, tipo: 'producto' })));
+                setPaginacion(prev => ({
+                    ...prev,
+                    totalPaginas: resultado.paginas,
+                    total: resultado.total
+                }));
+            }
         } catch (err) {
-            console.error('Error al cargar productos:', err);
-            setError('Error al cargar los productos. Por favor, intenta de nuevo.');
+            console.error('Error al cargar items:', err);
+            setError('Error al cargar los items. Por favor, intenta de nuevo.');
         } finally {
             setLoading(false);
         }
@@ -137,7 +159,11 @@ export default function CatalogoProductos() {
                     {/* Header con resultados */}
                     <div className="mb-6">
                         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                            {filtros.categoria_id 
+                            {filtros.soloOfertas 
+                                ? '🔥 Ofertas Activas' 
+                                : filtros.soloCombos 
+                                ? '🎁 Combos Especiales'
+                                : filtros.categoria_id 
                                 ? categorias.find(c => c.categoria_id === filtros.categoria_id)?.nombre 
                                 : 'Todos los productos'
                             }
@@ -145,20 +171,10 @@ export default function CatalogoProductos() {
                         <div className="flex justify-between items-center">
                             <p className="text-gray-700 font-semibold">
                                 {loading 
-                                    ? 'Cargando productos...' 
+                                    ? 'Cargando...' 
                                     : `${paginacion.total} ${paginacion.total === 1 ? 'resultado encontrado' : 'resultados encontrados'}`
                                 }
                             </p>
-                            <select 
-                                value={filtros.ordenar}
-                                onChange={(e) => setFiltros(prev => ({ ...prev, ordenar: e.target.value }))}
-                                className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                            >
-                                <option value="nombre">Ordenar por: Relevancia</option>
-                                <option value="precio_asc">Precio: Menor a Mayor</option>
-                                <option value="precio_desc">Precio: Mayor a Menor</option>
-                                <option value="recientes">Más Recientes</option>
-                            </select>
                         </div>
                     </div>
 
@@ -180,14 +196,21 @@ export default function CatalogoProductos() {
                     {/* Grid de productos */}
                     {!loading && !error && (
                         <>
-                            {productos.length > 0 ? (
+                            {items.length > 0 ? (
                                 <>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        {productos.map((producto) => (
-                                            <ProductCard 
-                                                key={producto.producto_id} 
-                                                producto={producto} 
-                                            />
+                                        {items.map((item) => (
+                                            item.tipo === 'combo' ? (
+                                                <ComboCard 
+                                                    key={`combo-${item.combo_id}`} 
+                                                    combo={item} 
+                                                />
+                                            ) : (
+                                                <ProductCard 
+                                                    key={`producto-${item.producto_id}`} 
+                                                    producto={item} 
+                                                />
+                                            )
                                         ))}
                                     </div>
 
@@ -202,7 +225,7 @@ export default function CatalogoProductos() {
                                 <div className="text-center py-12">
                                     <div className="text-6xl mb-4">🔍</div>
                                     <h3 className="text-xl font-bold text-gray-900 mb-2">
-                                        No se encontraron productos
+                                        No se encontraron {filtros.soloCombos ? 'combos' : 'productos'}
                                     </h3>
                                     <p className="text-gray-600 mb-4">
                                         Intenta ajustar los filtros o buscar con otros términos
@@ -211,9 +234,12 @@ export default function CatalogoProductos() {
                                         onClick={() => handleFiltrosChange({
                                             busqueda: '',
                                             categoria_id: null,
+                                            marca: null,
                                             precioMin: null,
                                             precioMax: null,
                                             ordenar: 'nombre',
+                                            soloOfertas: false,
+                                            soloCombos: false,
                                             pagina: 1
                                         })}
                                         className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"

@@ -44,25 +44,19 @@ export default function ProductCard({ producto }) {
                             ÚLTIMAS {producto.stock}
                         </div>
                     )}
-                    {/* Badge 2x1 o promoción (ejemplo) */}
-                    {producto.stock > 10 && (
-                        <div className="bg-yellow-400 text-gray-900 text-xs px-2 py-1 rounded font-bold shadow-md">
-                            OFERTA
+                    {/* Badge de oferta activa */}
+                    {producto.tiene_oferta && !sinStock && (
+                        <div className="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
+                            {producto.descuento}% OFF
+                        </div>
+                    )}
+                    {/* Badge de combo */}
+                    {producto.tiene_combo && !producto.tiene_oferta && !sinStock && (
+                        <div className="bg-purple-500 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
+                            EN COMBO
                         </div>
                     )}
                 </div>
-
-                {/* Corazón de favorito */}
-                <button 
-                    onClick={(e) => {
-                        e.preventDefault();
-                        console.log('Favorito:', producto.producto_id);
-                    }}
-                    className="absolute top-2 left-2 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 transition-colors"
-                    aria-label="Agregar a favoritos"
-                >
-                    <span className="text-lg">🤍</span>
-                </button>
             </a>
 
             {/* Información del producto */}
@@ -81,33 +75,41 @@ export default function ProductCard({ producto }) {
                     </h3>
                 </a>
 
-                {/* Descripción breve */}
-                {producto.descripcion && (
-                    <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-                        {producto.descripcion}
-                    </p>
-                )}
-
-                {/* Categoría */}
-                {producto.categoria_nombre && (
-                    <span className="text-xs text-gray-500 mb-2">
-                        en <span className="text-blue-600 hover:underline">{producto.categoria_nombre}</span>
-                    </span>
-                )}
-
                 {/* Precio y opciones de compra */}
                 <div className="mt-auto">
                     {/* Precio principal */}
                     <div className="mb-3">
-                        <div className="text-2xl font-black text-gray-900">
-                            {formatearPrecio(producto.precio)}
-                        </div>
-                        <p className="text-xs text-green-700 font-medium">
-                            {Math.round(producto.precio * 0.10) > 0 && `Envío gratis`}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                            en 12x ${Math.round(producto.precio / 12).toLocaleString('es-AR')}
-                        </p>
+                        {/* Si hay descuento por oferta, mostrar precio original tachado */}
+                        {producto.tiene_oferta && producto.precio_con_descuento ? (
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-sm text-gray-500 line-through">
+                                        {formatearPrecio(producto.precio_original)}
+                                    </span>
+                                    <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">
+                                        {producto.descuento}% OFF
+                                    </span>
+                                </div>
+                                <div className="text-2xl font-black text-red-600">
+                                    {formatearPrecio(producto.precio_con_descuento)}
+                                </div>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Ahorrás {formatearPrecio(producto.precio_original - producto.precio_con_descuento)}
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="text-2xl font-black text-gray-900">
+                                {formatearPrecio(producto.precio)}
+                            </div>
+                        )}
+                        {/* Mostrar badge de combo si aplica */}
+                        {producto.tiene_combo && (
+                            <div className="mt-2">
+                                <span className="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-1 rounded">
+                                    🎁 Disponible en combo
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Botón de agregar al carrito */}

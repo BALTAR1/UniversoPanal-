@@ -19,6 +19,7 @@ export const productosPublicosService = {
      * @param {string} opciones.busqueda - Texto de búsqueda en nombre/descripción
      * @param {string} opciones.ordenar - Campo para ordenar (nombre, precio, created_at)
      * @param {boolean} opciones.ordenAsc - true = ascendente, false = descendente
+     * @param {boolean} opciones.soloOfertas - true = solo productos con ofertas activas
      * @returns {Promise<{productos: Array, total: number, paginas: number}>}
      */
     obtenerConFiltros: async (opciones = {}) => {
@@ -31,7 +32,8 @@ export const productosPublicosService = {
             precioMax = null,
             busqueda = '',
             ordenar = 'nombre',
-            ordenAsc = true
+            ordenAsc = true,
+            soloOfertas = false
         } = opciones;
 
         // Calcula el rango para la paginación
@@ -84,33 +86,109 @@ export const productosPublicosService = {
             throw error;
         }
 
-        // Procesa los productos para agregar la imagen principal
-        const productosFormateados = (data || []).map(producto => {
+        // Obtener ofertas activas para todos los productos
+        const now = new Date().toISOString();
+        const { data: ofertasActivas } = await supabase
+            .from('ofertas')
+            .select('*')
+            .eq('activo', true)
+            .lte('fecha_inicio', now)
+            .gte('fecha_fin', now);
+
+        // Obtener combos activos
+        const { data: combosActivos } = await supabase
+            .from('combos')
+            .select(`
+                combo_id,
+                nombre,
+                precio_combo,
+                activo,
+                productos:combo_productos(
+                    cantidad,
+                    producto_id
+                )
+            `)
+            .eq('activo', true);
+
+        // Crear mapa de ofertas por producto_id
+        const ofertasMap = {};
+        (ofertasActivas || []).forEach(oferta => {
+            ofertasMap[oferta.producto_id] = oferta;
+        });
+
+        // Crear mapa de combos por producto_id
+        const combosMap = {};
+        (combosActivos || []).forEach(combo => {
+            combo.productos?.forEach(cp => {
+                if (!combosMap[cp.producto_id]) {
+                    combosMap[cp.producto_id] = [];
+                }
+                combosMap[cp.producto_id].push({
+                    combo_id: combo.combo_id,
+                    nombre: combo.nombre,
+                    precio_combo: combo.precio_combo
+                });
+            });
+        });
+
+        // Procesa los productos para agregar la imagen principal, ofertas y combos
+        let productosFormateados = (data || []).map(producto => {
             // Usa imagen_url del producto o la primera imagen de producto_imagenes
             const imagenPrincipal = producto.imagen_url || producto.imagenes?.[0]?.url || '/images/placeholder.svg';
+            
+            // Buscar oferta activa para este producto
+            const ofertaActiva = ofertasMap[producto.producto_id];
+            
+            // Calcular precio con descuento si hay oferta
+            let precioConDescuento = null;
+            let descuento = null;
+            if (ofertaActiva) {
+                // Intenta obtener el descuento (puede ser descuento_porcentaje o descuento)
+                descuento = ofertaActiva.descuento_porcentaje || ofertaActiva.descuento;
+                if (descuento) {
+                    precioConDescuento = producto.precio * (1 - descuento / 100);
+                }
+            }
+
+            // Obtener combos de este producto
+            const combosProducto = combosMap[producto.producto_id] || [];
             
             return {
                 ...producto,
                 imagen_principal: imagenPrincipal,
                 categoria_nombre: producto.categoria?.nombre || 'Sin categoría',
-                todas_imagenes: producto.imagenes || []
+                todas_imagenes: producto.imagenes || [],
+                // Datos de oferta
+                tiene_oferta: !!ofertaActiva && !!descuento,
+                descuento: descuento,
+                precio_con_descuento: precioConDescuento,
+                precio_original: producto.precio,
+                // Datos de combos
+                tiene_combo: combosProducto.length > 0,
+                combos: combosProducto
             };
         });
 
-        // Calcula el total de páginas
-        const totalPaginas = count ? Math.ceil(count / porPagina) : 0;
+        // Filtrar por ofertas si se solicita
+        if (soloOfertas) {
+            productosFormateados = productosFormateados.filter(p => p.tiene_oferta);
+        }
+
+        // Calcular el total después de filtros adicionales
+        const totalFiltrado = productosFormateados.length;
+        const totalPaginas = Math.ceil(totalFiltrado / porPagina);
 
         return {
             productos: productosFormateados,
-            total: count || 0,
-            paginas: totalPaginas,
+            total: soloOfertas ? totalFiltrado : (count || 0),
+            paginas: soloOfertas ? totalPaginas : (count ? Math.ceil(count / porPagina) : 0),
             paginaActual: pagina,
             porPagina
         };
     },
 
     /**
-     * Obtiene un producto por su ID con todas sus imágenes
+     * Obtiene un producto por su ID con todas sus imágenes y ofertas activas
      * @param {number} id - ID del producto
      * @returns {Promise<Object>}
      */
@@ -134,6 +212,26 @@ export const productosPublicosService = {
         // Ordena las imágenes si existen
         if (data?.imagenes) {
             data.imagenes = data.imagenes || [];
+        }
+
+        // Obtener ofertas activas para el producto
+        const now = new Date().toISOString();
+        const { data: ofertas } = await supabase
+            .from('ofertas')
+            .select('*')
+            .eq('producto_id', id)
+            .eq('activo', true)
+            .lte('fecha_inicio', now)
+            .gte('fecha_fin', now)
+            .limit(1)
+            .single();
+
+        // Si hay oferta activa, calcular precio con descuento
+        if (ofertas) {
+            data.oferta = ofertas;
+            data.precio_original = data.precio;
+            data.precio_con_descuento = data.precio * (1 - ofertas.descuento / 100);
+            data.descuento = ofertas.descuento;
         }
 
         return data;
@@ -267,5 +365,189 @@ export const categoriasPublicasService = {
         return Object.entries(marcasMap)
             .map(([marca, count]) => ({ marca, count }))
             .sort((a, b) => b.count - a.count);
+    }
+};
+
+/**
+ * Servicio para obtener combos públicos
+ */
+export const combosPublicosService = {
+    /**
+     * Obtiene todos los combos activos y vigentes con paginación
+     * @param {Object} opciones - Opciones de paginación
+     * @param {number} opciones.pagina - Número de página (empieza en 1)
+     * @param {number} opciones.porPagina - Cantidad de combos por página
+     * @returns {Promise<{combos: Array, total: number, paginas: number}>}
+     */
+    obtenerActivos: async (opciones = {}) => {
+        const {
+            pagina = 1,
+            porPagina = 12
+        } = opciones;
+
+        const desde = (pagina - 1) * porPagina;
+        const hasta = desde + porPagina - 1;
+
+        const now = new Date().toISOString();
+        
+        const { data, error, count } = await supabase
+            .from('combos')
+            .select(`
+                *,
+                combo_productos(
+                    cantidad,
+                    productos(
+                        producto_id,
+                        nombre,
+                        marca,
+                        precio,
+                        imagen_url,
+                        stock
+                    )
+                )
+            `, { count: 'exact' })
+            .eq('activo', true)
+            .lte('fecha_inicio', now)
+            .gte('fecha_fin', now)
+            .order('created_at', { ascending: false })
+            .range(desde, hasta);
+
+        if (error) {
+            console.error('Error al obtener combos:', error);
+            throw error;
+        }
+
+        const totalPaginas = count ? Math.ceil(count / porPagina) : 0;
+
+        return {
+            combos: data || [],
+            total: count || 0,
+            paginas: totalPaginas,
+            paginaActual: pagina,
+            porPagina
+        };
+    },
+
+    /**
+     * Obtiene un combo por su ID
+     * @param {number} id - ID del combo
+     * @returns {Promise<Object>}
+     */
+    obtenerPorId: async (id) => {
+        const { data, error } = await supabase
+            .from('combos')
+            .select(`
+                *,
+                combo_productos(
+                    cantidad,
+                    productos(
+                        producto_id,
+                        nombre,
+                        marca,
+                        modelo,
+                        precio,
+                        imagen_url,
+                        stock,
+                        descripcion
+                    )
+                )
+            `)
+            .eq('combo_id', id)
+            .eq('activo', true)
+            .single();
+
+        if (error) {
+            console.error('Error al obtener combo:', error);
+            throw error;
+        }
+
+        // Calcular precio de ahorro
+        if (data?.combo_productos) {
+            let precioTotal = 0;
+            data.combo_productos.forEach(item => {
+                if (item.productos) {
+                    precioTotal += item.productos.precio * item.cantidad;
+                }
+            });
+            data.precio_total_individual = precioTotal;
+            data.ahorro = precioTotal - data.precio_combo;
+            data.porcentaje_ahorro = ((data.ahorro / precioTotal) * 100).toFixed(2);
+        }
+
+        return data;
+    }
+};
+
+/**
+ * Servicio para obtener ofertas públicas
+ */
+export const ofertasPublicasService = {
+    /**
+     * Obtiene todas las ofertas activas y vigentes
+     * @returns {Promise<Array>}
+     */
+    obtenerActivas: async () => {
+        const now = new Date().toISOString();
+        
+        const { data, error } = await supabase
+            .from('ofertas')
+            .select(`
+                *,
+                productos(
+                    producto_id,
+                    nombre,
+                    marca,
+                    precio,
+                    imagen_url,
+                    stock,
+                    categoria:categorias(categoria_id, nombre)
+                )
+            `)
+            .eq('activo', true)
+            .lte('fecha_inicio', now)
+            .gte('fecha_fin', now)
+            .order('descuento', { ascending: false });
+
+        if (error) {
+            console.error('Error al obtener ofertas:', error);
+            throw error;
+        }
+
+        // Calcular precio con descuento
+        return (data || []).map(oferta => {
+            if (oferta.productos) {
+                oferta.productos.precio_original = oferta.productos.precio;
+                oferta.productos.precio_con_descuento = oferta.productos.precio * (1 - oferta.descuento / 100);
+                oferta.productos.descuento = oferta.descuento;
+            }
+            return oferta;
+        });
+    },
+
+    /**
+     * Obtiene ofertas para un producto específico
+     * @param {number} productoId - ID del producto
+     * @returns {Promise<Object|null>}
+     */
+    obtenerPorProducto: async (productoId) => {
+        const now = new Date().toISOString();
+        
+        const { data, error } = await supabase
+            .from('ofertas')
+            .select('*')
+            .eq('producto_id', productoId)
+            .eq('activo', true)
+            .lte('fecha_inicio', now)
+            .gte('fecha_fin', now)
+            .order('descuento', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (error) {
+            // No hay oferta activa, no es un error crítico
+            return null;
+        }
+
+        return data;
     }
 };
