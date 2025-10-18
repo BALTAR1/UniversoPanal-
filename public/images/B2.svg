@@ -1,0 +1,28 @@
+<svg width="1920" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradiente de fondo -->
+  <defs>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo con gradiente -->
+  <rect width="1920" height="600" fill="url(#grad2)"/>
+  
+  <!-- Texto central -->
+  <text x="960" y="250" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle">
+    Ofertas Especiales
+  </text>
+  <text x="960" y="320" font-family="Arial, sans-serif" font-size="36" fill="white" text-anchor="middle" opacity="0.9">
+    Hasta 30% de descuento en productos seleccionados
+  </text>
+  <text x="960" y="380" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" opacity="0.8">
+    ¡Aprovecha nuestras promociones!
+  </text>
+  
+  <!-- Decoración: estrellas -->
+  <polygon points="200,150 220,200 270,200 230,230 250,280 200,250 150,280 170,230 130,200 180,200" fill="white" opacity="0.15"/>
+  <polygon points="1700,400 1715,440 1755,440 1723,463 1738,503 1700,478 1662,503 1677,463 1645,440 1685,440" fill="white" opacity="0.15"/>
+  <polygon points="400,450 412,482 444,482 418,500 430,532 400,512 370,532 382,500 356,482 388,482" fill="white" opacity="0.12"/>
+</svg>

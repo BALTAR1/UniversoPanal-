@@ -1,56 +1,43 @@
-// Importa los 'hooks' useState y useEffect desde React.
 import { useState, useEffect } from 'react';
-
-// Importa componentes de UI personalizados.
-import DataTable from '../ui/DataTable.jsx';
-import Modal from '../ui/Modal.jsx';
-import Button from '../ui/Button.jsx';
-import ImageUploader from '../ui/ImageUploader.jsx';
-
-// Importa los servicios de la API.
+import DataTable from '../../ui/DataTable.jsx';
+import Modal from '../../ui/Modal.jsx';
+import Button from '../../ui/Button.jsx';
+import ImageUploader from '../../ui/ImageUploader.jsx';
 import { productosService, categoriasService, productoImagenesService } from '../../../services/apiServices.js';
 
 export default function ProductosManager() {
-    // ---- ESTADOS DEL COMPONENTE ----
+    // Estados
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
+    const [imageModalOpen, setImageModalOpen] = useState(false);
+    const [selectedImage, setSelectedImage] = useState(null);
     const [editingProducto, setEditingProducto] = useState(null);
     const [formData, setFormData] = useState({
         nombre: '',
+        marca: '',
+        modelo: '',
         descripcion: '',
         precio: '',
         sku: '',
         stock: '',
         categoria_id: '',
-        imagen_url: '', // Imagen principal (primera del array)
+        imagen_url: '',
         peso_kg: '',
         activo: true,
-        marca: '',
-        modelo: '',
     });
-
-    // --- NUEVO ESTADO ---
-    // Almacena un array de URLs de imágenes para el producto. Cada producto puede tener múltiples imágenes.
     const [imagenesProducto, setImagenesProducto] = useState([]);
-    
-    // Almacena la URL de la imagen que se va a mostrar en grande. `null` si ninguna está ampliada.
-    const [enlargedImageUrl, setEnlargedImageUrl] = useState(null);
 
-
-    // ---- CONFIGURACIÓN DE LA TABLA ----
-    // Se modifica la columna 'imagen_url' para renderizar la imagen y hacerla clickeable.
+    // Columnas de la tabla
     const columns = [
         { key: 'producto_id', label: 'ID' },
-        // --- COLUMNA DE IMÁGENES ---
         {
             key: 'imagen_url',
-            label: 'Imágenes',
+            label: 'Imagen',
             render: (imageUrl, row) => {
-                if (!imageUrl) return <span className="text-gray-400">N/A</span>;
+                if (!imageUrl) return <span className="text-gray-400">Sin imagen</span>;
                 
-                // Combinar imagen principal + imágenes adicionales
                 const todasLasImagenes = [imageUrl];
                 if (row.imagenes_adicionales && row.imagenes_adicionales.length > 0) {
                     todasLasImagenes.push(...row.imagenes_adicionales.map(img => img.url));
@@ -58,20 +45,21 @@ export default function ProductosManager() {
                 
                 return (
                     <div className="flex items-center gap-1">
-                        {/* Mostrar hasta 3 miniaturas */}
-                        {todasLasImagenes.slice(0, 3).map((url, idx) => (
+                        {todasLasImagenes.slice(0, 2).map((url, idx) => (
                             <img
                                 key={idx}
                                 src={url}
                                 alt={`Producto ${idx + 1}`}
-                                className="h-12 w-12 object-cover rounded border border-gray-200 cursor-pointer hover:scale-110 transition-transform"
-                                onClick={() => setEnlargedImageUrl(url)}
+                                className="h-10 w-10 object-cover rounded border border-gray-200 cursor-pointer hover:scale-150 transition-transform"
+                                onClick={() => {
+                                    setSelectedImage(url);
+                                    setImageModalOpen(true);
+                                }}
                             />
                         ))}
-                        {/* Badge si hay más de 3 imágenes */}
-                        {todasLasImagenes.length > 3 && (
-                            <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
-                                +{todasLasImagenes.length - 3}
+                        {todasLasImagenes.length > 2 && (
+                            <span className="text-xs bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                +{todasLasImagenes.length - 2}
                             </span>
                         )}
                     </div>
@@ -79,18 +67,44 @@ export default function ProductosManager() {
             },
         },
         { key: 'nombre', label: 'Nombre' },
-        { key: 'precio', label: 'Precio', render: (value) => `$${value}` },
-        { key: 'stock', label: 'Stock' },
         { key: 'marca', label: 'Marca' },
-        { key: 'modelo', label: 'Modelo' },
+        { key: 'modelo', label: 'Modelo', render: (value) => value || '-' },
+        { 
+            key: 'precio', 
+            label: 'Precio', 
+            render: (value) => `$${parseFloat(value).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+        },
+        { 
+            key: 'stock', 
+            label: 'Stock',
+            render: (value) => {
+                const stock = parseInt(value);
+                let className = 'px-2 py-1 text-xs font-semibold rounded-full ';
+                if (stock === 0) className += 'bg-red-100 text-red-800';
+                else if (stock < 10) className += 'bg-yellow-100 text-yellow-800';
+                else className += 'bg-green-100 text-green-800';
+                return <span className={className}>{stock}</span>;
+            }
+        },
+        { key: 'sku', label: 'SKU' },
+        {
+            key: 'activo',
+            label: 'Estado',
+            render: (value) => (
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}>
+                    {value ? 'Activo' : 'Inactivo'}
+                </span>
+            )
+        },
     ];
 
-    // ---- EFECTOS SECUNDARIOS ----
+    // Cargar datos al montar
     useEffect(() => {
         cargarDatos();
     }, []);
 
-    // ---- FUNCIONES ----
     async function cargarDatos() {
         try {
             setLoading(true);
@@ -99,7 +113,7 @@ export default function ProductosManager() {
                 categoriasService.obtenerTodas(),
             ]);
             
-            // Para cada producto, obtener sus imágenes adicionales
+            // Cargar imágenes adicionales para cada producto
             const productosConImagenes = await Promise.all(
                 productosData.map(async (producto) => {
                     try {
@@ -109,7 +123,6 @@ export default function ProductosManager() {
                             imagenes_adicionales: imagenes || []
                         };
                     } catch (error) {
-                        console.warn(`No se pudieron cargar imágenes para producto ${producto.producto_id}`);
                         return {
                             ...producto,
                             imagenes_adicionales: []
@@ -137,6 +150,8 @@ export default function ProductosManager() {
         setEditingProducto(null);
         setFormData({
             nombre: '',
+            marca: '',
+            modelo: '',
             descripcion: '',
             precio: '',
             sku: '',
@@ -145,10 +160,8 @@ export default function ProductosManager() {
             imagen_url: '',
             peso_kg: '',
             activo: true,
-            marca: '',
-            modelo: '',
         });
-        setImagenesProducto([]); // Limpia el array de imágenes
+        setImagenesProducto([]);
         setModalOpen(true);
     }
 
@@ -156,27 +169,27 @@ export default function ProductosManager() {
         setEditingProducto(producto);
         setFormData({
             nombre: producto.nombre,
+            marca: producto.marca || '',
+            modelo: producto.modelo || '',
             descripcion: producto.descripcion || '',
             precio: producto.precio,
             sku: producto.sku,
             stock: producto.stock,
-            categoria_id: producto.categoria_id,
+            categoria_id: producto.categoria_id || '',
             imagen_url: producto.imagen_url || '',
             peso_kg: producto.peso_kg || '',
             activo: producto.activo !== undefined ? producto.activo : true,
-            marca: producto.marca || '',
-            modelo: producto.modelo || '',
         });
-        // Carga las imágenes: imagen principal + imágenes adicionales de la tabla producto_imagenes
+        
+        // Cargar imágenes
         const imagenes = [];
         if (producto.imagen_url) {
             imagenes.push(producto.imagen_url);
         }
         if (producto.imagenes_adicionales && producto.imagenes_adicionales.length > 0) {
-            // Las imágenes adicionales vienen de la tabla producto_imagenes con estructura {imagen_id, producto_id, url, descripcion}
             imagenes.push(...producto.imagenes_adicionales.map(img => img.url || img));
         }
-        setImagenesProducto(imagenes.filter(img => img)); // Filtra valores vacíos
+        setImagenesProducto(imagenes.filter(img => img));
         setModalOpen(true);
     }
 
@@ -197,20 +210,22 @@ export default function ProductosManager() {
     async function handleSubmit(e) {
         e.preventDefault();
         try {
-            // Prepara los datos del producto (sin imagenes_adicionales, solo imagen_url principal)
             const dataToSubmit = {
                 ...formData,
-                imagen_url: imagenesProducto[0] || formData.imagen_url, // Primera imagen como principal
+                imagen_url: imagenesProducto[0] || formData.imagen_url,
+                precio: parseFloat(formData.precio),
+                stock: parseInt(formData.stock),
+                peso_kg: formData.peso_kg ? parseFloat(formData.peso_kg) : null,
+                categoria_id: formData.categoria_id || null,
             };
             
             let productoId;
             
             if (editingProducto) {
-                // ACTUALIZAR PRODUCTO EXISTENTE
                 await productosService.actualizar(editingProducto.producto_id, dataToSubmit);
                 productoId = editingProducto.producto_id;
                 
-                // Eliminar todas las imágenes adicionales existentes
+                // Eliminar imágenes adicionales existentes
                 if (editingProducto.imagenes_adicionales && editingProducto.imagenes_adicionales.length > 0) {
                     await Promise.all(
                         editingProducto.imagenes_adicionales.map(img => 
@@ -219,11 +234,7 @@ export default function ProductosManager() {
                     );
                 }
             } else {
-                // CREAR PRODUCTO NUEVO
                 const response = await productosService.crear(dataToSubmit);
-                console.log('Respuesta del servidor al crear producto:', response);
-                
-                // Intentar obtener el ID del producto de diferentes maneras
                 productoId = response?.producto_id || 
                              response?.id || 
                              response?.data?.producto_id ||
@@ -232,14 +243,11 @@ export default function ProductosManager() {
                              response?.[0]?.producto_id;
                 
                 if (!productoId) {
-                    console.error('Respuesta completa del servidor:', JSON.stringify(response, null, 2));
-                    throw new Error('No se pudo obtener el ID del producto creado. Verifica la respuesta del servidor.');
+                    throw new Error('No se pudo obtener el ID del producto creado');
                 }
-                
-                console.log('ID del producto creado:', productoId);
             }
             
-            // Guardar imágenes adicionales (todas excepto la primera que ya está en imagen_url)
+            // Guardar imágenes adicionales
             const imagenesAdicionales = imagenesProducto.slice(1);
             if (imagenesAdicionales.length > 0) {
                 await Promise.all(
@@ -247,7 +255,7 @@ export default function ProductosManager() {
                         productoImagenesService.agregar({
                             producto_id: productoId,
                             url: url,
-                            descripcion: `Imagen ${index + 2}` // Descripción opcional
+                            descripcion: `Imagen ${index + 2}`
                         })
                     )
                 );
@@ -262,26 +270,16 @@ export default function ProductosManager() {
         }
     }
 
-    /**
-     * Agrega una nueva imagen al array de imágenes del producto.
-     * @param {string} url - URL de la imagen subida.
-     */
     function handleImagenAgregada(url) {
         setImagenesProducto(prev => [...prev, url]);
-        // Si es la primera imagen, actualiza también imagen_url en formData
         if (imagenesProducto.length === 0) {
             setFormData(prev => ({ ...prev, imagen_url: url }));
         }
     }
 
-    /**
-     * Elimina una imagen del array de imágenes.
-     * @param {number} index - Índice de la imagen a eliminar.
-     */
     function handleEliminarImagen(index) {
         const nuevasImagenes = imagenesProducto.filter((_, i) => i !== index);
         setImagenesProducto(nuevasImagenes);
-        // Si se elimina la primera imagen, actualiza imagen_url en formData
         if (index === 0 && nuevasImagenes.length > 0) {
             setFormData(prev => ({ ...prev, imagen_url: nuevasImagenes[0] }));
         } else if (nuevasImagenes.length === 0) {
@@ -299,13 +297,14 @@ export default function ProductosManager() {
 
     return (
         <div>
-            {/* Cabecera y botón de crear */}
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-800">Gestión de Productos</h2>
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-800">Gestión de Productos</h2>
+                    <p className="text-gray-600 mt-1">Administra el catálogo completo de productos</p>
+                </div>
                 <Button onClick={handleCreate}>+ Nuevo Producto</Button>
             </div>
 
-            {/* Tabla de productos */}
             <DataTable
                 columns={columns}
                 data={productos}
@@ -313,205 +312,46 @@ export default function ProductosManager() {
                 onDelete={handleDelete}
             />
 
-            {/* Modal del formulario de edición/creación */}
+            {/* Modal de formulario */}
             <Modal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
                 title={editingProducto ? 'Editar Producto' : 'Nuevo Producto'}
+                size="lg"
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Campo para el nombre del producto */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Nombre *
-                        </label>
-                        <input
-                            type="text"
-                            name="nombre"
-                            value={formData.nombre}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
+                    {/* Información Básica */}
+                    <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                        <h4 className="font-semibold text-blue-900 mb-2">Información Básica</h4>
                     </div>
 
-                    {/* Campo para la descripción */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Descripción
-                        </label>
-                        <textarea
-                            name="descripcion"
-                            value={formData.descripcion}
-                            onChange={handleInputChange}
-                            rows={3}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </div>
-
-                    {/* Campo para el SKU */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            SKU (Código) *
-                        </label>
-                        <input
-                            type="text"
-                            name="sku"
-                            value={formData.sku}
-                            onChange={handleInputChange}
-                            required
-                            placeholder="Ej: IP15PM-256-BLK"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                    </div>
-
-                    {/* Grid para precio y stock */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Precio *
+                                Nombre del Producto *
                             </label>
                             <input
-                                type="number"
-                                name="precio"
-                                value={formData.precio}
+                                type="text"
+                                name="nombre"
+                                value={formData.nombre}
                                 onChange={handleInputChange}
                                 required
-                                step="0.01"
-                                min="0"
+                                placeholder="Ej: Pañales Pampers Premium Care"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Stock *
-                            </label>
-                            <input
-                                type="number"
-                                name="stock"
-                                value={formData.stock}
-                                onChange={handleInputChange}
-                                required
-                                min="0"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Campo para el peso */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Peso (kg) *
-                            </label>
-                            <input
-                                type="number"
-                                name="peso_kg"
-                                value={formData.peso_kg}
-                                onChange={handleInputChange}
-                                required
-                                step="0.001"
-                                min="0"
-                                placeholder="0.500"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            />
-                        </div>
-                    </div>
-
-                    {/* --- SECCIÓN DE IMÁGENES MÚLTIPLES --- */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Imágenes del Producto *
-                        </label>
-                        
-                        {/* Componente para subir nueva imagen */}
-                        <div className="mb-4">
-                            <ImageUploader
-                                currentImageUrl={null}
-                                onImageUploaded={handleImagenAgregada}
-                            />
-                        </div>
-
-                        {/* Galería de imágenes cargadas */}
-                        {imagenesProducto.length > 0 && (
-                            <div className="space-y-2">
-                                <p className="text-sm text-gray-600">
-                                    Imágenes cargadas ({imagenesProducto.length})
-                                    {imagenesProducto.length > 0 && <span className="ml-2 text-blue-600">(La primera será la imagen principal)</span>}
-                                </p>
-                                <div className="grid grid-cols-3 gap-3">
-                                    {imagenesProducto.map((url, index) => (
-                                        <div key={index} className="relative group">
-                                            <img
-                                                src={url}
-                                                alt={`Producto ${index + 1}`}
-                                                className="w-full h-24 object-cover rounded-lg border-2 border-gray-200 cursor-pointer hover:border-blue-500 transition-all"
-                                                onClick={() => setEnlargedImageUrl(url)}
-                                            />
-                                            {/* Badge de imagen principal */}
-                                            {index === 0 && (
-                                                <span className="absolute top-1 left-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded">
-                                                    Principal
-                                                </span>
-                                            )}
-                                            {/* Botón para eliminar */}
-                                            <button
-                                                type="button"
-                                                onClick={() => handleEliminarImagen(index)}
-                                                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                                                title="Eliminar imagen"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Campo oculto para validación */}
-                        <input
-                            type="hidden"
-                            value={imagenesProducto.length > 0 ? imagenesProducto[0] : ''}
-                            required
-                        />
-                    </div>
-
-                    {/* Campo para seleccionar categoría */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Categoría *
-                        </label>
-                        <select
-                            name="categoria_id"
-                            value={formData.categoria_id}
-                            onChange={handleInputChange}
-                            required
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        >
-                            <option value="">Selecciona una categoría</option>
-                            {categorias.map((cat) => (
-                                <option key={cat.categoria_id} value={cat.categoria_id}>
-                                    {cat.nombre}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Grid para marca y modelo */}
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Marca
+                                Marca *
                             </label>
                             <input
                                 type="text"
                                 name="marca"
                                 value={formData.marca}
                                 onChange={handleInputChange}
+                                required
+                                placeholder="Ej: Pampers, Huggies, Chicco"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
@@ -525,55 +365,173 @@ export default function ProductosManager() {
                                 name="modelo"
                                 value={formData.modelo}
                                 onChange={handleInputChange}
+                                placeholder="Ej: Premium Care, Soft Touch"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                SKU (Código) *
+                            </label>
+                            <input
+                                type="text"
+                                name="sku"
+                                value={formData.sku}
+                                onChange={handleInputChange}
+                                required
+                                placeholder="Ej: PAM-PC-RNP-36"
                                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             />
                         </div>
                     </div>
 
-                    {/* Botones de acción */}
-                    <div className="flex justify-end gap-3 mt-6">
-                        <Button
-                            variant="outline"
-                            onClick={() => setModalOpen(false)}
-                            type="button"
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Descripción
+                        </label>
+                        <textarea
+                            name="descripcion"
+                            value={formData.descripcion}
+                            onChange={handleInputChange}
+                            rows={3}
+                            placeholder="Describe las características del producto..."
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                    </div>
+
+                    {/* Precio e Inventario */}
+                    <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded mt-6">
+                        <h4 className="font-semibold text-green-900 mb-2">Precio e Inventario</h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Precio *
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-3 top-2.5 text-gray-500">$</span>
+                                <input
+                                    type="number"
+                                    name="precio"
+                                    value={formData.precio}
+                                    onChange={handleInputChange}
+                                    required
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="0.00"
+                                    className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Stock Disponible *
+                            </label>
+                            <input
+                                type="number"
+                                name="stock"
+                                value={formData.stock}
+                                onChange={handleInputChange}
+                                required
+                                min="0"
+                                placeholder="0"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Peso (kg)
+                            </label>
+                            <input
+                                type="number"
+                                name="peso_kg"
+                                value={formData.peso_kg}
+                                onChange={handleInputChange}
+                                step="0.001"
+                                min="0"
+                                placeholder="0.000"
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Categoría */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Categoría
+                        </label>
+                        <select
+                            name="categoria_id"
+                            value={formData.categoria_id}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
+                            <option value="">Sin categoría</option>
+                            {categorias.filter(cat => cat.activo).map(cat => (
+                                <option key={cat.categoria_id} value={cat.categoria_id}>
+                                    {cat.nombre}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Imágenes */}
+                    <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded mt-6">
+                        <h4 className="font-semibold text-purple-900 mb-2">Imágenes del Producto</h4>
+                    </div>
+
+                    <ImageUploader
+                        onImageUploaded={handleImagenAgregada}
+                        currentImages={imagenesProducto}
+                        onDeleteImage={handleEliminarImagen}
+                    />
+
+                    {/* Estado */}
+                    <div className="mt-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.activo}
+                                onChange={(e) => setFormData(prev => ({ ...prev, activo: e.target.checked }))}
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <span className="text-sm font-medium text-gray-700">
+                                Producto activo (visible en la tienda)
+                            </span>
+                        </label>
+                    </div>
+
+                    {/* Botones */}
+                    <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                        <Button variant="outline" onClick={() => setModalOpen(false)} type="button">
                             Cancelar
                         </Button>
                         <Button type="submit">
-                            {editingProducto ? 'Actualizar' : 'Crear'}
+                            {editingProducto ? 'Actualizar Producto' : 'Crear Producto'}
                         </Button>
                     </div>
                 </form>
             </Modal>
-            
-            {/* --- NUEVO --- */}
-            {/* Modal para mostrar la imagen ampliada */}
-            {enlargedImageUrl && (
-                // Contenedor del modal (overlay)
-                <div
-                    className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50"
-                    // Al hacer clic en el fondo, se cierra la imagen.
-                    onClick={() => setEnlargedImageUrl(null)}
-                >
-                    {/* Contenedor de la imagen para evitar que el clic en la imagen cierre el modal */}
-                    <div className="relative p-4">
-                        <img
-                            src={enlargedImageUrl}
-                            alt="Producto Ampliado"
-                            className="max-w-4xl max-h-[80vh] rounded-lg shadow-lg"
-                            // Detiene la propagación del clic para que no llegue al fondo.
-                            onClick={(e) => e.stopPropagation()}
-                        />
-                         {/* Botón para cerrar */}
-                        <button 
-                            onClick={() => setEnlargedImageUrl(null)}
-                            className="absolute top-0 right-0 mt-2 mr-2 text-white bg-black bg-opacity-50 rounded-full p-2 leading-none"
-                        >
-                            &times;
-                        </button>
-                    </div>
-                </div>
-            )}
+
+            {/* Modal de visualización de imagen */}
+            <Modal
+                isOpen={imageModalOpen}
+                onClose={() => setImageModalOpen(false)}
+                title="Vista Previa de Imagen"
+                size="lg"
+            >
+                {selectedImage && (
+                    <img
+                        src={selectedImage}
+                        alt="Vista previa"
+                        className="w-full h-auto rounded-lg"
+                    />
+                )}
+            </Modal>
         </div>
     );
 }

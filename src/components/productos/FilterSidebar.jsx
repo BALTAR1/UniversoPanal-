@@ -1,0 +1,283 @@
+import { useState, useEffect } from 'react';
+
+/**
+ * Componente de filtros laterales - Inspirado en Mercado Libre
+ * Filtros dinámicos basados en datos reales de productos
+ */
+export default function FilterSidebar({ 
+    categorias = [], 
+    marcas = [],
+    rangoPrecios = { min: 0, max: 0 },
+    filtrosActuales = {},
+    onFiltrosChange 
+}) {
+    // Estados locales
+    const [busqueda, setBusqueda] = useState(filtrosActuales.busqueda || '');
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(filtrosActuales.categoria_id || null);
+    const [marcaSeleccionada, setMarcaSeleccionada] = useState(filtrosActuales.marca || null);
+    const [precioMin, setPrecioMin] = useState(filtrosActuales.precioMin || '');
+    const [precioMax, setPrecioMax] = useState(filtrosActuales.precioMax || '');
+    const [ordenamiento, setOrdenamiento] = useState(filtrosActuales.ordenar || 'relevancia');
+
+    // Estado para secciones colapsables
+    const [seccionesAbiertas, setSeccionesAbiertas] = useState({
+        categorias: true,
+        marcas: true,
+        precio: true
+    });
+
+    // Función para aplicar filtros
+    const aplicarFiltros = () => {
+        const nuevosFiltros = {
+            busqueda: busqueda.trim(),
+            categoria_id: categoriaSeleccionada,
+            marca: marcaSeleccionada,
+            precioMin: precioMin !== '' ? Number(precioMin) : null,
+            precioMax: precioMax !== '' ? Number(precioMax) : null,
+            ordenar: ordenamiento,
+            pagina: 1
+        };
+        
+        onFiltrosChange(nuevosFiltros);
+    };
+
+    // Limpiar filtros
+    const limpiarFiltros = () => {
+        setBusqueda('');
+        setCategoriaSeleccionada(null);
+        setMarcaSeleccionada(null);
+        setPrecioMin('');
+        setPrecioMax('');
+        setOrdenamiento('relevancia');
+        
+        onFiltrosChange({
+            busqueda: '',
+            categoria_id: null,
+            marca: null,
+            precioMin: null,
+            precioMax: null,
+            ordenar: 'relevancia',
+            pagina: 1
+        });
+    };
+
+    // Toggle sección
+    const toggleSeccion = (seccion) => {
+        setSeccionesAbiertas(prev => ({
+            ...prev,
+            [seccion]: !prev[seccion]
+        }));
+    };
+
+    return (
+        <aside className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
+            {/* Header */}
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                    </svg>
+                    <h2 className="text-base font-semibold text-gray-900">Filtros</h2>
+                </div>
+                <button
+                    onClick={limpiarFiltros}
+                    className="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                >
+                    Limpiar
+                </button>
+            </div>
+
+            <div className="p-4 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto">
+                {/* Búsqueda */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Buscar
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={busqueda}
+                            onChange={(e) => setBusqueda(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && aplicarFiltros()}
+                            placeholder="Buscar productos..."
+                            className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        />
+                        <svg className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                {/* Categorías */}
+                {categorias.length > 0 && (
+                    <div className="border-t border-gray-200 pt-4">
+                        <button
+                            onClick={() => toggleSeccion('categorias')}
+                            className="w-full flex items-center justify-between text-sm font-medium text-gray-900 mb-3"
+                        >
+                            <span>Sub-Categoría</span>
+                            <svg 
+                                className={`w-4 h-4 transition-transform ${seccionesAbiertas.categorias ? 'rotate-180' : ''}`}
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        
+                        {seccionesAbiertas.categorias && (
+                            <div className="space-y-2">
+                                {categorias.map((categoria) => (
+                                    <label key={categoria.categoria_id} className="flex items-center cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={categoriaSeleccionada === categoria.categoria_id}
+                                            onChange={() => {
+                                                const nuevaCat = categoriaSeleccionada === categoria.categoria_id ? null : categoria.categoria_id;
+                                                setCategoriaSeleccionada(nuevaCat);
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900">
+                                            {categoria.nombre}
+                                        </span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Marcas */}
+                {marcas.length > 0 && (
+                    <div className="border-t border-gray-200 pt-4">
+                        <button
+                            onClick={() => toggleSeccion('marcas')}
+                            className="w-full flex items-center justify-between text-sm font-medium text-gray-900 mb-3"
+                        >
+                            <span>Marca</span>
+                            <svg 
+                                className={`w-4 h-4 transition-transform ${seccionesAbiertas.marcas ? 'rotate-180' : ''}`}
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+                        
+                        {seccionesAbiertas.marcas && (
+                            <div className="space-y-2 max-h-48 overflow-y-auto">
+                                {marcas.map((item, index) => (
+                                    <label key={index} className="flex items-center cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={marcaSeleccionada === item.marca}
+                                            onChange={() => {
+                                                const nuevaMarca = marcaSeleccionada === item.marca ? null : item.marca;
+                                                setMarcaSeleccionada(nuevaMarca);
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700 group-hover:text-gray-900 flex-1">
+                                            {item.marca}
+                                        </span>
+                                        <span className="text-xs text-gray-500">({item.count})</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Precio */}
+                <div className="border-t border-gray-200 pt-4">
+                    <button
+                        onClick={() => toggleSeccion('precio')}
+                        className="w-full flex items-center justify-between text-sm font-medium text-gray-900 mb-3"
+                    >
+                        <span>Precio</span>
+                        <svg 
+                            className={`w-4 h-4 transition-transform ${seccionesAbiertas.precio ? 'rotate-180' : ''}`}
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    
+                    {seccionesAbiertas.precio && (
+                        <div className="space-y-3">
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label className="block text-xs text-gray-600 mb-1">Desde</label>
+                                    <div className="relative">
+                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                                        <input
+                                            type="number"
+                                            value={precioMin}
+                                            onChange={(e) => setPrecioMin(e.target.value)}
+                                            placeholder="0"
+                                            min="0"
+                                            className="w-full pl-6 pr-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-gray-600 mb-1">Hasta</label>
+                                    <div className="relative">
+                                        <span className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500 text-sm">$</span>
+                                        <input
+                                            type="number"
+                                            value={precioMax}
+                                            onChange={(e) => setPrecioMax(e.target.value)}
+                                            placeholder={rangoPrecios.max.toString()}
+                                            min="0"
+                                            className="w-full pl-6 pr-2 py-1.5 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            {rangoPrecios.max > 0 && (
+                                <p className="text-xs text-gray-500">
+                                    Rango: ${rangoPrecios.min.toLocaleString()} - ${rangoPrecios.max.toLocaleString()}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+
+                {/* Ordenar por */}
+                <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                        Ordenar por
+                    </label>
+                    <select
+                        value={ordenamiento}
+                        onChange={(e) => {
+                            setOrdenamiento(e.target.value);
+                            setTimeout(() => aplicarFiltros(), 0);
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="relevancia">Más relevantes</option>
+                        <option value="nombre">Nombre (A-Z)</option>
+                        <option value="precio_asc">Menor precio</option>
+                        <option value="precio_desc">Mayor precio</option>
+                        <option value="recientes">Más recientes</option>
+                    </select>
+                </div>
+
+                {/* Botón aplicar */}
+                <button
+                    onClick={aplicarFiltros}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                >
+                    Aplicar filtros
+                </button>
+            </div>
+        </aside>
+    );
+}

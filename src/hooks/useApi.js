@@ -3,9 +3,9 @@
 // useEffect permite ejecutar código con efectos secundarios (como llamadas a una API) cuando el componente se monta o actualiza.
 import { useState, useEffect } from 'react';
 
-// Define la URL base del servidor de la API.
-// Centralizarla aquí facilita cambiarla en el futuro si el backend se mueve a otro dominio.
-const API_BASE_URL = 'http://localhost:5000';
+// Define la URL base del servidor de la API desde las variables de entorno.
+// Esto facilita cambiar entre desarrollo y producción sin modificar el código.
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:5000';
 
 /**
  * Función centralizada para realizar peticiones HTTP a la API.

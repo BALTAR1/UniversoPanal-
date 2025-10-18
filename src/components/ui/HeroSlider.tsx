@@ -8,9 +8,9 @@ interface Banner {
 }
 
 const banners: Banner[] = [
-  { id: 1, image: '/images/B1.png', alt: 'Banner 1' },
-  { id: 2, image: '/images/B2.png', alt: 'Banner 2' },
-  { id: 3, image: '/images/B1.png', alt: 'Banner 3' },
+  { id: 1, image: '/images/B1.svg', alt: 'Banner 1 - Mundo Pañal' },
+  { id: 2, image: '/images/B2.svg', alt: 'Banner 2 - Ofertas Especiales' },
+  { id: 3, image: '/images/B1.svg', alt: 'Banner 3 - Mundo Pañal' },
 ];
 
 export default function HeroSlider() {
