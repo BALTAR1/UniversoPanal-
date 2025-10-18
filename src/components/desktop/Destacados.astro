@@ -1,15 +1,37 @@
 ---
-// Productos destacados de ejemplo
-const productos = [
-  { id: 1, nombre: 'Pañales Premium', precio: 12999, imagen: '/images/desta.svg', desc: 'Pack x48 unidades, máxima absorción' },
-  { id: 2, nombre: 'Toallitas Húmedas', precio: 2499, imagen: '/images/desta.svg', desc: 'Pack x3, suaves y resistentes' },
-  { id: 3, nombre: 'Crema Protectora', precio: 8999, imagen: '/images/desta.svg', desc: 'Protección contra irritaciones' },
-  { id: 4, nombre: 'Shampoo Bebé', precio: 3999, imagen: '/images/desta.svg', desc: 'Sin lágrimas, pH balanceado' },
-  { id: 5, nombre: 'Aceite Corporal', precio: 4999, imagen: '/images/desta.svg', desc: 'Hidratación profunda' },
-  { id: 6, nombre: 'Talco Bebé', precio: 2999, imagen: '/images/desta.svg', desc: 'Frescura y suavidad' },
-  { id: 7, nombre: 'Peine y Cepillo', precio: 1999, imagen: '/images/desta.svg', desc: 'Set para bebé' },
-  { id: 8, nombre: 'Termómetro Digital', precio: 5999, imagen: '/images/desta.svg', desc: 'Lectura rápida' },
-];
+// Obtener productos destacados desde la API
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:5000/api';
+
+interface Producto {
+  producto_id: number;
+  nombre: string;
+  descripcion?: string;
+  precio: number;
+  imagen_url?: string;
+}
+
+let productos: Producto[] = [];
+
+try {
+  const response = await fetch(`${API_URL}/productos/destacados?limit=8`);
+  if (response.ok) {
+    productos = await response.json();
+  } else {
+    console.error('Error al cargar productos destacados:', response.statusText);
+  }
+} catch (error) {
+  console.error('Error al conectar con la API:', error);
+}
+
+// Formatear precio
+function formatearPrecio(precio: number): string {
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(precio);
+}
 ---
 
 <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -18,42 +40,50 @@ const productos = [
     <p class="text-gray-600 text-lg max-w-xl mx-auto">Descubrí los productos más elegidos y con mejor relación precio/calidad de nuestra tienda.</p>
   </div>
 
-  <!-- Slider horizontal -->
-  <div class="relative">
-    <div id="sliderDestacados" class="flex gap-6 overflow-x-auto scroll-smooth pb-4 hide-scrollbar">
-      {productos.map((producto) => (
-        <div class="min-w-[260px] max-w-xs w-full bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col items-center p-6 transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
-          <img src={producto.imagen} alt={producto.nombre} class="w-28 h-28 object-contain mb-4" />
-          <h2 class="text-lg font-bold text-gray-900 mb-1 text-center">{producto.nombre}</h2>
-          <p class="text-sm text-gray-500 mb-3 text-center">{producto.desc}</p>
-          <div class="text-2xl font-extrabold text-blue-600 mb-4">${producto.precio.toLocaleString('es-AR')}</div>
-          <button class="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-colors">Comprar</button>
-        </div>
-      ))}
+  {productos.length > 0 ? (
+    <div class="relative">
+      <div id="sliderDestacados" class="flex gap-6 overflow-x-auto scroll-smooth pb-4 hide-scrollbar">
+        {productos.map((producto) => (
+          <div class="min-w-[260px] max-w-xs w-full bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col items-center p-6 transition-transform duration-300 hover:-translate-y-2 hover:shadow-2xl">
+            <img src={producto.imagen_url || '/images/desta.svg'} alt={producto.nombre} class="w-28 h-28 object-contain mb-4" />
+            <h2 class="text-lg font-bold text-gray-900 mb-1 text-center">{producto.nombre}</h2>
+            <p class="text-sm text-gray-500 mb-3 text-center line-clamp-2">{producto.descripcion || 'Sin descripción'}</p>
+            <div class="text-2xl font-extrabold text-blue-600 mb-4">{formatearPrecio(producto.precio)}</div>
+            <a href={`/producto/${producto.producto_id}`} class="w-full py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-colors text-center block">
+              Ver producto
+            </a>
+          </div>
+        ))}
+      </div>
+      <!-- Flechas -->
+      <button id="prevDestacados" class="hidden md:flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+      </button>
+      <button id="nextDestacados" class="hidden md:flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+      </button>
     </div>
-    <!-- Flechas -->
-    <button id="prevDestacados" class="hidden md:flex items-center justify-center absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-    </button>
-    <button id="nextDestacados" class="hidden md:flex items-center justify-center absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-    </button>
+  ) : (
+    <div class="text-center py-12">
+      <p class="text-gray-500 text-lg">No hay productos destacados en este momento.</p>
+    </div>
+  )}
+  
+  <!-- Botones de Exploración -->
+  <div class="mt-10 flex flex-wrap justify-center gap-4">
+    <a href="/productos" class="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg">
+      📦 Explorar catálogo
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </a>
+    <a href="/combos" class="inline-flex items-center gap-2 px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg">
+      🎁 Ver combos
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+      </svg>
+    </a>
   </div>
-    <!-- Botones de Exploración -->
-    <div class="mt-10 flex flex-wrap justify-center gap-4">
-      <a href="/productos" class="inline-flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg">
-        📦 Explorar catálogo
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
-      </a>
-      <a href="/combos" class="inline-flex items-center gap-2 px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 text-lg">
-        🎁 Ver combos
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
-        </svg>
-      </a>
-    </div>
 </section>
 
 <style>

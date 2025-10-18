@@ -26,6 +26,7 @@ export default function ProductosManager() {
         imagen_url: '',
         peso_kg: '',
         activo: true,
+        es_destacado: false,
     });
     const [imagenesProducto, setImagenesProducto] = useState([]);
 
@@ -98,6 +99,17 @@ export default function ProductosManager() {
                 </span>
             )
         },
+        {
+            key: 'es_destacado',
+            label: 'Destacado',
+            render: (value) => (
+                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    value ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-500'
+                }`}>
+                    {value ? '⭐ Destacado' : '-'}
+                </span>
+            )
+        },
     ];
 
     // Cargar datos al montar
@@ -160,6 +172,7 @@ export default function ProductosManager() {
             imagen_url: '',
             peso_kg: '',
             activo: true,
+            es_destacado: false,
         });
         setImagenesProducto([]);
         setModalOpen(true);
@@ -179,6 +192,7 @@ export default function ProductosManager() {
             imagen_url: producto.imagen_url || '',
             peso_kg: producto.peso_kg || '',
             activo: producto.activo !== undefined ? producto.activo : true,
+            es_destacado: producto.es_destacado || false,
         });
         
         // Cargar imágenes
@@ -491,7 +505,7 @@ export default function ProductosManager() {
                     />
 
                     {/* Estado */}
-                    <div className="mt-4">
+                    <div className="mt-4 space-y-3">
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
@@ -501,6 +515,18 @@ export default function ProductosManager() {
                             />
                             <span className="text-sm font-medium text-gray-700">
                                 Producto activo (visible en la tienda)
+                            </span>
+                        </label>
+                        
+                        <label className="flex items-center gap-2 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.es_destacado}
+                                onChange={(e) => setFormData(prev => ({ ...prev, es_destacado: e.target.checked }))}
+                                className="w-4 h-4 text-yellow-600 border-gray-300 rounded focus:ring-yellow-500"
+                            />
+                            <span className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                                ⭐ Producto destacado (aparece en la página de inicio)
                             </span>
                         </label>
                     </div>
