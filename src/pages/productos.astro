@@ -5,6 +5,7 @@ import Nav from '../components/ui/Nav.astro';
 import Hero from '../components/desktop/Hero.astro';
 import Footer from '../components/desktop/Footer.astro';
 import CatalogoProductos from '../components/productos/CatalogoProductos.jsx';
+import WhatsAppButton from "../components/ui/WhatsAppButton.astro";
 ---
 
 <Layout title="Productos - Mundo Pañal">
@@ -17,6 +18,7 @@ import CatalogoProductos from '../components/productos/CatalogoProductos.jsx';
     <!-- Catálogo de Productos -->
     <section class="bg-gray-50 py-12">
         <CatalogoProductos client:only="react" />
+        <WhatsAppButton />
     </section>
     
 </Layout>

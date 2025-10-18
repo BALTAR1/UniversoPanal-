@@ -1,52 +1,68 @@
 ---
-import FlipCard from '../ui/FlipCard.jsx';
-const servicios = [
-	{
-		titulo: 'Mayorista',
-		items: [
-			'Precios exclusivos por volumen',
-			'Atención personalizada B2B',
-			'Envíos a todo el país',
-			'Facturación a empresas',
-		],
-	},
-	{
-		titulo: 'Minorista',
-		items: [
-			'Ofertas semanales',
-			'Envíos rápidos',
-			'Soporte post-venta',
-			'Compra 100% online',
-		],
-	},
-];
 ---
-
-<section class="w-full py-8 bg-[#f6fbff] mb-20">
-	<div class="max-w-5xl mx-auto px-4">
-		<h1 class="text-4xl md:text-5xl font-black text-blue-900 mb-4 text-center">Nuestros Servicios</h1>
-		<p class="text-lg md:text-x max-w-2xl mx-auto text-center mb-12 font-semibold">
-			Ofrecemos soluciones tanto para clientes mayoristas como minoristas, adaptándonos a cada necesidad con atención y beneficios exclusivos.
-		</p>
-		<div class="flex flex-col md:flex-row gap-8 justify-center items-center">
-					<FlipCard
-						frontTitle={servicios[0].titulo}
-						backTitle="¿Qué incluye?"
-						backItems={servicios[0].items}
-						size="xl"
-						buttonLabel="Contactar"
-						buttonHref="#contacto"
-						buttonColor="blue"
-					/>
-					<FlipCard
-						frontTitle={servicios[1].titulo}
-						backTitle="¿Qué incluye?"
-						backItems={servicios[1].items}
-						size="xl"
-						buttonLabel="Catálogo"
-						buttonHref="#catalogo"
-						buttonColor="cyan"
-					/>
+<section class="w-full py-12 md:py-20 bg-gradient-to-b from-[#fafdff] to-[#f3f6fa]">
+	<div class="max-w-6xl mx-auto px-2 md:px-6">
+			<div class="mb-2 flex justify-center">
+				<span class="bg-yellow-50 text-yellow-700 text-xs font-semibold px-3 py-1 rounded-full tracking-wide">Elige tu modalidad</span>
+			</div>
+			</span>
+			<h1 class="text-4xl md:text-5xl font-extrabold text-slate-400 mb-2 text-center tracking-tight leading-tight">
+				<span class="font-light text-slate-400">Venta</span> <span class="text-cyan-600 font-extrabold">Mayorista</span> <span class="font-light text-slate-400">vs</span> <span class="text-pink-600 font-extrabold">Minorista</span>
+			</h1>
+			<p class="text-base md:text-lg max-w-2xl mx-auto text-center mb-10 text-slate-500 font-medium">
+				Ofrecemos soluciones adaptadas a tus necesidades, ya sea para tu negocio o para tu hogar.
+			</p>
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-start">
+				<!-- Card Mayorista -->
+				<div class="relative bg-white border border-cyan-100 shadow-sm rounded-lg p-6 md:p-8 flex flex-col min-h-[320px] h-[320px] md:min-h-[360px] md:h-[360px]">
+						<div class="absolute top-0 right-0 w-32 h-32 bg-cyan-50 rounded-br-lg rounded-tl-full opacity-30 -z-10"></div>
+								<div class="flex items-center gap-2 mb-1">
+									<div class="bg-cyan-500/90 text-white p-2 rounded-full flex items-center justify-center shadow-sm">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20z"/><path d="M8 12h8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+									</div>
+									<div>
+										<h2 class="text-base md:text-lg font-bold text-cyan-700 leading-tight">Mayorista</h2>
+										<p class="text-xs md:text-sm text-slate-400">Para tu negocio</p>
+									</div>
+								</div>
+								<p class="text-slate-600 text-xs mb-2">Ideal para tiendas, farmacias y distribuidores que buscan los mejores precios del mercado</p>
+								<ul class="mb-3 space-y-1.5">
+							  <li class="flex items-start gap-1.5"><span class="text-cyan-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg></span><span><b class="text-sm font-bold">Compra en Volumen</b> <span class="text-slate-400 text-xs">Pedidos desde 50 unidades con precios especiales</span></span></li>
+							<li class="flex items-start gap-1.5"><span class="text-cyan-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M4 12h16"/></svg></span><span><b class="text-sm font-bold">Descuentos Exclusivos</b> <span class="text-slate-400 text-xs">Hasta 40% de descuento en productos seleccionados</span></span></li>
+							  <li class="flex items-start gap-1.5"><span class="text-cyan-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M12 3v18"/></svg></span><span><b class="text-sm font-bold">Márgenes Competitivos</b> <span class="text-slate-400 text-xs">Mejores precios para maximizar tus ganancias</span></span></li>
+							<li class="flex items-start gap-1.5"><span class="text-cyan-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></span><span><b class="text-sm font-bold">Asesoría Personalizada</b> <span class="text-slate-400 text-xs">Soporte dedicado para tu negocio</span></span></li>
+						</ul>
+	<a href="#contacto" class="mt-auto inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-1 px-3 rounded-md transition-colors text-center shadow-sm text-sm mx-auto">Solicitar Catálogo Mayorista</a>
+					</div>
+			<!-- Card Minorista -->
+					<div class="relative bg-white border border-pink-100 shadow-sm rounded-lg p-6 md:p-8 flex flex-col min-h-[320px] h-[320px] md:min-h-[360px] md:h-[360px]">
+						<div class="absolute top-0 left-0 w-32 h-32 bg-pink-50 rounded-bl-lg rounded-tr-full opacity-30 -z-10"></div>
+								<div class="flex items-center gap-2 mb-1">
+									<div class="bg-pink-500/90 text-white p-2 rounded-full flex items-center justify-center shadow-sm">
+										<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20z"/><path d="M16 12h-8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+									</div>
+									<div>
+										<h2 class="text-base md:text-lg font-bold text-pink-700 leading-tight">Minorista</h2>
+										<p class="text-xs md:text-sm text-slate-400">Para tu hogar</p>
+									</div>
+								</div>
+								<p class="text-slate-600 text-xs mb-2">Perfecto para padres y familias que buscan calidad y comodidad en cada compra</p>
+								<ul class="mb-3 space-y-1.5">
+							  <li class="flex items-start gap-1.5"><span class="text-pink-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 12h-8"/></svg></span><span><b class="text-sm font-bold">Compra por Unidad</b> <span class="text-slate-400 text-xs">Sin mínimos de compra, la cantidad que necesites</span></span></li>
+							<li class="flex items-start gap-1.5"><span class="text-pink-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12h14"/></svg></span><span><b class="text-sm font-bold">Entrega Rápida</b> <span class="text-slate-400 text-xs">Envíos express en 24-48 horas</span></span></li>
+							  <li class="flex items-start gap-1.5"><span class="text-pink-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg></span><span><b class="text-sm font-bold">Variedad de Productos</b> <span class="text-slate-400 text-xs">Amplio catálogo de pañales, leches y más</span></span></li>
+							<li class="flex items-start gap-1.5"><span class="text-pink-300"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path d="M4 17h16"/><path d="M4 21h16"/></svg></span><span><b class="text-sm font-bold">Promociones Semanales</b> <span class="text-slate-400 text-xs">Ofertas especiales cada semana</span></span></li>
+						</ul>
+	<a href="#catalogo" class="mt-auto inline-block bg-pink-500 hover:bg-pink-600 text-white font-semibold py-1 px-3 rounded-md transition-colors text-center shadow-sm text-sm mx-auto">Comprar Ahora</a>
+					</div>
 		</div>
+		<!-- Bloque de ayuda -->
+			<div class="mt-12 flex justify-center">
+				<div class="bg-white border border-gray-100 rounded-lg px-8 py-6 text-center max-w-xl w-full shadow-sm">
+					<div class="text-base font-semibold text-gray-800 mb-2">¿No estás seguro cuál opción elegir?</div>
+					<div class="text-sm text-gray-600 mb-4">Nuestro equipo está listo para ayudarte a encontrar la mejor solución.</div>
+					<a href="#contacto" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-md transition-colors">Contactar Asesor</a>
+				</div>
+			</div>
 	</div>
 </section>

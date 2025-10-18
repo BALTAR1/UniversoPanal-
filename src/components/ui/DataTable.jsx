@@ -27,10 +27,10 @@ export default function DataTable({ columns, data, onEdit, onDelete }) {
 	}
 	
 	return (
-		<div className="bg-white rounded-lg shadow-md overflow-hidden">
+	<div className="bg-[#e0f2fe] rounded-lg shadow-md overflow-hidden">
 			<div className="overflow-x-auto">
 				<table className="min-w-full divide-y divide-gray-200">
-					<thead className="bg-gray-50">
+					<thead className="bg-[#e0f2fe]">
 						<tr>
 							{columns.map((column) => (
 								<th
@@ -91,7 +91,7 @@ export default function DataTable({ columns, data, onEdit, onDelete }) {
 			{/* Footer con contador */}
 			<div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
 				<p className="text-sm text-gray-600">
-					Mostrando <span className="font-medium">{data.length}</span> registro(s)
+					<span className="px-3 py-1 rounded bg-[#e0f2fe] text-gray-700 font-medium inline-block">Mostrando <span className="font-bold">{data.length}</span> registro(s)</span>
 				</p>
 			</div>
 		</div>
