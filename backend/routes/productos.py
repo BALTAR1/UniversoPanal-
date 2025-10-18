@@ -163,6 +163,8 @@ def filtrar_productos():
             query = query.gte('precio', args['precio_min'])
         if 'precio_max' in args:
             query = query.lte('precio', args['precio_max'])
+        if 'es_destacado' in args:
+            query = query.eq('es_destacado', args['es_destacado'].lower() == 'true')
 
         # Paginación
         try:
@@ -188,4 +190,22 @@ def filtrar_productos():
         return jsonify(response.data), 200
     except Exception as e:
         print("ERROR:", str(e))  # Log para errores
+        return jsonify({'error': str(e)}), 500
+
+# =========================
+# Endpoint: Obtener productos destacados
+# =========================
+@producto_bp.route('/productos/destacados', methods=['GET'])
+def obtener_productos_destacados():
+    try:
+        query = supabase.table('productos').select('*').eq('es_destacado', True).eq('activo', True)
+        
+        # Limitar a 8 productos destacados
+        limit = int(request.args.get('limit', 8))
+        query = query.limit(limit)
+        
+        response = query.execute()
+        return jsonify(response.data), 200
+    except Exception as e:
+        print("ERROR:", str(e))
         return jsonify({'error': str(e)}), 500
