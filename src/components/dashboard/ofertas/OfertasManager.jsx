@@ -5,23 +5,35 @@ import Button from '../../ui/Button.jsx';
 import { ofertasService } from '../../../services/ofertasService.js';
 import { productosService } from '../../../services/apiServices.js';
 
+/**
+ * OfertasManager
+ * - Componente del dashboard que permite crear, editar, activar/desactivar y eliminar ofertas
+ * - Explicación línea a línea en los comentarios para aprendizaje
+ */
 export default function OfertasManager() {
-    // Estados
+    // ---------- Estados principales ----------
+    // Lista de ofertas obtenidas desde el backend
     const [ofertas, setOfertas] = useState([]);
+    // Lista de productos para seleccionar en el formulario de creación/edición
     const [productos, setProductos] = useState([]);
+    // Indicador de carga general (muestra spinner mientras se obtienen datos)
     const [loading, setLoading] = useState(true);
+    // Controla si el modal de formulario está abierto
     const [modalOpen, setModalOpen] = useState(false);
+    // Oferta actualmente en edición (null cuando se crea una nueva)
     const [editingOferta, setEditingOferta] = useState(null);
+    // FormData: estado que representa los campos del formulario de oferta
     const [formData, setFormData] = useState({
-        producto_id: '',
-        descuento: '',
-        fecha_inicio: '',
-        fecha_fin: '',
-        activo: true,
-        tipo_oferta: ''
+        producto_id: '', // id del producto al que se le aplica la oferta
+        descuento: '', // porcentaje (0-100)
+        fecha_inicio: '', // fecha ISO YYYY-MM-DD
+        fecha_fin: '', // fecha ISO YYYY-MM-DD
+        activo: true, // booleano para activar/desactivar la oferta
+        tipo_oferta: '' // string que indica el tipo (temporada, liquidacion, etc.)
     });
-    
-    // Tipos de oferta disponibles
+
+    // ---------- Catálogo de tipos de oferta ----------
+    // Array con valores y etiquetas para mostrar en el select del formulario
     const tiposOferta = [
         { value: '', label: 'Sin especificar' },
         { value: 'temporada', label: 'Temporada' },
@@ -31,15 +43,19 @@ export default function OfertasManager() {
         { value: 'cyber_monday', label: 'Cyber Monday' },
         { value: 'aniversario', label: 'Aniversario' },
     ];
-    
-    // Columnas de la tabla
+
+    // ---------- Definición de columnas para DataTable ----------
+    // Cada columna puede tener: key, label y un render opcional para personalizar la celda
     const columns = [
         { key: 'oferta_id', label: 'ID' },
         {
             key: 'producto',
             label: 'Producto',
+            // render recibe el valor de la celda (producto) y debe devolver JSX
             render: (producto) => {
+                // Si no hay producto relacionado, mostramos un placeholder
                 if (!producto) return <span className="text-gray-400">Sin producto</span>;
+                // Si existe, mostramos imagen (si está) y nombre + marca
                 return (
                     <div className="flex items-center gap-2">
                         {producto.imagen_url && (
@@ -60,6 +76,7 @@ export default function OfertasManager() {
         {
             key: 'producto',
             label: 'Precio Original',
+            // Mostrar el precio original del producto formateado
             render: (producto) => {
                 if (!producto) return '-';
                 return `$${parseFloat(producto.precio).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
@@ -68,7 +85,9 @@ export default function OfertasManager() {
         {
             key: 'descuento',
             label: 'Descuento',
+            // render recibe el valor (descuento) y la fila completa (row)
             render: (value, row) => {
+                // Calculamos el precio final aplicando el % de descuento
                 const precioOriginal = row.producto?.precio || 0;
                 const precioFinal = precioOriginal * (1 - value / 100);
                 return (
@@ -85,7 +104,9 @@ export default function OfertasManager() {
             key: 'tipo_oferta',
             label: 'Tipo',
             render: (value) => {
+                // Si no hay tipo, mostramos un guión tenue
                 if (!value) return <span className="text-gray-400">-</span>;
+                // Buscamos la etiqueta correspondiente en el array `tiposOferta`
                 const tipo = tiposOferta.find(t => t.value === value);
                 return (
                     <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
@@ -97,12 +118,15 @@ export default function OfertasManager() {
         {
             key: 'fecha_inicio',
             label: 'Vigencia',
+            // Render que muestra rango de fechas y si está vigente actualmente
             render: (inicio, row) => {
+                // Si no hay fechas, indicamos que no tiene vigencia
                 if (!inicio || !row.fecha_fin) return <span className="text-gray-400">Sin vigencia</span>;
+                // Formateamos las fechas a formato local (es-AR)
                 const inicioDate = new Date(inicio).toLocaleDateString('es-AR');
                 const finDate = new Date(row.fecha_fin).toLocaleDateString('es-AR');
                 
-                // Verificar si está vigente
+                // Determinar si la oferta está vigente según fecha actual
                 const now = new Date();
                 const start = new Date(inicio);
                 const end = new Date(row.fecha_fin);
@@ -121,6 +145,7 @@ export default function OfertasManager() {
         {
             key: 'activo',
             label: 'Estado',
+            // Badge visual que indica si la oferta está activa o no
             render: (value) => (
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -131,19 +156,23 @@ export default function OfertasManager() {
         },
     ];
 
-    // Cargar datos al montar
+    // ---------- Efecto de carga inicial ----------
+    // Se ejecuta una sola vez al montar el componente para obtener ofertas y productos
     useEffect(() => {
         cargarDatos();
     }, []);
 
+    // Función que consulta el backend para obtener ofertas y productos
     async function cargarDatos() {
         try {
             setLoading(true);
+            // Llamadas paralelas para optimizar tiempo de carga
             const [ofertasData, productosData] = await Promise.all([
                 ofertasService.obtenerTodas({ limit: 100 }),
                 productosService.obtenerTodos({ limit: 100 }),
             ]);
             
+            // Actualizamos estados con la data recibida
             setOfertas(ofertasData);
             setProductos(productosData);
         } catch (error) {
@@ -154,6 +183,8 @@ export default function OfertasManager() {
         }
     }
 
+    // ---------- Handlers de formulario y UI ----------
+    // Actualiza el estado formData al cambiar inputs (soporta checkbox)
     function handleInputChange(e) {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({ 
@@ -162,6 +193,7 @@ export default function OfertasManager() {
         }));
     }
 
+    // Abrir modal para crear una nueva oferta (limpia formData)
     function handleCreate() {
         setEditingOferta(null);
         setFormData({
@@ -175,6 +207,7 @@ export default function OfertasManager() {
         setModalOpen(true);
     }
 
+    // Abrir modal para editar una oferta existente y precargar los campos
     function handleEdit(oferta) {
         setEditingOferta(oferta);
         setFormData({
@@ -188,10 +221,11 @@ export default function OfertasManager() {
         setModalOpen(true);
     }
 
+    // Enviar formulario: crea o actualiza oferta según el contexto (editingOferta)
     async function handleSubmit(e) {
         e.preventDefault();
 
-        // Validaciones
+        // Validaciones básicas del formulario
         if (!formData.producto_id) {
             alert('Debes seleccionar un producto');
             return;
@@ -203,6 +237,7 @@ export default function OfertasManager() {
         }
 
         try {
+            // Preparamos el payload para la API
             const data = {
                 ...formData,
                 producto_id: parseInt(formData.producto_id),
@@ -210,13 +245,16 @@ export default function OfertasManager() {
             };
 
             if (editingOferta) {
+                // Si estamos editando, llamamos al servicio de actualización
                 await ofertasService.actualizar(editingOferta.oferta_id, data);
                 alert('Oferta actualizada correctamente');
             } else {
+                // Si es nueva, la creamos
                 await ofertasService.crear(data);
                 alert('Oferta creada correctamente');
             }
 
+            // Cerramos modal y recargamos datos para reflejar cambios
             setModalOpen(false);
             cargarDatos();
         } catch (error) {
@@ -225,6 +263,8 @@ export default function OfertasManager() {
         }
     }
 
+    // ---------- Eliminación y toggle ----------
+    // Elimina una oferta y recarga la lista
     async function handleDelete(oferta) {
         const producto = oferta.producto;
         if (!confirm(`¿Estás seguro de eliminar la oferta del producto "${producto?.nombre || 'N/A'}"?`)) {
@@ -241,6 +281,7 @@ export default function OfertasManager() {
         }
     }
 
+    // Cambia el estado activo/inactivo de la oferta
     async function handleToggle(oferta) {
         try {
             await ofertasService.toggle(oferta.oferta_id);
@@ -251,10 +292,14 @@ export default function OfertasManager() {
         }
     }
 
+    // ---------- Utilidad: calcular vista previa de precio con descuento ----------
     function calcularPrecioFinal() {
+        // Si falta producto o descuento no hay vista previa
         if (!formData.producto_id || !formData.descuento) return null;
+        // Buscar el producto seleccionado en el array `productos`
         const producto = productos.find(p => p.producto_id === parseInt(formData.producto_id));
         if (!producto) return null;
+        // Calcular precio final aplicando el %
         const precioFinal = producto.precio * (1 - parseFloat(formData.descuento) / 100);
         return {
             original: producto.precio,
@@ -263,6 +308,7 @@ export default function OfertasManager() {
         };
     }
 
+    // ---------- Render condicional por estado de carga ----------
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -271,6 +317,7 @@ export default function OfertasManager() {
         );
     }
 
+    // ---------- JSX principal del componente (lista + modal) ----------
     return (
         <div>
             <div className="mb-6 flex justify-between items-center">
@@ -283,6 +330,7 @@ export default function OfertasManager() {
                 </Button>
             </div>
 
+            {/* Tabla con las ofertas actuales */}
             <DataTable
                 columns={columns}
                 data={ofertas}
@@ -302,7 +350,7 @@ export default function OfertasManager() {
                 )}
             />
 
-            {/* Modal de formulario */}
+            {/* Modal de formulario: reutilizable para crear y editar */}
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingOferta ? 'Editar Oferta' : 'Crear Oferta'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* Seleccionar producto */}
@@ -351,7 +399,7 @@ export default function OfertasManager() {
                         </div>
                     </div>
 
-                    {/* Vista previa de precio */}
+                    {/* Vista previa de precio (render condicional si hay producto y descuento) */}
                     {(() => {
                         const precios = calcularPrecioFinal();
                         return precios && (

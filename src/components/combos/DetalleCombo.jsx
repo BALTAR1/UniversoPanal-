@@ -3,54 +3,67 @@ import { combosPublicosService } from '../../services/productosPublicos.js';
 
 /**
  * Componente de detalle de combo
- * Muestra información completa del combo, productos incluidos, precios y ahorro
+ * - Muestra información completa del combo: imágenes, lista de productos, precio y ahorro
+ * - Comentarios añadidos para aprendizaje (sin cambiar la lógica)
  */
 export default function DetalleCombo({ comboId }) {
+    // Estado que contiene el objeto `combo` obtenido del backend
     const [combo, setCombo] = useState(null);
+    // Estado para controlar la UI de carga
     const [loading, setLoading] = useState(true);
+    // Estado para almacenar mensajes de error y mostrarlos en UI
     const [error, setError] = useState(null);
+    // Índice de la imagen seleccionada en el slider
     const [imagenSeleccionada, setImagenSeleccionada] = useState(0);
+    // Cantidad de combos que el usuario desea agregar
     const [cantidad, setCantidad] = useState(1);
 
-    // Obtener todas las imágenes de los productos del combo
+    // Función que recolecta todas las imágenes disponibles del combo
     const obtenerTodasImagenes = () => {
+        // Array que guardará las URLs de las imágenes
         const imagenes = [];
+        // Recorremos los productos del combo y agregamos sus imágenes si están disponibles
         combo?.combo_productos?.forEach(item => {
             if (item.productos?.imagen_url) {
                 imagenes.push(item.productos.imagen_url);
             }
         });
-        // Agregar imagen principal del combo si existe
+        // Si el combo tiene una imagen principal distinta, la colocamos al inicio
         if (combo?.imagen_url && !imagenes.includes(combo.imagen_url)) {
             imagenes.unshift(combo.imagen_url);
         }
-        // Si no hay imágenes, usar placeholder
+        // Si no encontramos imágenes, agregamos una imagen placeholder por defecto
         if (imagenes.length === 0) {
             imagenes.push('/images/placeholder.svg');
         }
+        // Retornamos el array con las imágenes finales
         return imagenes;
     };
 
+    // Obtenemos el array de imágenes solo si `combo` ya fue cargado
     const todasImagenes = combo ? obtenerTodasImagenes() : [];
 
+    // Efecto que se ejecuta cuando cambia `comboId` para recargar datos
     useEffect(() => {
         cargarCombo();
     }, [comboId]);
 
+    // Función asíncrona que consulta el servicio para obtener el combo por su ID
     const cargarCombo = async () => {
         try {
-            setLoading(true);
-            setError(null);
+            setLoading(true); // activamos indicador de carga
+            setError(null); // limpiamos errores previos
             const data = await combosPublicosService.obtenerPorId(comboId);
-            setCombo(data);
+            setCombo(data); // guardamos la respuesta en el estado
         } catch (err) {
             console.error('Error al cargar combo:', err);
-            setError('No se pudo cargar el combo');
+            setError('No se pudo cargar el combo'); // mensaje legible para el usuario
         } finally {
-            setLoading(false);
+            setLoading(false); // desactivamos indicador de carga
         }
     };
 
+    // Formatea números a moneda local (pesos argentinos)
     const formatearPrecio = (precio) => {
         return new Intl.NumberFormat('es-AR', {
             style: 'currency',
@@ -60,35 +73,40 @@ export default function DetalleCombo({ comboId }) {
         }).format(precio);
     };
 
+    // Función para armar el objeto que representaría el item que se añadiría al carrito
     const agregarAlCarrito = () => {
         const itemCarrito = {
-            combo_id: combo.combo_id,
-            nombre: combo.nombre,
-            precio: combo.precio_combo,
-            cantidad: cantidad,
-            tipo: 'combo',
-            productos: combo.combo_productos,
-            imagen: todasImagenes[0]
+            combo_id: combo.combo_id, // id del combo
+            nombre: combo.nombre, // nombre del combo
+            precio: combo.precio_combo, // precio por unidad del combo
+            cantidad: cantidad, // cantidad seleccionada
+            tipo: 'combo', // tipo para distinguir en el carrito
+            productos: combo.combo_productos, // detalle de los productos incluidos
+            imagen: todasImagenes[0] // imagen principal para mostrar en el carrito
         };
 
+        // Por ahora solo mostramos en consola y alert (pendiente: integrar con useCart)
         console.log('Agregando combo al carrito:', itemCarrito);
         alert(`${combo.nombre} x${cantidad} agregado al carrito`);
     };
 
+    // Referencia para mantener la referencia del intervalo del autoplay
     const intervaloRef = useRef(null);
 
-    // Autoplay: cambia la imagen cada 5 segundos
+    // Autoplay: cambiamos la imagen cada 5 segundos si hay más de una
     useEffect(() => {
-        if (todasImagenes.length <= 1) return;
+        if (todasImagenes.length <= 1) return; // no crear intervalo si solo hay 1 imagen
         intervaloRef.current = setInterval(() => {
             setImagenSeleccionada((prev) => (prev + 1) % todasImagenes.length);
         }, 5000);
+        // Limpieza del intervalo cuando el componente se desmonta o se actualiza
         return () => clearInterval(intervaloRef.current);
     }, [todasImagenes.length]);
 
-    // Funciones para flechas
+    // Funciones para navegar manualmente las imágenes (antes/después)
     const handlePrev = () => {
         setImagenSeleccionada((prev) => (prev - 1 + todasImagenes.length) % todasImagenes.length);
+        // Al interactuar detenemos temporalmente el autoplay
         clearInterval(intervaloRef.current);
     };
 
@@ -97,6 +115,7 @@ export default function DetalleCombo({ comboId }) {
         clearInterval(intervaloRef.current);
     };
 
+    // Si estamos cargando, mostramos un spinner centrado
     if (loading) {
         return (
             <div className="flex justify-center items-center h-96">
@@ -105,6 +124,7 @@ export default function DetalleCombo({ comboId }) {
         );
     }
 
+    // Si ocurre un error o no existe el combo, mostramos mensaje de error
     if (error || !combo) {
         return (
             <div className="max-w-7xl mx-auto px-4 py-8">
@@ -116,13 +136,15 @@ export default function DetalleCombo({ comboId }) {
         );
     }
 
+    // Variables derivadas del objeto `combo` para mostrar en la UI
     const precioTotalIndividual = combo.precio_total_individual || 0;
     const ahorro = combo.ahorro || 0;
     const porcentajeAhorro = combo.porcentaje_ahorro || 0;
 
+    // Render del detalle completo
     return (
         <div className="max-w-7xl mx-auto px-4 py-8">
-            {/* Breadcrumb de navegación */}
+            {/* Breadcrumb de navegación (mejora la experiencia y SEO) */}
             <nav className="flex items-center gap-2 text-sm mb-8" aria-label="Breadcrumb">
                 <a href="/" className="text-blue-600 hover:text-blue-700 hover:underline">
                     Inicio
@@ -137,7 +159,7 @@ export default function DetalleCombo({ comboId }) {
                 </span>
             </nav>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Columna izquierda: Imágenes */}
+                {/* Columna izquierda: slider de imágenes y miniaturas */}
                 <div className="flex flex-col gap-4">
                     {/* Imagen principal con slider */}
                     <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square group">
@@ -147,7 +169,7 @@ export default function DetalleCombo({ comboId }) {
                             className="w-full h-full object-cover"
                         />
 
-                        {/* Botones de navegación */}
+                        {/* Botones de navegación (aparecen on-hover) */}
                         {todasImagenes.length > 1 && (
                             <>
                                 <button
@@ -169,12 +191,12 @@ export default function DetalleCombo({ comboId }) {
                             </>
                         )}
 
-                        {/* Badge de combo */}
+                        {/* Badge que indica que es un combo */}
                         <div className="absolute top-4 right-4 bg-purple-500 text-white px-3 py-1 rounded-full font-bold text-sm">
                             🎁 COMBO
                         </div>
 
-                        {/* Indicador de página */}
+                        {/* Indicador de posición en el slider (ej: 1 / 4) */}
                         {todasImagenes.length > 1 && (
                             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                                 {imagenSeleccionada + 1} / {todasImagenes.length}
@@ -182,7 +204,7 @@ export default function DetalleCombo({ comboId }) {
                         )}
                     </div>
 
-                    {/* Miniaturas de imágenes */}
+                    {/* Miniaturas clickeables para seleccionar imagen */}
                     {todasImagenes.length > 1 && (
                         <div className="flex gap-2 overflow-x-auto pb-2">
                             {todasImagenes.map((img, idx) => (
@@ -206,9 +228,9 @@ export default function DetalleCombo({ comboId }) {
                     )}
                 </div>
 
-                {/* Columna derecha: Información */}
+                {/* Columna derecha: información detallada del combo */}
                 <div className="flex flex-col gap-6">
-                    {/* Nombre y marca */}
+                    {/* Nombre y resumen del combo */}
                     <div>
                         <h1 className="text-4xl font-black text-gray-900 mb-2">
                             {combo.nombre}
@@ -220,7 +242,7 @@ export default function DetalleCombo({ comboId }) {
                         </div>
                     </div>
 
-                    {/* Precios y ahorro */}
+                    {/* Precios y ahorro: comparativa y visualización del monto ahorrado */}
                     <div className="border-b pb-6">
                         <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
                             <p className="text-sm text-gray-600 mb-2">Precio normalmente:</p>
@@ -243,10 +265,10 @@ export default function DetalleCombo({ comboId }) {
                         </div>
                     </div>
 
-                    {/* Productos incluidos */}
+                    {/* Lista de productos incluidos: imagen, nombre, marca y precio por unidad */}
                     <div className="border-b pb-6">
                         <h2 className="text-lg font-bold text-gray-900 mb-4">
-                            📦 Productos incluidos en el combo
+                            Productos incluidos en el combo
                         </h2>
                         <div className="space-y-3">
                             {combo.combo_productos?.map((item, idx) => (
@@ -285,7 +307,7 @@ export default function DetalleCombo({ comboId }) {
                         </div>
                     </div>
 
-                    {/* Cantidad y carrito */}
+                    {/* Controles de cantidad y botón para agregar al carrito */}
                     <div className="space-y-3">
                         <div className="flex items-center gap-4">
                             <label className="text-sm font-medium text-gray-700">
@@ -314,7 +336,8 @@ export default function DetalleCombo({ comboId }) {
                             onClick={agregarAlCarrito}
                             className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors text-lg"
                         >
-                            🛒 Agregar al carrito - {formatearPrecio(combo.precio_combo * cantidad)}
+                            {/* Botón muestra el precio total (precio combo * cantidad) */}
+                            Agregar al carrito - {formatearPrecio(combo.precio_combo * cantidad)}
                         </button>
                     </div>
                 </div>

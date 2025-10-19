@@ -17,7 +17,12 @@ import WhatsAppButton from "../components/ui/WhatsAppButton.astro";
     
     <!-- Catálogo de Productos -->
     <section class="bg-gray-50 py-12">
-        <CatalogoProductos client:only="react" />
+        <CatalogoProductos 
+            client:only="react"
+            categoriaInicial={null}
+            busquedaInicial=""
+            soloOfertas={false}
+        />
         <WhatsAppButton />
     </section>
     

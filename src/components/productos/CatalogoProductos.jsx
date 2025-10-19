@@ -8,8 +8,17 @@ import { productosPublicosService, categoriasPublicasService, combosPublicosServ
 /**
  * Componente principal del catálogo de productos
  * Gestiona el estado de filtros, paginación y carga de datos
+ * 
+ * @param {Object} props
+ * @param {string|null} props.categoriaInicial - Nombre de la categoría inicial a filtrar
+ * @param {string} props.busquedaInicial - Texto de búsqueda inicial
+ * @param {boolean} props.soloOfertas - Si debe mostrar solo productos con ofertas
  */
-export default function CatalogoProductos() {
+export default function CatalogoProductos({ 
+    categoriaInicial = null, 
+    busquedaInicial = '', 
+    soloOfertas = false 
+}) {
     // Estados
     const [productos, setProductos] = useState([]);
     const [combos, setCombos] = useState([]);
@@ -29,14 +38,14 @@ export default function CatalogoProductos() {
     });
     
     const [filtros, setFiltros] = useState({
-        busqueda: '',
+        busqueda: busquedaInicial || '',
         categoria_id: null,
         marca: null,
         precioMin: null,
         precioMax: null,
         ordenar: 'relevancia',
         ordenAsc: true,
-        soloOfertas: false,
+        soloOfertas: soloOfertas,
         soloCombos: false
     });
 
@@ -53,6 +62,33 @@ export default function CatalogoProductos() {
                 setCategorias(cats);
                 setMarcas(marcasData);
                 setRangoPrecios(rango);
+
+                // Si se especificó una categoría inicial, encontrarla y establecerla
+                if (categoriaInicial && cats.length > 0) {
+                    const categoriaEncontrada = cats.find(
+                        cat => cat.nombre.toLowerCase() === categoriaInicial.toLowerCase()
+                    );
+                    if (categoriaEncontrada) {
+                        // Priorizar filtro por categoria_id de la BD
+                        setFiltros(prev => ({
+                            ...prev,
+                            categoria_id: categoriaEncontrada.categoria_id,
+                            busqueda: '' // Limpiar búsqueda si se encontró categoría
+                        }));
+                    } else if (busquedaInicial) {
+                        // Si no se encontró la categoría en BD, usar búsqueda por palabras clave
+                        setFiltros(prev => ({
+                            ...prev,
+                            busqueda: busquedaInicial
+                        }));
+                    }
+                } else if (busquedaInicial) {
+                    // Si no hay categoría inicial pero sí búsqueda, aplicarla
+                    setFiltros(prev => ({
+                        ...prev,
+                        busqueda: busquedaInicial
+                    }));
+                }
             } catch (err) {
                 console.error('Error al cargar datos iniciales:', err);
                 setError('Error al cargar categorías y precios');
@@ -60,7 +96,7 @@ export default function CatalogoProductos() {
         };
 
         cargarDatosIniciales();
-    }, []);
+    }, [categoriaInicial, busquedaInicial]);
 
     // Carga de productos cuando cambian los filtros o la página
     useEffect(() => {
