@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { productosPublicosService } from '../../services/productosPublicos.js';
+import { addToCart } from '../../hooks/useCart.js';
 
 /**
  * Componente de detalle de producto - Inspirado en Mercado Libre
@@ -64,7 +65,7 @@ export default function DetalleProducto({ productoId }) {
         const itemCarrito = {
             producto_id: producto.producto_id,
             nombre: producto.nombre,
-            precio: producto.precio,
+            precio: producto.precio_con_descuento || producto.precio,
             cantidad: cantidad,
             caracteristicas: {
                 talla: tallaSeleccionada,
@@ -74,10 +75,8 @@ export default function DetalleProducto({ productoId }) {
             imagen: producto.imagen_url || producto.imagenes?.[0]?.url
         };
 
-        console.log('Agregando al carrito:', itemCarrito);
-        
-        // Aquí implementarías la lógica del carrito (localStorage, context, etc.)
-        alert(`${producto.nombre} (Talla ${tallaSeleccionada}) x${cantidad} agregado al carrito`);
+        // Agregar al carrito usando el hook
+        addToCart(itemCarrito);
     };
 
     const intervaloRef = useRef(null);
