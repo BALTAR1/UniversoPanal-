@@ -6,6 +6,7 @@ import Hero from '../components/desktop/Hero.astro';
 import Categorias from '../components/desktop/Categorias.astro';
 import Destacados from '../components/desktop/Destacados.astro';
 import Servicios from '../components/desktop/Servicios.astro';
+import Marcas from '../components/desktop/Marcas.astro';
 import Footer from '../components/desktop/Footer.astro';
 import WhatsAppButton from "../components/ui/WhatsAppButton.astro";
 
@@ -14,9 +15,56 @@ import WhatsAppButton from "../components/ui/WhatsAppButton.astro";
 <Layout>
     <Nav />
     <Hero />
-    <Categorias />
-    <Destacados />
-    <Servicios />
-    <Footer />
+    <div class="scroll-reveal">
+        <Categorias />
+    </div>
+    <div class="scroll-reveal">
+        <Destacados />
+    </div>
+    <div class="scroll-reveal">
+        <Servicios />
+    </div>
+    <div class="scroll-reveal">
+        <Marcas />
+    </div>
+    <div class="scroll-reveal">
+        <Footer />
+    </div>
     <WhatsAppButton />
 </Layout>
+
+<style>
+    .scroll-reveal {
+        opacity: 0;
+        transform: translateY(50px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+    
+    .scroll-reveal.revealed {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<script>
+    // Scroll reveal effect
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('revealed');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, observerOptions);
+
+    // Observe all scroll-reveal elements
+    document.addEventListener('DOMContentLoaded', () => {
+        const revealElements = document.querySelectorAll('.scroll-reveal');
+        revealElements.forEach(el => observer.observe(el));
+    });
+</script>

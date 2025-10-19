@@ -3,48 +3,66 @@
 import SocialMedias from '../ui/SocialMedias.jsx';
 ---
 
-<!-- Sección combinada CTA + Footer que ocupa toda la pantalla -->
-<section class="w-full min-h-screen flex flex-col bg-gradient-to-b from-[#0a1536] via-[#101c3a] to-[#181f3a]">
+<!-- Sección de FAQ y Mapa -->
+<section class="w-full bg-white">
+<style>
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.animate-gradient-move {
+  background-size: 200% 200%;
+  animation: gradientMove 12s ease-in-out infinite;
+}
+</style>
 
   <!-- FAQ Section (Acordeón) -->
   <style>
     .faq-accordion details {
-      border: 2px solid #232b4d;
-      background: linear-gradient(135deg, #eaf1fb 70%, #dbeafe 100%);
-      color: #232b4d;
-      box-shadow: 0 8px 32px 0 rgba(47,93,255,0.08), 0 2px 8px 0 rgba(0,0,0,0.10);
-      transition: box-shadow 0.2s, border-color 0.2s, transform 0.2s;
-      overflow: hidden;
-      border-radius: 2rem;
-      padding: 1.2rem 2rem;
-      font-size: 1.18rem;
+      border: 1px solid #e2e8f0;
+      background: white;
+      color: #1e293b;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      border-radius: 1rem;
+      padding: 1rem 1.5rem;
+      font-size: 1.05rem;
+      margin-bottom: 0.75rem;
+      transition: all 0.3s ease;
+    }
+    .faq-accordion details:hover {
+      border-color: #38bdf8;
+      box-shadow: 0 4px 12px rgba(56,189,248,0.15);
     }
     .faq-accordion details[open] {
-      border-color: #2f5dff;
-      box-shadow: 0 12px 40px 0 rgba(47,93,255,0.13), 0 2px 8px 0 rgba(0,0,0,0.10);
-      transform: scale(1.025);
+      background: #f0f9ff;
+      border-color: #38bdf8;
+      box-shadow: 0 4px 16px rgba(56,189,248,0.2);
     }
     .faq-accordion summary {
       outline: none;
-      font-size: 1.45rem;
-      font-weight: 800;
-      color: #232b4d;
-      padding: 0.7rem 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1e293b;
+      padding: 0.5rem 0;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 0.75rem;
       transition: color 0.2s;
       position: relative;
-      letter-spacing: -0.5px;
+      letter-spacing: -0.3px;
+    }
+    .faq-accordion summary::marker {
+      display: none;
     }
     .faq-accordion summary::after {
       content: '';
       display: inline-block;
-      width: 1.1em;
-      height: 1.1em;
+      width: 1.2em;
+      height: 1.2em;
       margin-left: auto;
-      background: url('data:image/svg+xml;utf8,<svg fill="%23232b4d" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"/></svg>') no-repeat center/contain;
+      background: url('data:image/svg+xml;utf8,<svg fill="%23ff792b" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"/></svg>') no-repeat center/contain;
       transform: rotate(0deg);
       transition: transform 0.3s;
     }
@@ -52,48 +70,95 @@ import SocialMedias from '../ui/SocialMedias.jsx';
       transform: rotate(180deg);
     }
     .faq-accordion p {
-      color: #232b4d;
-      font-size: 1.15rem;
-      margin-top: 1.1rem;
-      line-height: 1.8;
-      padding-bottom: 0.4rem;
-      padding-left: 0.2rem;
-      font-weight: 500;
+      color: #475569;
+      font-size: 1rem;
+      margin-top: 0.75rem;
+      line-height: 1.7;
+      padding-bottom: 0.25rem;
+      font-weight: 400;
     }
   </style>
-  <div id="faq" class="flex-1 flex items-center justify-center py-16 px-4" style="scroll-margin-top:88px;">
-    <div class="max-w-2xl w-full mx-auto">
-      <h2 class="text-3xl md:text-5xl font-black text-white mb-10 text-center drop-shadow-lg tracking-tight">Preguntas Frecuentes</h2>
-      <div class="faq-accordion space-y-5">
-        <details>
-          <summary>¿Cómo realizo una compra?</summary>
-          <p>Selecciona los productos que deseas, agrégalos al carrito y sigue los pasos para completar tu pedido. Si tienes dudas, puedes contactarnos por WhatsApp.</p>
-        </details>
-        <details>
-          <summary>¿Cuáles son los métodos de pago?</summary>
-          <p>Aceptamos tarjetas de crédito, débito, transferencias y pagos por MercadoPago.</p>
-        </details>
-        <details>
-          <summary>¿Hacen envíos a todo el país?</summary>
-          <p>Sí, realizamos envíos a todo el país mediante correo y mensajería. El costo y tiempo de entrega se calculan al finalizar la compra.</p>
-        </details>
-        <details>
-          <summary>¿Cuáles son nuestros horarios de atención?</summary>
-          <p>Atendemos de lunes a sábado de 8:00 a 14:00 hs y de 17:00 a 21:00 hs.</p>
-        </details>
+  <div id="faq" class="w-full py-20 md:py-28 px-4 bg-gradient-to-b from-[#f0f9ff] to-white" style="scroll-margin-top:88px;">
+    <div class="w-full max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 md:gap-24 items-start">
+      <!-- FAQ a la izquierda -->
+      <div>
+        <h2 class="text-[2.5rem] md:text-[3.5rem] font-black text-cyan-600 mb-4 text-center tracking-tight" style="letter-spacing:-0.03em;">Preguntas Frecuentes</h2>
+        <p class="text-lg md:text-xl text-slate-600 text-center mb-12 font-semibold" style="letter-spacing:-0.01em;">Todo lo que necesitas saber sobre tu compra</p>
+        <div class="faq-accordion">
+          <details>
+            <summary>¿Cómo realizo una compra?</summary>
+            <p>Selecciona los productos que deseas, agrégalos al carrito y sigue los pasos para completar tu pedido. Si tienes dudas, puedes contactarnos por WhatsApp.</p>
+          </details>
+          <details>
+            <summary>¿Cuáles son los métodos de pago?</summary>
+            <p>Aceptamos tarjetas de crédito, débito, transferencias y pagos por MercadoPago.</p>
+          </details>
+          <details>
+            <summary>¿Hacen envíos a todo el país?</summary>
+            <p>Sí, realizamos envíos a todo el país mediante correo y mensajería. El costo y tiempo de entrega se calculan al finalizar la compra.</p>
+          </details>
+          <details>
+            <summary>¿Qué garantía ofrecen en los productos?</summary>
+            <p>Todos nuestros productos cuentan con garantía de calidad. Si hay algún defecto o problema, nos comprometemos a reemplazarlo sin costo adicional dentro de los primeros 30 días.</p>
+          </details>
+        </div>
+      </div>
+      <!-- Mapa a la derecha -->
+      <div class="w-full flex flex-col">
+        <h3 class="text-[2.5rem] md:text-[3.5rem] font-black text-pink-600 mb-4 text-center tracking-tight" style="letter-spacing:-0.03em;">¿Dónde estamos?</h3>
+        <p class="text-lg md:text-xl text-slate-600 text-center mb-12 font-semibold" style="letter-spacing:-0.01em;">Visítanos en nuestra tienda física</p>
+        <div class="w-full h-96 rounded-2xl overflow-hidden shadow-lg border-2 border-cyan-200 mb-8">
+          <iframe
+            src="https://www.google.com/maps?q=-31.5375,-68.5364&z=16&output=embed"
+            width="100%"
+            height="100%"
+            style="border:0; min-height:384px;"
+            allowfullscreen=""
+            loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"
+            title="Ubicación del local"
+          ></iframe>
+        </div>
+        <!-- Tarjetas de información -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div class="bg-gradient-to-br from-cyan-50 to-blue-50 border-2 border-cyan-300 rounded-xl p-6 flex items-start gap-4 shadow-md hover:shadow-lg transition-shadow">
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-full p-4 flex-shrink-0">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 mb-1 text-lg">Dirección</h4>
+              <p class="text-base text-slate-700">Av. Libertador 1234, San Juan, Argentina</p>
+            </div>
+          </div>
+          <div class="bg-gradient-to-br from-pink-50 to-rose-50 border-2 border-pink-300 rounded-xl p-6 flex items-start gap-4 shadow-md hover:shadow-lg transition-shadow">
+            <div class="bg-gradient-to-br from-pink-500 to-pink-600 rounded-full p-4 flex-shrink-0">
+              <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2"/>
+              </svg>
+            </div>
+            <div>
+              <h4 class="font-bold text-slate-800 mb-1 text-lg">Horarios</h4>
+              <p class="text-base text-slate-700">Lun-Sáb: 8:00-14:00 y 17:00-21:00 hs</p>
+            </div>
+          </div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- Footer Section -->
-  <footer class="bg-white text-black py-12 px-4 border-t border-gray-200">
+<!-- Footer Section -->
+<footer class="w-full bg-[#c5e3f2] text-slate-700 py-12 px-4 border-t border-gray-200">
     <div class="max-w-7xl mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         
         <!-- Columna 1: Logo y descripción -->
         <div>
           <h3 class="text-2xl font-black mb-3">Universo Pañal</h3>
-          <p class="text-black/70 text-sm mb-4">
+          <p class="text-slate-500 text-sm mb-4">
             El cuidado que tu bebé merece, la confianza que vos necesitás.
           </p>
         </div>
@@ -101,7 +166,7 @@ import SocialMedias from '../ui/SocialMedias.jsx';
         <!-- Columna 2: Enlaces rápidos -->
         <div>
           <h4 class="text-lg font-bold mb-3">Enlaces Rápidos</h4>
-          <ul class="space-y-2 text-black/70 text-sm">
+          <ul class="space-y-2 text-slate-500 text-sm">
             <li><a href="#" class="hover:text-black transition">Inicio</a></li>
             <li><a href="#" class="hover:text-black transition">Productos</a></li>
             <li><a href="#" class="hover:text-black transition">Servicios</a></li>
@@ -112,7 +177,7 @@ import SocialMedias from '../ui/SocialMedias.jsx';
         <!-- Columna 3: Categorías -->
         <div>
           <h4 class="text-lg font-bold mb-3">Categorías</h4>
-          <ul class="space-y-2 text-black/70 text-sm">
+          <ul class="space-y-2 text-slate-500 text-sm">
             <li><a href="#" class="hover:text-black transition">Pañales</a></li>
             <li><a href="#" class="hover:text-black transition">Nutricion</a></li>
             <li><a href="#" class="hover:text-black transition">Higiene</a></li>
@@ -130,10 +195,8 @@ import SocialMedias from '../ui/SocialMedias.jsx';
       </div>
 
       <!-- Copyright -->
-      <div class="border-t border-gray-200 pt-6 text-center text-black/60 text-sm">
+      <div class="border-t border-gray-200 pt-6 text-center text-slate-400 text-sm">
         <p>&copy; 2025 Universo Pañal. Todos los derechos reservados para devs/prote.</p>
       </div>
     </div>
   </footer>
-
-</section>
