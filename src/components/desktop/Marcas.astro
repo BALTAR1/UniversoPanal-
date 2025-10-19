@@ -1,0 +1,167 @@
+---
+// Marcas con las que trabajamos
+const marcas = [
+  { id: 1, nombre: 'Babysec', imagen: '/images/marcas/Babysec.png' },
+  { id: 2, nombre: 'Huggies', imagen: '/images/marcas/Huggies.png' },
+  { id: 3, nombre: 'Nido', imagen: '/images/marcas/Nido.png' },
+  { id: 4, nombre: 'Nutricia', imagen: '/images/marcas/Nutricia.png' },
+  { id: 5, nombre: 'Pampers', imagen: '/images/marcas/Pampers.png' },
+  { id: 6, nombre: 'Vital', imagen: '/images/marcas/Vital.png' },
+  { id: 6, nombre: 'Jhonsons', imagen: '/images/marcas/Jhonsons.png' },
+  { id: 7, nombre: 'Ensure', imagen: '/images/marcas/Ensure.png' },
+  { id: 8, nombre: 'Comodin', imagen: '/images/marcas/Comodin.png' },
+  { id: 9, nombre: 'Nestle', imagen: '/images/marcas/Nestle.png' }
+];
+---
+
+<section class="w-full py-24 md:py-32 bg-[#f8eddc] relative overflow-hidden">
+  {/* Chupete grande - Superior izquierda */}
+  <svg class="absolute top-20 left-0 w-40 h-40 opacity-30 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <circle cx="100" cy="80" r="40" fill="#ffb6b9"/>
+    <ellipse cx="100" cy="120" rx="50" ry="25" fill="#f8b4d9"/>
+    <rect x="85" y="110" width="30" height="30" rx="15" fill="#fff"/>
+  </svg>
+  
+  {/* Biberón - Superior derecha */}
+  <svg class="absolute top-24 right-0 w-36 h-36 opacity-28 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <rect x="60" y="60" width="80" height="100" rx="30" fill="#a0e7e5"/>
+    <rect x="85" y="30" width="30" height="40" rx="15" fill="#fff"/>
+    <ellipse cx="100" cy="160" rx="30" ry="15" fill="#7dd3c0"/>
+    <circle cx="90" cy="100" r="8" fill="#fff" opacity="0.5"/>
+    <circle cx="110" cy="120" r="8" fill="#fff" opacity="0.5"/>
+  </svg>
+
+  {/* Sonajero - Superior cerca del centro */}
+  <svg class="absolute top-4 left-1/4 w-30 h-30 opacity-32 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <circle cx="100" cy="80" r="38" fill="#f7e9a0"/>
+    <rect x="88" y="112" width="24" height="65" rx="12" fill="#ff792b"/>
+    <circle cx="92" cy="72" r="10" fill="#fff"/>
+    <circle cx="108" cy="88" r="10" fill="#fff"/>
+    <circle cx="100" cy="95" r="9" fill="#fff"/>
+  </svg>
+
+  {/* Osito de peluche - Lateral izquierda medio */}
+  <svg class="absolute top-1/2 left-0 -translate-y-1/2 w-38 h-38 opacity-32 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <circle cx="70" cy="70" r="26" fill="#d4a574"/>
+    <circle cx="130" cy="70" r="26" fill="#d4a574"/>
+    <circle cx="100" cy="105" r="48" fill="#d4a574"/>
+    <circle cx="85" cy="100" r="9" fill="#333"/>
+    <circle cx="115" cy="100" r="9" fill="#333"/>
+    <ellipse cx="100" cy="120" rx="16" ry="11" fill="#c99869"/>
+  </svg>
+
+  {/* Bloques ABC - Inferior izquierda */}
+  <svg class="absolute bottom-8 left-8 w-38 h-38 opacity-32 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <rect x="40" y="80" width="52" height="52" rx="8" fill="#ff6b9d"/>
+    <rect x="80" y="100" width="52" height="52" rx="8" fill="#a0e7e5"/>
+    <rect x="60" y="120" width="52" height="52" rx="8" fill="#f7e9a0"/>
+    <text x="60" y="118" font-size="28" fill="#fff" font-weight="bold">A</text>
+    <text x="100" y="138" font-size="28" fill="#fff" font-weight="bold">B</text>
+    <text x="80" y="158" font-size="28" fill="#fff" font-weight="bold">C</text>
+  </svg>
+
+  {/* Pato de goma - Inferior derecha */}
+  <svg class="absolute bottom-12 right-0 w-42 h-42 opacity-32 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <ellipse cx="110" cy="120" rx="52" ry="42" fill="#f7e9a0"/>
+    <circle cx="88" cy="88" r="38" fill="#f7e9a0"/>
+    <circle cx="83" cy="83" r="7" fill="#333"/>
+    <ellipse cx="72" cy="94" rx="16" ry="11" fill="#ff792b"/>
+    <path d="M132 108 Q145 113 138 126" stroke="#f7d56d" stroke-width="5" fill="none"/>
+  </svg>
+
+  {/* Pelota grande - Lateral derecha superior */}
+  <svg class="absolute top-1/3 right-0 w-34 h-34 opacity-28 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <circle cx="100" cy="100" r="52" fill="#a0e7e5"/>
+    <path d="M100 48 L100 152 M48 100 L152 100" stroke="#fff" stroke-width="9"/>
+    <circle cx="100" cy="100" r="52" fill="none" stroke="#7dd3c0" stroke-width="7"/>
+    <circle cx="100" cy="100" r="36" fill="none" stroke="#fff" stroke-width="5" opacity="0.4"/>
+  </svg>
+
+  {/* Cochecito - Superior derecha cerca del centro */}
+  <svg class="absolute top-6 right-1/4 w-34 h-34 opacity-32 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <rect x="55" y="68" width="85" height="52" rx="26" fill="#a0e7e5"/>
+    <circle cx="78" cy="132" r="22" fill="#333"/>
+    <circle cx="122" cy="132" r="22" fill="#333"/>
+    <circle cx="78" cy="132" r="13" fill="#666"/>
+    <circle cx="122" cy="132" r="13" fill="#666"/>
+    <rect x="132" y="56" width="9" height="32" fill="#7dd3c0"/>
+  </svg>
+
+  {/* Estrella - Lateral izquierda superior */}
+  <svg class="absolute top-1/4 left-3 w-26 h-26 opacity-28 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <path d="M100 28 L117 76 L165 76 L127 107 L144 155 L100 124 L56 155 L73 107 L35 76 L83 76 Z" fill="#f7e9a0"/>
+    <circle cx="100" cy="102" r="17" fill="#fff" opacity="0.6"/>
+  </svg>
+
+  {/* Biberón pequeño - Lateral izquierda inferior */}
+  <svg class="absolute bottom-1/3 left-0 w-30 h-30 opacity-28 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <rect x="72" y="68" width="56" height="75" rx="22" fill="#ffb6b9"/>
+    <rect x="88" y="48" width="24" height="28" rx="12" fill="#fff"/>
+    <ellipse cx="100" cy="143" rx="23" ry="12" fill="#f8b4d9"/>
+    <circle cx="92" cy="100" r="7" fill="#fff" opacity="0.4"/>
+  </svg>
+
+  {/* Luna y estrellas - Superior izquierda cerca del centro */}
+  <svg class="absolute top-10 left-1/3 -translate-x-1/2 w-32 h-32 opacity-26 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <path d="M98 48 Q120 68 120 100 Q120 132 98 152 Q142 141 142 100 Q142 59 98 48 Z" fill="#f7e9a0"/>
+    <circle cx="68" cy="58" r="6" fill="#f7e9a0"/>
+    <circle cx="56" cy="78" r="5" fill="#f7e9a0"/>
+    <circle cx="73" cy="90" r="7" fill="#f7e9a0"/>
+  </svg>
+
+  {/* Sonajero 2 - Inferior centro derecha */}
+  <svg class="absolute bottom-14 right-1/3 w-28 h-28 opacity-27 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <circle cx="100" cy="68" r="32" fill="#ff6b9d"/>
+    <rect x="90" y="94" width="20" height="55" rx="10" fill="#a0e7e5"/>
+    <circle cx="93" cy="62" r="7" fill="#fff"/>
+    <circle cx="107" cy="74" r="7" fill="#fff"/>
+  </svg>
+
+  {/* Osito pequeño - Lateral derecha inferior */}
+  <svg class="absolute bottom-1/4 right-3 w-32 h-32 opacity-30 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <circle cx="73" cy="73" r="22" fill="#d4a574"/>
+    <circle cx="127" cy="73" r="22" fill="#d4a574"/>
+    <circle cx="100" cy="108" r="38" fill="#d4a574"/>
+    <circle cx="88" cy="103" r="7" fill="#333"/>
+    <circle cx="112" cy="103" r="7" fill="#333"/>
+  </svg>
+
+  {/* Chupete adicional - Inferior centro */}
+  <svg class="absolute bottom-20 left-1/3 w-26 h-26 opacity-27 z-0" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg" style="pointer-events:none">
+    <circle cx="100" cy="78" r="38" fill="#ffb6b9"/>
+    <ellipse cx="100" cy="118" rx="43" ry="22" fill="#f8b4d9"/>
+    <circle cx="100" cy="78" r="22" fill="#fff" opacity="0.4"/>
+  </svg>
+
+  {/* Difuminado superior para transición suave */}
+  <div class="absolute top-0 left-0 w-full h-16 pointer-events-none z-10" style="background: linear-gradient(to bottom, #fff 60%, rgba(248,237,220,0.7) 100%);"></div>
+  
+  {/* Difuminado inferior para transición suave */}
+  <div class="absolute bottom-0 left-0 w-full h-16 pointer-events-none z-10" style="background: linear-gradient(to top, #fff 60%, rgba(248,237,220,0.7) 100%);"></div>
+  
+  <div class="max-w-7xl mx-auto px-4 md:px-10 relative z-10">
+    <!-- Título y subtítulo -->
+    <div class="text-center mb-12 md:mb-16">
+      <h2 class="text-3xl md:text-6xl font-black text-cyan-600 mb-3 mt-4">
+        Marcas de <span class="text-[#ff792b] font-black">Confianza</span>
+      </h2>
+      <p class="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto font-medium">
+        Trabajamos con las marcas líderes del mercado para ofrecerte los mejores productos
+      </p>
+    </div>
+
+    <!-- Grid de marcas -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 md:gap-8 items-center">
+      {marcas.map((marca) => (
+        <div class="group bg-white rounded-2xl p-6 md:p-8 shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100 hover:border-blue-200 flex items-center justify-center aspect-square hover:-translate-y-1">
+          <img 
+            src={marca.imagen} 
+            alt={`Logo de ${marca.nombre}`}
+            class="w-full h-full object-contain transition-all duration-300 filter group-hover:brightness-110"
+            loading="lazy"
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

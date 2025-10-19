@@ -1,6 +1,7 @@
 ---
+import { whatsappConfig, buildWhatsappUrl } from '../../config/whatsappMessages.js';
 ---
-<section class="w-full py-16 md:py-28 bg-gradient-to-b from-[#fafdff] to-[#f3f6fa]">
+<section class="w-full pt-6 md:pt-10 pb-16 md:pb-28 bg-white">
 	<div class="max-w-7xl mx-auto px-4 md:px-10">
 		<div class="mb-6 flex justify-center">
 			<span class="bg-yellow-100 text-yellow-800 text-base font-bold px-5 py-2 rounded-full tracking-wide shadow">Elige tu modalidad</span>
@@ -32,7 +33,7 @@
 					<li class="flex items-start gap-2"><span class="text-cyan-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></span><span><b class="font-bold">Asesoría Personalizada</b> <span class="text-slate-400 text-sm">Soporte dedicado para tu negocio</span></span></li>
 					<li class="flex items-start gap-2"><span class="text-cyan-400"><svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v8"/><path d="M8 16h8"/></svg></span><span><b class="font-bold">Envíos Programados</b> <span class="text-slate-400 text-sm">Coordiná entregas según tu demanda</span></span></li>
 				</ul>
-				<a href="#contacto" class="mt-auto inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg transition-colors text-center shadow-lg text-lg mx-auto">Contactar</a>
+				<a href={buildWhatsappUrl(whatsappConfig.mayorista)} target="_blank" rel="noopener" class="mt-auto inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg transition-colors text-center shadow-lg text-lg mx-auto">Contactar</a>
 			</div>
 			<!-- Card Minorista -->
 			<div class="relative bg-white border-2 border-pink-200 shadow-xl rounded-2xl p-10 md:p-14 flex flex-col min-h-[400px] h-[440px] md:min-h-[440px] md:h-[480px]">
