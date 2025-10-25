@@ -6,6 +6,7 @@ from routes.categoria import categoria_bp
 from routes.producto_imagenes import producto_imagenes_bp
 from routes.combos import combo_bp
 from routes.ofertas import oferta_bp
+from routes.banners import banner_bp
 # Importar CORS para manejar las politicas de seguridad
 from flask_cors import CORS
 # Importar os para manejar variables de entorno
@@ -27,6 +28,7 @@ app.register_blueprint(categoria_bp)
 app.register_blueprint(producto_imagenes_bp)
 app.register_blueprint(combo_bp)
 app.register_blueprint(oferta_bp)
+app.register_blueprint(banner_bp)
 
 # Configurar CORS para permitir solicitudes desde el frontend
 CORS(app, resources={

@@ -1,42 +1,46 @@
-/**
- * Componente ImageUploader
- * Permite subir imágenes a Supabase Storage y obtener su URL pública
- */
+// Componente ImageUploader
+// Permite subir imágenes a Supabase Storage y obtener su URL pública
 
+// Importa useState para manejar estados locales
 import { useState } from 'react';
+// Importa instancia de Supabase para subir imágenes
 import { supabase } from '../../lib/supabaseCliente.js';
 
+// Componente principal para subir imágenes
 export default function ImageUploader({ onImageUploaded, currentImages = [], onDeleteImage }) {
+	// Estado para mostrar spinner de carga
 	const [uploading, setUploading] = useState(false);
+	// Estado para mostrar progreso de subida
 	const [uploadProgress, setUploadProgress] = useState(0);
-	
+
+	// Maneja la selección de archivo y la subida
 	async function handleFileSelect(e) {
-		const file = e.target.files?.[0];
+		const file = e.target.files?.[0]; // Obtiene el archivo seleccionado
 		if (!file) return;
-		
-		// Validar tipo de archivo
+
+		// Validar tipo de archivo (solo imágenes)
 		if (!file.type.startsWith('image/')) {
 			alert('Por favor selecciona un archivo de imagen válido');
 			return;
 		}
-		
+
 		// Validar tamaño (máximo 5MB)
 		if (file.size > 5 * 1024 * 1024) {
 			alert('La imagen debe ser menor a 5MB');
 			return;
 		}
-		
+
 		try {
-			setUploading(true);
-			setUploadProgress(10);
-			
-			// Crear nombre único para el archivo
+			setUploading(true); // Activa spinner
+			setUploadProgress(10); // Progreso inicial
+
+			// Crea nombre único para el archivo
 			const fileExt = file.name.split('.').pop();
 			const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
 			const filePath = `productos/${fileName}`;
-			
-			setUploadProgress(30);
-			
+
+			setUploadProgress(30); // Progreso tras preparar nombre
+
 			// Subir imagen a Supabase Storage
 			const { data, error } = await supabase.storage
 				.from('productos_paniales') // Nombre del bucket en Supabase Storage
@@ -44,46 +48,48 @@ export default function ImageUploader({ onImageUploaded, currentImages = [], onD
 					cacheControl: '3600',
 					upsert: false
 				});
-			
+
 			if (error) {
 				console.error('Error al subir imagen:', error);
 				throw error;
 			}
-			
-			setUploadProgress(70);
-			
-			// Obtener URL pública
+
+			setUploadProgress(70); // Progreso tras subir
+
+			// Obtener URL pública de la imagen subida
 			const { data: { publicUrl } } = supabase.storage
 				.from('productos_paniales')
 				.getPublicUrl(filePath);
-			
-			setUploadProgress(100);
-			
-			// Notificar al componente padre
+
+			setUploadProgress(100); // Progreso final
+
+			// Notifica al componente padre la URL subida
 			if (onImageUploaded) {
 				onImageUploaded(publicUrl);
 			}
-			
-			// Resetear input
+
+			// Resetea el input de archivo
 			e.target.value = '';
-			
+
 		} catch (error) {
 			console.error('Error:', error);
 			alert('Error al subir la imagen: ' + error.message);
 		} finally {
-			setUploading(false);
-			setUploadProgress(0);
+			setUploading(false); // Oculta spinner
+			setUploadProgress(0); // Resetea progreso
 		}
 	}
-	
+
+	// Renderiza el uploader y la previsualización
 	return (
 		<div className="space-y-4">
-			{/* Botón de subir imagen */}
+			{/* Sección para subir imagen */}
 			<div>
 				<label className="block text-sm font-medium text-gray-700 mb-2">
 					Imágenes del Producto
 				</label>
 				<div className="flex items-center gap-3">
+					{/* Input de archivo oculto y botón visual */}
 					<label className="relative cursor-pointer">
 						<input
 							type="file"
@@ -107,6 +113,7 @@ export default function ImageUploader({ onImageUploaded, currentImages = [], onD
 							</div>
 						</div>
 					</label>
+					{/* Muestra el progreso en texto si está subiendo */}
 					{uploading && (
 						<span className="text-sm text-gray-600">
 							{uploadProgress}%
@@ -117,8 +124,8 @@ export default function ImageUploader({ onImageUploaded, currentImages = [], onD
 					Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB
 				</p>
 			</div>
-			
-			{/* Barra de progreso */}
+
+			{/* Barra de progreso visual */}
 			{uploading && (
 				<div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
 					<div 
@@ -127,22 +134,23 @@ export default function ImageUploader({ onImageUploaded, currentImages = [], onD
 					/>
 				</div>
 			)}
-			
-			{/* Previsualización de imágenes */}
+
+			{/* Previsualización de imágenes subidas */}
 			{currentImages.length > 0 && (
 				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
 					{currentImages.map((url, index) => (
 						<div key={index} className="relative group">
+							{/* Imagen subida */}
 							<img
 								src={url}
 								alt={`Imagen ${index + 1}`}
 								className="w-full h-32 object-cover rounded-lg border-2 border-gray-200"
 							/>
-							{/* Badge de orden */}
+							{/* Badge para indicar orden/principal */}
 							<div className="absolute top-2 left-2 bg-blue-600 text-white text-xs px-2 py-1 rounded">
 								{index === 0 ? 'Principal' : `#${index + 1}`}
 							</div>
-							{/* Botón de eliminar */}
+							{/* Botón para eliminar imagen */}
 							{onDeleteImage && (
 								<button
 									type="button"

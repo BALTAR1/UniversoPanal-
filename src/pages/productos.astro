@@ -2,19 +2,29 @@
 import Layout from '../layouts/Layout.astro';
 import '../styles/global.css';
 import Nav from '../components/ui/Nav.astro';
-import Hero from '../components/desktop/Hero.astro';
-import Footer from '../components/desktop/Footer.astro';
+import NavMobile from '../mobile/NavMobile.astro';
+import MenuBurger from '../mobile/MenuBurger.astro';
+import HeroProductos from '../components/desktop/HeroProductos.astro';
 import CatalogoProductos from '../components/productos/CatalogoProductos.jsx';
 import WhatsAppButton from "../components/ui/WhatsAppButton.astro";
 ---
 
 <Layout title="Productos - Mundo Pañal">
-    <!-- Navegación -->
-    <Nav />
+    {/* Nav Desktop */}
+    <div class="hidden md:block">
+        <Nav />
+    </div>
     
-    <!-- Hero Section -->
-    <Hero />
+    {/* Nav Mobile */}
+    <div class="block md:hidden">
+        <NavMobile />
+    </div>
     
+    <MenuBurger />
+
+    <!-- Hero de la página de productos -->
+    <HeroProductos />
+
     <!-- Catálogo de Productos -->
     <section class="bg-gray-50 py-12">
         <CatalogoProductos 

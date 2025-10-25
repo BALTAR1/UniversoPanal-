@@ -1,6 +1,6 @@
 ---
 // Obtener productos destacados desde la API
-const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:5000';
 
 interface Producto {
   producto_id: number;
@@ -77,10 +77,10 @@ function formatearPrecio(precio: number): string {
   </div>
 
   {productos.length > 0 ? (
-    <div class="relative flex justify-center">
-      <div id="sliderDestacados" class="flex gap-6 overflow-x-auto scroll-smooth pb-4 hide-scrollbar justify-center">
-        {productos.map((producto) => (
-          <div class="min-w-[260px] max-w-xs w-full bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col p-6 items-center">
+    <div class="relative flex justify-center px-16">
+      <div id="sliderDestacados" class="flex gap-6 overflow-x-hidden pb-4 hide-scrollbar" style="width: 1360px;">
+        {productos.map((producto, idx) => (
+          <div class="bg-white rounded-2xl shadow-xl border border-gray-100 flex flex-col p-6 items-center" style="flex: 0 0 320px; width: 320px;">
             <img src={producto.imagen_url || '/images/desta.svg'} alt={producto.nombre} class="w-28 h-28 object-contain mb-4 mx-auto" />
             <h2 class="text-lg md:text-xl font-bold text-gray-900 mb-1 text-center">{producto.nombre}</h2>
             <p class="text-sm md:text-base text-gray-500 mb-3 text-center line-clamp-2 min-h-[40px]">{producto.descripcion || 'Sin descripción'}</p>
@@ -93,19 +93,19 @@ function formatearPrecio(precio: number): string {
           </div>
         ))}
       </div>
-      <!-- Flechas -->
-    <button id="prevDestacados" class="hidden md:flex items-center justify-center absolute left-75 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-        </button>
-    <button id="nextDestacados" class="hidden md:flex items-center justify-center absolute right-75 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-        </button>
-      </div>
-    ) : (
-      <div class="text-center py-12">
-        <p class="text-gray-500 text-lg">No hay productos destacados en este momento.</p>
-      </div>
-    )}
+      {/* Flechas */}
+      <button id="prevDestacados" class="hidden md:flex items-center justify-center absolute left-50 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+      </button>
+      <button id="nextDestacados" class="hidden md:flex items-center justify-center absolute right-50 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white shadow hover:bg-blue-100 z-10 border border-gray-200 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+      </button>
+    </div>
+  ) : (
+    <div class="text-center py-12">
+      <p class="text-gray-500 text-lg">No hay productos destacados en este momento.</p>
+    </div>
+  )}
   
   <!-- Botones de Exploración -->
   <div class="mt-10 flex flex-wrap justify-center gap-4">
@@ -133,19 +133,50 @@ function formatearPrecio(precio: number): string {
 </style>
 
 <script>
-// Slider funcionalidad básica para flechas
+// Slider funcionalidad para mostrar 4 cards y desplazarse de 4 en 4
 if (typeof window !== 'undefined') {
   setTimeout(() => {
     const slider = document.getElementById('sliderDestacados');
     const prev = document.getElementById('prevDestacados');
     const next = document.getElementById('nextDestacados');
+    
     if (slider && prev && next) {
+      let currentPage = 0;
+      const cardsPerPage = 4;
+      const cardWidth = 320; // ancho de cada card
+      const gap = 24; // gap de 6 (1.5rem = 24px)
+      const totalCards = slider.children.length;
+      const totalPages = Math.ceil(totalCards / cardsPerPage);
+      
+      function updateSlider() {
+        if (!slider || !prev || !next) return;
+        
+        const scrollAmount = currentPage * (cardWidth * cardsPerPage + gap * (cardsPerPage - 1));
+        slider.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+        
+        // Actualizar visibilidad de botones
+        prev.style.opacity = currentPage === 0 ? '0.5' : '1';
+        prev.style.pointerEvents = currentPage === 0 ? 'none' : 'auto';
+        next.style.opacity = currentPage >= totalPages - 1 ? '0.5' : '1';
+        next.style.pointerEvents = currentPage >= totalPages - 1 ? 'none' : 'auto';
+      }
+      
       prev.addEventListener('click', () => {
-        slider.scrollBy({ left: -slider.offsetWidth, behavior: 'smooth' });
+        if (currentPage > 0) {
+          currentPage--;
+          updateSlider();
+        }
       });
+      
       next.addEventListener('click', () => {
-        slider.scrollBy({ left: slider.offsetWidth, behavior: 'smooth' });
+        if (currentPage < totalPages - 1) {
+          currentPage++;
+          updateSlider();
+        }
       });
+      
+      // Inicializa en la primera página
+      updateSlider();
     }
   }, 100);
 }

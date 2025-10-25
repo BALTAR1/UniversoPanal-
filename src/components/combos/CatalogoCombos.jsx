@@ -1,6 +1,10 @@
+// Importa los hooks de React para manejar estado y efectos secundarios
 import { useState, useEffect } from 'react';
+// Importa el componente visual para mostrar cada combo
 import ComboCard from './ComboCard.jsx';
+// Importa el componente de paginación reutilizable
 import Pagination from '../productos/Pagination.jsx';
+// Importa el servicio que obtiene combos públicos desde la API
 import { combosPublicosService } from '../../services/productosPublicos.js';
 
 /**
@@ -8,58 +12,64 @@ import { combosPublicosService } from '../../services/productosPublicos.js';
  * Gestiona el estado de paginación y carga de datos de combos
  */
 export default function CatalogoCombos() {
-    // Estados
+    // Estado para almacenar los combos obtenidos
     const [combos, setCombos] = useState([]);
+    // Estado para saber si está cargando los datos
     const [loading, setLoading] = useState(true);
+    // Estado para mostrar errores en la carga
     const [error, setError] = useState(null);
     
-    // Estado de paginación
+    // Estado para la paginación (página actual, total de páginas, total de combos, combos por página)
     const [paginacion, setPaginacion] = useState({
-        paginaActual: 1,
-        totalPaginas: 1,
-        total: 0,
-        porPagina: 16 // 4 columnas x 4 filas (como Mercado Libre)
+        paginaActual: 1, // Página actual
+        totalPaginas: 1, // Total de páginas
+        total: 0,        // Total de combos
+        porPagina: 16    // Combos por página (4 columnas x 4 filas)
     });
 
-    // Carga de combos cuando cambia la página
+    // useEffect: carga combos cada vez que cambia la página actual
     useEffect(() => {
-        cargarCombos();
-    }, [paginacion.paginaActual]);
+        cargarCombos(); // Llama a la función para cargar combos
+    }, [paginacion.paginaActual]); // Solo cuando cambia la página
 
-    // Función para cargar combos
+    // Función asíncrona para cargar combos desde el servicio
     const cargarCombos = async () => {
         try {
-            setLoading(true);
-            setError(null);
+            setLoading(true); // Muestra spinner de carga
+            setError(null);   // Limpia errores anteriores
 
-            // Obtiene los combos
+            // Llama al servicio para obtener combos activos y paginados
             const resultado = await combosPublicosService.obtenerActivos({
                 pagina: paginacion.paginaActual,
                 porPagina: paginacion.porPagina
             });
             
+            // Actualiza el estado con los combos obtenidos
             setCombos(resultado.combos);
+            // Actualiza la paginación con los datos recibidos
             setPaginacion(prev => ({
                 ...prev,
                 totalPaginas: resultado.paginas,
                 total: resultado.total
             }));
         } catch (err) {
+            // Si ocurre un error, lo muestra en pantalla
             console.error('Error al cargar combos:', err);
             setError('Error al cargar los combos. Por favor, intenta de nuevo.');
         } finally {
-            setLoading(false);
+            setLoading(false); // Oculta el spinner de carga
         }
     };
 
-    // Maneja el cambio de página
+    // Función para cambiar la página actual (usada por el componente Pagination)
     const handleCambioPagina = (nuevaPagina) => {
         setPaginacion(prev => ({ ...prev, paginaActual: nuevaPagina }));
     };
 
+    // Renderiza el catálogo de combos
     return (
         <div className="container mx-auto px-4 py-8">
-            {/* Header con resultados */}
+            {/* Header con resultados y título */}
             <div className="mb-8">
                 <h1 className="text-4xl font-black text-gray-900 mb-2 flex items-center gap-3">
                     <span>🎁</span>
@@ -78,7 +88,7 @@ export default function CatalogoCombos() {
                 </div>
             </div>
 
-            {/* Mostrar error si existe */}
+            {/* Muestra error si existe */}
             {error && (
                 <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
                     <p className="font-semibold">Error</p>
@@ -86,7 +96,7 @@ export default function CatalogoCombos() {
                 </div>
             )}
 
-            {/* Loading spinner */}
+            {/* Spinner de carga */}
             {loading && (
                 <div className="flex justify-center items-center h-64">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
@@ -98,6 +108,7 @@ export default function CatalogoCombos() {
                 <>
                     {combos.length > 0 ? (
                         <>
+                            {/* Muestra los combos en un grid responsivo */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                                 {combos.map((combo) => (
                                     <ComboCard 
@@ -107,7 +118,7 @@ export default function CatalogoCombos() {
                                 ))}
                             </div>
 
-                            {/* Paginación */}
+                            {/* Componente de paginación */}
                             <Pagination
                                 paginaActual={paginacion.paginaActual}
                                 totalPaginas={paginacion.totalPaginas}
@@ -115,6 +126,7 @@ export default function CatalogoCombos() {
                             />
                         </>
                     ) : (
+                        // Si no hay combos, muestra mensaje amigable
                         <div className="text-center py-12">
                             <div className="text-6xl mb-4">🎁</div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">

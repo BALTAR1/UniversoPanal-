@@ -29,12 +29,16 @@ export default function CatalogoProductos({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
+    // Estados para modales mobile
+    const [mostrarModalOrdenar, setMostrarModalOrdenar] = useState(false);
+    const [mostrarModalFiltrar, setMostrarModalFiltrar] = useState(false);
+    
     // Estado de paginación y filtros
     const [paginacion, setPaginacion] = useState({
         paginaActual: 1,
         totalPaginas: 1,
         total: 0,
-        porPagina: 16 // 4 columnas x 4 filas (como Mercado Libre)
+        porPagina: 16 // 2 columnas x 8 filas en mobile, 4 columnas x 4 filas en desktop
     });
     
     const [filtros, setFiltros] = useState({
@@ -176,11 +180,17 @@ export default function CatalogoProductos({
         setPaginacion(prev => ({ ...prev, paginaActual: nuevaPagina }));
     };
 
+    // Función para cambiar ordenamiento desde modal mobile
+    const handleCambioOrdenamiento = (nuevoOrden) => {
+        handleFiltrosChange({ ordenar: nuevoOrden, pagina: 1 });
+        setMostrarModalOrdenar(false);
+    };
+
     return (
-        <div className="container mx-auto px-4 py-8">
-            <div className="flex flex-col lg:flex-row gap-6">
-                {/* Sidebar de filtros */}
-                <div className="lg:w-1/4">
+        <div className="w-full">
+            <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
+                {/* Sidebar de filtros - Solo visible en desktop */}
+                <div className="hidden lg:block lg:w-1/4">
                     <FilterSidebar
                         categorias={categorias}
                         marcas={marcas}
@@ -191,26 +201,62 @@ export default function CatalogoProductos({
                 </div>
 
                 {/* Área de productos */}
-                <div className="lg:w-3/4">
-                    {/* Header con resultados */}
-                    <div className="mb-6">
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                            {filtros.soloOfertas 
-                                ? '🔥 Ofertas Activas' 
-                                : filtros.soloCombos 
-                                ? '🎁 Combos Especiales'
-                                : filtros.categoria_id 
-                                ? categorias.find(c => c.categoria_id === filtros.categoria_id)?.nombre 
-                                : 'Todos los productos'
-                            }
-                        </h2>
-                        <div className="flex justify-between items-center">
-                            <p className="text-gray-700 font-semibold">
+                <div className="w-full lg:w-3/4">
+                    {/* Header con resultados y controles mobile */}
+                    <div className="mb-4 md:mb-6">
+                        {/* Desktop Header */}
+                        <div className="hidden md:block">
+                            <h2 className="text-3xl font-bold text-[#ff792b] mb-2">
+                                {filtros.soloOfertas 
+                                    ? 'Ofertas Activas' 
+                                    : filtros.soloCombos 
+                                    ? 'Combos Especiales'
+                                    : filtros.categoria_id 
+                                    ? categorias.find(c => c.categoria_id === filtros.categoria_id)?.nombre 
+                                    : 'Todos los productos'
+                                }
+                            </h2>
+                            <div className="flex justify-between items-center">
+                                <p className="text-gray-700 font-semibold">
+                                    {loading 
+                                        ? 'Cargando...' 
+                                        : `${paginacion.total} ${paginacion.total === 1 ? 'resultado encontrado' : 'resultados encontrados'}`
+                                    }
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Mobile Header con botones de Ordenar y Filtrar */}
+                        <div className="md:hidden">
+                            <p className="text-sm text-gray-600 mb-3">
                                 {loading 
                                     ? 'Cargando...' 
-                                    : `${paginacion.total} ${paginacion.total === 1 ? 'resultado encontrado' : 'resultados encontrados'}`
+                                    : `${paginacion.total} ${paginacion.total === 1 ? 'resultado' : 'resultados'}`
                                 }
                             </p>
+                            <div className="flex gap-2">
+                                {/* Botón Ordenar */}
+                                <button 
+                                    onClick={() => setMostrarModalOrdenar(true)}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"/>
+                                    </svg>
+                                    <span>Ordenar</span>
+                                </button>
+                                
+                                {/* Botón Filtrar */}
+                                <button 
+                                    onClick={() => setMostrarModalFiltrar(true)}
+                                    className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                                    </svg>
+                                    <span>Filtrar</span>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -229,12 +275,12 @@ export default function CatalogoProductos({
                         </div>
                     )}
 
-                    {/* Grid de productos */}
+                    {/* Grid de productos - Responsive: 2 cols mobile, 4 cols desktop */}
                     {!loading && !error && (
                         <>
                             {items.length > 0 ? (
                                 <>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4">
                                         {items.map((item) => (
                                             item.tipo === 'combo' ? (
                                                 <ComboCard 
@@ -260,7 +306,7 @@ export default function CatalogoProductos({
                             ) : (
                                 <div className="text-center py-12">
                                     <div className="text-6xl mb-4">🔍</div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                                    <h3 className="text-xl font-bold text-[#ff792b] mb-2">
                                         No se encontraron {filtros.soloCombos ? 'combos' : 'productos'}
                                     </h3>
                                     <p className="text-gray-600 mb-4">
@@ -288,6 +334,91 @@ export default function CatalogoProductos({
                     )}
                 </div>
             </div>
+
+            {/* Modal de Ordenar - Mobile */}
+            {mostrarModalOrdenar && (
+                <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50" onClick={() => setMostrarModalOrdenar(false)}>
+                    <div className="bg-white rounded-t-2xl w-full max-w-lg animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-900">Ordenar por</h3>
+                            <button 
+                                onClick={() => setMostrarModalOrdenar(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        {/* Opciones de ordenamiento */}
+                        <div className="p-4 space-y-2 max-h-[60vh] overflow-y-auto">
+                            {[
+                                { valor: 'relevancia', texto: 'Más relevantes' },
+                                { valor: 'nombre', texto: 'Nombre (A-Z)' },
+                                { valor: 'precio_asc', texto: 'Menor precio' },
+                                { valor: 'precio_desc', texto: 'Mayor precio' },
+                                { valor: 'recientes', texto: 'Más recientes' }
+                            ].map(opcion => (
+                                <button
+                                    key={opcion.valor}
+                                    onClick={() => handleCambioOrdenamiento(opcion.valor)}
+                                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
+                                        filtros.ordenar === opcion.valor 
+                                            ? 'bg-blue-50 text-blue-700 font-semibold' 
+                                            : 'hover:bg-gray-50 text-gray-700'
+                                    }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <span>{opcion.texto}</span>
+                                        {filtros.ordenar === opcion.valor && (
+                                            <svg className="w-5 h-5 text-blue-700" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
+                                            </svg>
+                                        )}
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal de Filtros - Mobile */}
+            {mostrarModalFiltrar && (
+                <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50" onClick={() => setMostrarModalFiltrar(false)}>
+                    <div className="bg-white rounded-t-2xl w-full max-w-lg max-h-[85vh] flex flex-col animate-slide-up" onClick={(e) => e.stopPropagation()}>
+                        {/* Header fijo */}
+                        <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                            <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
+                            <button 
+                                onClick={() => setMostrarModalFiltrar(false)}
+                                className="text-gray-400 hover:text-gray-600"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        {/* Contenido scrolleable del filtro */}
+                        <div className="flex-1 overflow-y-auto">
+                            <FilterSidebar
+                                categorias={categorias}
+                                marcas={marcas}
+                                rangoPrecios={rangoPrecios}
+                                filtrosActuales={filtros}
+                                onFiltrosChange={(nuevosFiltros) => {
+                                    handleFiltrosChange(nuevosFiltros);
+                                    setMostrarModalFiltrar(false);
+                                }}
+                                isMobile={true}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

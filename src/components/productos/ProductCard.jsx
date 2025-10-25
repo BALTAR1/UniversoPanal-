@@ -33,44 +33,38 @@ export default function ProductCard({ producto }) {
                 />
 
                 {/* Badges de promoción superior derecha */}
-                <div className="absolute top-2 right-2 flex flex-col gap-1">
+                <div className="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1">
                     {sinStock && (
-                        <div className="bg-red-600 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
+                        <div className="bg-red-600 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded font-bold shadow-md">
                             SIN STOCK
                         </div>
                     )}
                     {stockBajo && !sinStock && (
-                        <div className="bg-orange-500 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
+                        <div className="bg-orange-500 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded font-bold shadow-md">
                             ÚLTIMAS {producto.stock}
                         </div>
                     )}
                     {/* Badge de oferta activa */}
                     {producto.tiene_oferta && !sinStock && (
-                        <div className="bg-red-500 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
+                        <div className="bg-red-500 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded font-bold shadow-md">
                             {producto.descuento}% OFF
-                        </div>
-                    )}
-                    {/* Badge de combo */}
-                    {producto.tiene_combo && !producto.tiene_oferta && !sinStock && (
-                        <div className="bg-purple-500 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
-                            EN COMBO
                         </div>
                     )}
                 </div>
             </a>
 
             {/* Información del producto */}
-            <div className="p-3 flex flex-col flex-grow">
-                {/* Marca y Modelo */}
+            <div className="p-2 md:p-3 flex flex-col flex-grow">
+                {/* Marca y Modelo - Oculto en mobile */}
                 {producto.marca && (
-                    <p className="text-xs text-gray-600 font-medium mb-1">
+                    <p className="hidden md:block text-xs text-gray-600 font-medium mb-1">
                         {producto.marca}{producto.modelo ? ` - ${producto.modelo}` : ''}
                     </p>
                 )}
 
                 {/* Nombre del producto - Clickeable */}
                 <a href={urlDetalle} className="block">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 min-h-[2.5rem] group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-xs md:text-sm font-semibold text-gray-900 mb-1 md:mb-2 line-clamp-2 min-h-[2rem] md:min-h-[2.5rem] group-hover:text-blue-600 transition-colors">
                         {producto.nombre}
                     </h3>
                 </a>
@@ -78,35 +72,35 @@ export default function ProductCard({ producto }) {
                 {/* Precio y opciones de compra */}
                 <div className="mt-auto">
                     {/* Precio principal */}
-                    <div className="mb-3">
+                    <div className="mb-2 md:mb-3">
                         {/* Si hay descuento por oferta, mostrar precio original tachado */}
                         {producto.tiene_oferta && producto.precio_con_descuento ? (
                             <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    <span className="text-sm text-gray-500 line-through">
+                                <div className="flex items-center gap-1 md:gap-2 mb-0.5 md:mb-1">
+                                    <span className="text-[10px] md:text-sm text-gray-500 line-through">
                                         {formatearPrecio(producto.precio_original)}
                                     </span>
-                                    <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded">
+                                    <span className="bg-red-100 text-red-700 text-[9px] md:text-xs font-bold px-1 md:px-2 py-0.5 rounded">
                                         {producto.descuento}% OFF
                                     </span>
                                 </div>
-                                <div className="text-2xl font-black text-red-600">
+                                <div className="text-lg md:text-2xl font-black text-black">
                                     {formatearPrecio(producto.precio_con_descuento)}
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">
+                                <p className="hidden md:block text-xs text-gray-500 mt-1">
                                     Ahorrás {formatearPrecio(producto.precio_original - producto.precio_con_descuento)}
                                 </p>
                             </div>
                         ) : (
-                            <div className="text-2xl font-black text-gray-900">
+                            <div className="text-lg md:text-2xl font-black text-black">
                                 {formatearPrecio(producto.precio)}
                             </div>
                         )}
                         {/* Mostrar badge de combo si aplica */}
                         {producto.tiene_combo && (
-                            <div className="mt-2">
-                                <span className="inline-block bg-purple-100 text-purple-700 text-xs font-semibold px-2 py-1 rounded">
-                                    🎁 Disponible en combo
+                            <div className="mt-1 md:mt-2">
+                                <span className="inline-block bg-purple-100 text-purple-700 text-[9px] md:text-xs font-semibold px-1.5 md:px-2 py-0.5 md:py-1 rounded">
+                                    Disponible en combo
                                 </span>
                             </div>
                         )}
@@ -116,7 +110,7 @@ export default function ProductCard({ producto }) {
                     <a
                         href={urlDetalle}
                         className={`
-                            block w-full py-2.5 rounded-lg font-semibold text-sm text-center transition-all
+                            block w-full py-1.5 md:py-2.5 rounded-lg font-semibold text-xs md:text-sm text-center transition-all
                             ${sinStock 
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                                 : 'bg-green-600 text-white hover:bg-green-700 active:scale-95'
