@@ -3,13 +3,15 @@ import { useState, useEffect } from 'react';
 /**
  * Componente de filtros laterales - Inspirado en Mercado Libre
  * Filtros dinámicos basados en datos reales de productos
+ * Responsive: Sidebar en desktop, Modal bottom sheet en mobile
  */
 export default function FilterSidebar({ 
     categorias = [], 
     marcas = [],
     rangoPrecios = { min: 0, max: 0 },
     filtrosActuales = {},
-    onFiltrosChange 
+    onFiltrosChange,
+    isMobile = false
 }) {
     // Estados locales
     const [busqueda, setBusqueda] = useState(filtrosActuales.busqueda || '');
@@ -79,24 +81,26 @@ export default function FilterSidebar({
     };
 
     return (
-        <aside className="w-full bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {/* Header */}
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
-                    </svg>
-                    <h2 className="text-base font-semibold text-gray-900">Filtros</h2>
+        <aside className={`w-full bg-white overflow-hidden ${isMobile ? '' : 'rounded-lg border border-gray-200'}`}>
+            {/* Header - Solo mostrar en desktop */}
+            {!isMobile && (
+                <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
+                        </svg>
+                        <h2 className="text-base font-semibold text-gray-900">Filtros</h2>
+                    </div>
+                    <button
+                        onClick={limpiarFiltros}
+                        className="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline"
+                    >
+                        Limpiar
+                    </button>
                 </div>
-                <button
-                    onClick={limpiarFiltros}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium hover:underline"
-                >
-                    Limpiar
-                </button>
-            </div>
+            )}
 
-            <div className="p-4 space-y-5">
+            <div className={`p-4 space-y-5 ${isMobile ? '' : 'max-h-[70vh]'} overflow-y-auto`}>
                 {/* Búsqueda */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -355,6 +359,16 @@ export default function FilterSidebar({
                 >
                     Aplicar filtros
                 </button>
+
+                {/* Botón limpiar filtros - Solo en mobile */}
+                {isMobile && (
+                    <button
+                        onClick={limpiarFiltros}
+                        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                    >
+                        Limpiar todos los filtros
+                    </button>
+                )}
             </div>
         </aside>
     );

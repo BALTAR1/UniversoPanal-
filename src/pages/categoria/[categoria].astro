@@ -2,7 +2,9 @@
 import Layout from '../../layouts/Layout.astro';
 import '../../styles/global.css';
 import Nav from '../../components/ui/Nav.astro';
-import Hero from '../../components/desktop/Hero.astro';
+import NavMobile from '../../mobile/NavMobile.astro';
+import MenuBurger from '../../mobile/MenuBurger.astro';
+import HeroProductos from '../../components/desktop/HeroProductos.astro';
 import Footer from '../../components/desktop/Footer.astro';
 import CatalogoProductos from '../../components/productos/CatalogoProductos.jsx';
 import WhatsAppButton from "../../components/ui/WhatsAppButton.astro";
@@ -36,11 +38,20 @@ const catalogoProps = {
 ---
 
 <Layout title={title}>
-    <!-- Navegación -->
-    <Nav />
+    {/* Nav Desktop */}
+    <div class="hidden md:block">
+        <Nav />
+    </div>
+    
+    {/* Nav Mobile */}
+    <div class="block md:hidden">
+        <NavMobile />
+    </div>
+    
+    <MenuBurger />
     
     <!-- Hero Section -->
-    <Hero />
+    <HeroProductos />
     
     <!-- Breadcrumb -->
     <section class="bg-white border-b">

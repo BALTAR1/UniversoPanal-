@@ -50,7 +50,7 @@ export default function ComboCard({ combo }) {
         <article className="group bg-white rounded-lg border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
             {/* Contenedor de imagen - clickeable para ir al detalle */}
             <a href={urlDetalle} className="relative bg-gray-50 overflow-hidden aspect-square block">
-                {/* Imagen principal: `src` puede venir de diferentes fuentes como vimos arriba */}
+                {/* Imagen principal: se muestra la actual del array de imágenes */}
                 <img
                     src={imagenPrincipal}
                     alt={combo.nombre} // texto alternativo accesible
@@ -59,22 +59,22 @@ export default function ComboCard({ combo }) {
                 />
 
                 {/* Badges en la esquina superior derecha */}
-                <div className="absolute top-2 right-2 flex flex-col gap-1">
+                <div className="absolute top-1 md:top-2 right-1 md:right-2 flex flex-col gap-1">
                     {/* Badge fijo que indica que es un combo */}
-                    <div className="bg-purple-500 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
+                    <div className="bg-purple-500 text-white text-center text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded font-bold shadow-md">
                         {/* Icono y texto descriptivo */}
-                        🎁 COMBO
+                        COMBO
                     </div>
                     {/* Si hay ahorro calculado (>0), mostramos un badge adicional con el % */}
                     {porcentajeAhorro > 0 && (
-                        <div className="bg-green-500 text-white text-xs px-2 py-1 rounded font-bold shadow-md">
+                        <div className="bg-green-500 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded font-bold shadow-md">
                             AHORRA {porcentajeAhorro}%
                         </div>
                     )}
                 </div>
 
                 {/* Indicador en la esquina inferior izquierda con la cantidad de productos incluidos */}
-                <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded font-semibold">
+                <div className="absolute bottom-1 md:bottom-2 left-1 md:left-2 bg-black bg-opacity-70 text-white text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 md:py-1 rounded font-semibold">
                     {combo.combo_productos?.length || 0} productos
                 </div>
             </a>
@@ -124,13 +124,9 @@ export default function ComboCard({ combo }) {
                                         <span className="text-sm text-gray-500 line-through">
                                             {formatearPrecio(precioTotalIndividual)}
                                         </span>
-                                        {/* Badge indicando que es combo */}
-                                        <span className="bg-green-100 text-green-700 text-xs font-bold px-2 py-0.5 rounded">
-                                            COMBO
-                                        </span>
                                     </div>
                                     {/* Precio del combo en grande */}
-                                    <div className="text-2xl font-black text-green-700">
+                                    <div className="text-2xl font-black text-black">
                                         {formatearPrecio(combo.precio_combo)}
                                     </div>
                                     {/* Texto pequeño indicando el monto que se ahorra */}

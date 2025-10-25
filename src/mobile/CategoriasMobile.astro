@@ -1,0 +1,56 @@
+---
+// Categorías Mobile - Carrusel optimizado para móviles
+const categorias = [
+  { id: 1, nombre: 'Pañales', imagen: '/images/CatPanal.png' },
+  { id: 2, nombre: 'Nutrición', imagen: '/images/CatNutricion.png' },
+  { id: 3, nombre: 'Higiene', imagen: '/images/CatHigiene.png' },
+  { id: 4, nombre: 'Adultos', imagen: '/images/CatAdultos.png' },
+  { id: 5, nombre: 'Accesorios', imagen: '/images/CatAccesorios.png' },
+  { id: 6, nombre: 'Ofertas', imagen: '/images/CatOferta.jpg' },
+];
+---
+
+<section class="w-full py-8 bg-white">
+  <div class="px-4">
+    <h2 class="text-2xl font-black text-cyan-600 text-center mb-6">
+      Categorías
+    </h2>
+    
+    {/* Carrusel horizontal para mobile */}
+    <div class="overflow-x-auto pb-4 hide-scrollbar">
+      <div class="flex gap-4 px-2">
+        {categorias.map((categoria) => (
+          <a 
+            href={`/categoria/${categoria.nombre.toLowerCase()}`}
+            class="flex-shrink-0 w-32"
+          >
+            <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all overflow-hidden border border-gray-100">
+              <div class="relative h-32 bg-gray-50">
+                <img 
+                  src={categoria.imagen} 
+                  alt={categoria.nombre}
+                  class="w-full h-full object-cover"
+                />
+              </div>
+              <div class="p-2">
+                <p class="text-sm font-bold text-[#ff792b] text-center">
+                  {categoria.nombre}
+                </p>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

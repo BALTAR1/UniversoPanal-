@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { combosPublicosService } from '../../services/productosPublicos.js';
+import { addToCart } from '../../hooks/useCart.js';
 
 /**
  * Componente de detalle de combo
@@ -82,12 +83,15 @@ export default function DetalleCombo({ comboId }) {
             cantidad: cantidad, // cantidad seleccionada
             tipo: 'combo', // tipo para distinguir en el carrito
             productos: combo.combo_productos, // detalle de los productos incluidos
-            imagen: todasImagenes[0] // imagen principal para mostrar en el carrito
+            imagen: todasImagenes[0], // imagen principal para mostrar en el carrito
+            caracteristicas: {
+                pack: `Pack de ${combo.combo_productos?.length || 0} productos`,
+                ahorro: combo.ahorro > 0 ? `Ahorro: ${formatearPrecio(combo.ahorro)}` : null
+            }
         };
 
-        // Por ahora solo mostramos en consola y alert (pendiente: integrar con useCart)
-        console.log('Agregando combo al carrito:', itemCarrito);
-        alert(`${combo.nombre} x${cantidad} agregado al carrito`);
+        // Agregar al carrito usando el hook
+        addToCart(itemCarrito);
     };
 
     // Referencia para mantener la referencia del intervalo del autoplay
@@ -113,6 +117,32 @@ export default function DetalleCombo({ comboId }) {
     const handleNext = () => {
         setImagenSeleccionada((prev) => (prev + 1) % todasImagenes.length);
         clearInterval(intervaloRef.current);
+    };
+
+    // Manejo de deslizamiento táctil
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
+
+    const handleTouchStart = (e) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = (e) => {
+        setTouchEnd(e.changedTouches[0].clientX);
+        handleSwipe();
+    };
+
+    const handleSwipe = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe) {
+            handleNext();
+        } else if (isRightSwipe) {
+            handlePrev();
+        }
     };
 
     // Si estamos cargando, mostramos un spinner centrado
@@ -143,9 +173,9 @@ export default function DetalleCombo({ comboId }) {
 
     // Render del detalle completo
     return (
-        <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-4 py-4 md:py-8">
             {/* Breadcrumb de navegación (mejora la experiencia y SEO) */}
-            <nav className="flex items-center gap-2 text-sm mb-8" aria-label="Breadcrumb">
+            <nav className="flex items-center gap-2 text-xs md:text-sm mb-4 md:mb-8" aria-label="Breadcrumb">
                 <a href="/" className="text-blue-600 hover:text-blue-700 hover:underline">
                     Inicio
                 </a>
@@ -154,15 +184,19 @@ export default function DetalleCombo({ comboId }) {
                     Productos
                 </a>
                 <span className="text-gray-400">›</span>
-                <span className="text-gray-700 font-medium">
+                <span className="text-gray-700 font-medium truncate">
                     {combo.nombre}
                 </span>
             </nav>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
                 {/* Columna izquierda: slider de imágenes y miniaturas */}
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2 md:gap-4">
                     {/* Imagen principal con slider */}
-                    <div className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square group">
+                    <div 
+                        className="relative bg-gray-100 rounded-lg overflow-hidden aspect-square group"
+                        onTouchStart={handleTouchStart}
+                        onTouchEnd={handleTouchEnd}
+                    >
                         <img
                             src={todasImagenes[imagenSeleccionada]}
                             alt={combo.nombre}
@@ -174,31 +208,26 @@ export default function DetalleCombo({ comboId }) {
                             <>
                                 <button
                                     onClick={handlePrev}
-                                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 z-10"
+                                    className="absolute left-1 md:left-4 top-1/2 -translate-y-1/2 bg-white rounded-full p-1 md:p-2 shadow-lg hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 z-10"
                                 >
-                                    <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                                     </svg>
                                 </button>
                                 <button
                                     onClick={handleNext}
-                                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 z-10"
+                                    className="absolute right-1 md:right-4 top-1/2 -translate-y-1/2 bg-white rounded-full p-1 md:p-2 shadow-lg hover:bg-gray-100 transition-colors opacity-0 group-hover:opacity-100 z-10"
                                 >
-                                    <svg className="w-6 h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                                     </svg>
                                 </button>
                             </>
                         )}
 
-                        {/* Badge que indica que es un combo */}
-                        <div className="absolute top-4 right-4 bg-purple-500 text-white px-3 py-1 rounded-full font-bold text-sm">
-                            🎁 COMBO
-                        </div>
-
                         {/* Indicador de posición en el slider (ej: 1 / 4) */}
                         {todasImagenes.length > 1 && (
-                            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                            <div className="absolute bottom-2 md:bottom-4 left-1/2 -translate-x-1/2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
                                 {imagenSeleccionada + 1} / {todasImagenes.length}
                             </div>
                         )}
@@ -211,7 +240,7 @@ export default function DetalleCombo({ comboId }) {
                                 <button
                                     key={idx}
                                     onClick={() => setImagenSeleccionada(idx)}
-                                    className={`flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                                    className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all ${
                                         imagenSeleccionada === idx 
                                             ? 'border-purple-600' 
                                             : 'border-gray-200 hover:border-gray-400'
@@ -229,35 +258,35 @@ export default function DetalleCombo({ comboId }) {
                 </div>
 
                 {/* Columna derecha: información detallada del combo */}
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4 md:gap-6">
                     {/* Nombre y resumen del combo */}
                     <div>
-                        <h1 className="text-4xl font-black text-gray-900 mb-2">
+                        <h1 className="text-2xl md:text-4xl font-black text-gray-900 mb-2">
                             {combo.nombre}
                         </h1>
-                        <div className="flex items-center gap-4 text-sm">
-                            <span className="bg-purple-100 text-purple-700 px-3 py-1 rounded-full font-medium">
+                        <div className="flex items-center gap-4 text-xs md:text-sm">
+                            <span className="bg-purple-100 text-purple-700 px-2 md:px-3 py-1 rounded-full font-medium">
                                 Pack de {combo.combo_productos?.length || 0} productos
                             </span>
                         </div>
                     </div>
 
                     {/* Precios y ahorro: comparativa y visualización del monto ahorrado */}
-                    <div className="border-b pb-6">
-                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4">
-                            <p className="text-sm text-gray-600 mb-2">Precio normalmente:</p>
-                            <p className="text-sm text-gray-500 line-through mb-3">
+                    <div className="border-b pb-4 md:pb-6">
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3 md:p-4 mb-4">
+                            <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2">Precio normalmente:</p>
+                            <p className="text-xs md:text-sm text-gray-500 line-through mb-2 md:mb-3">
                                 {formatearPrecio(precioTotalIndividual)}
                             </p>
                             
-                            <p className="text-sm text-gray-600 mb-2">Precio en combo:</p>
-                            <div className="text-4xl font-black text-green-600 mb-3">
+                            <p className="text-xs md:text-sm text-gray-600 mb-1 md:mb-2">Precio en combo:</p>
+                            <div className="text-2xl md:text-4xl font-black text-gray-900 mb-2 md:mb-3">
                                 {formatearPrecio(combo.precio_combo)}
                             </div>
 
                             {ahorro > 0 && (
-                                <div className="bg-green-100 border border-green-300 rounded p-3 mb-3">
-                                    <p className="text-sm font-semibold text-green-700">
+                                <div className="bg-green-100 border border-green-300 rounded p-2 md:p-3 mb-0">
+                                    <p className="text-xs md:text-sm font-semibold text-green-700">
                                         ¡Ahorrás {formatearPrecio(ahorro)}! ({porcentajeAhorro}%)
                                     </p>
                                 </div>
@@ -266,24 +295,24 @@ export default function DetalleCombo({ comboId }) {
                     </div>
 
                     {/* Lista de productos incluidos: imagen, nombre, marca y precio por unidad */}
-                    <div className="border-b pb-6">
-                        <h2 className="text-lg font-bold text-gray-900 mb-4">
+                    <div className="border-b pb-4 md:pb-6">
+                        <h2 className="text-base md:text-lg font-bold text-gray-900 mb-3 md:mb-4">
                             Productos incluidos en el combo
                         </h2>
-                        <div className="space-y-3">
+                        <div className="space-y-2 md:space-y-3">
                             {combo.combo_productos?.map((item, idx) => (
-                                <div key={idx} className="bg-gray-50 rounded-lg p-3 flex gap-3">
+                                <div key={idx} className="bg-gray-50 rounded-lg p-2 md:p-3 flex gap-2 md:gap-3">
                                     {item.productos?.imagen_url && (
                                         <img
                                             src={item.productos.imagen_url}
                                             alt={item.productos.nombre}
-                                            className="w-16 h-16 object-cover rounded"
+                                            className="w-14 h-14 md:w-16 md:h-16 object-cover rounded flex-shrink-0"
                                         />
                                     )}
-                                    <div className="flex-1">
-                                        <div className="flex items-start justify-between">
-                                            <div>
-                                                <p className="font-semibold text-gray-900">
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-start justify-between gap-2">
+                                            <div className="min-w-0">
+                                                <p className="font-semibold text-gray-900 text-sm md:text-base truncate">
                                                     {item.cantidad}x {item.productos?.nombre}
                                                 </p>
                                                 {item.productos?.marca && (
@@ -292,8 +321,8 @@ export default function DetalleCombo({ comboId }) {
                                                     </p>
                                                 )}
                                             </div>
-                                            <div className="text-right">
-                                                <p className="font-bold text-gray-900">
+                                            <div className="text-right flex-shrink-0">
+                                                <p className="font-bold text-gray-900 text-sm md:text-base">
                                                     {formatearPrecio(item.productos?.precio || 0)}
                                                 </p>
                                                 <p className="text-xs text-gray-500">
@@ -308,24 +337,24 @@ export default function DetalleCombo({ comboId }) {
                     </div>
 
                     {/* Controles de cantidad y botón para agregar al carrito */}
-                    <div className="space-y-3">
-                        <div className="flex items-center gap-4">
-                            <label className="text-sm font-medium text-gray-700">
+                    <div className="space-y-2 md:space-y-3">
+                        <div className="flex items-center gap-3 md:gap-4">
+                            <label className="text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">
                                 Cantidad de combos:
                             </label>
                             <div className="flex items-center border border-gray-300 rounded-lg">
                                 <button
                                     onClick={() => setCantidad(Math.max(1, cantidad - 1))}
-                                    className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+                                    className="px-2 md:px-3 py-1 md:py-2 text-gray-600 hover:bg-gray-100 text-sm md:text-base"
                                 >
                                     −
                                 </button>
-                                <span className="px-4 py-2 font-semibold text-gray-900">
+                                <span className="px-3 md:px-4 py-1 md:py-2 font-semibold text-gray-900 text-sm md:text-base">
                                     {cantidad}
                                 </span>
                                 <button
                                     onClick={() => setCantidad(cantidad + 1)}
-                                    className="px-3 py-2 text-gray-600 hover:bg-gray-100"
+                                    className="px-2 md:px-3 py-1 md:py-2 text-gray-600 hover:bg-gray-100 text-sm md:text-base"
                                 >
                                     +
                                 </button>
@@ -334,7 +363,7 @@ export default function DetalleCombo({ comboId }) {
 
                         <button
                             onClick={agregarAlCarrito}
-                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 rounded-lg transition-colors text-lg"
+                            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-lg transition-colors text-sm md:text-lg"
                         >
                             {/* Botón muestra el precio total (precio combo * cantidad) */}
                             Agregar al carrito - {formatearPrecio(combo.precio_combo * cantidad)}

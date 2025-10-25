@@ -1,18 +1,31 @@
+// Importa los hooks de React para manejar estado y efectos secundarios
 import { useState, useEffect } from 'react';
+// Importa el componente de tabla para mostrar combos
 import DataTable from '../../ui/DataTable.jsx';
+// Importa el componente Modal para formularios emergentes
 import Modal from '../../ui/Modal.jsx';
+// Importa el componente Button para botones reutilizables
 import Button from '../../ui/Button.jsx';
+// Importa el componente para subir imágenes
 import ImageUploader from '../../ui/ImageUploader.jsx';
+// Importa el servicio para interactuar con la API de combos
 import { combosService } from '../../../services/combosService.js';
+// Importa el servicio para interactuar con la API de productos
 import { productosService } from '../../../services/apiServices.js';
 
+// Componente principal para la gestión de combos
 export default function CombosManager() {
-    // Estados
+    // Estado para la lista de combos
     const [combos, setCombos] = useState([]);
+    // Estado para la lista de productos disponibles
     const [productos, setProductos] = useState([]);
+    // Estado para mostrar spinner de carga
     const [loading, setLoading] = useState(true);
+    // Estado para mostrar/ocultar el modal de edición/creación
     const [modalOpen, setModalOpen] = useState(false);
+    // Estado para saber si se está editando un combo existente
     const [editingCombo, setEditingCombo] = useState(null);
+    // Estado para el formulario del combo (datos a crear/editar)
     const [formData, setFormData] = useState({
         nombre: '',
         descripcion: '',
@@ -22,15 +35,17 @@ export default function CombosManager() {
         fecha_inicio: '',
         fecha_fin: ''
     });
+    // Estado para los productos seleccionados en el combo
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
     
-    // Columnas de la tabla
+    // Definición de las columnas para la tabla de combos
     const columns = [
         { key: 'combo_id', label: 'ID' },
         {
             key: 'imagen_url',
             label: 'Imagen',
             render: (imageUrl) => {
+                // Renderiza la imagen del combo o un texto si no hay imagen
                 if (!imageUrl) return <span className="text-gray-400">Sin imagen</span>;
                 return (
                     <img
@@ -46,7 +61,7 @@ export default function CombosManager() {
             key: 'precio_combo', 
             label: 'Precio', 
             render: (value, row) => {
-                // Calcular precio total individual
+                // Calcula el precio total individual sumando los productos
                 let precioTotal = 0;
                 if (row.productos && row.productos.length > 0) {
                     row.productos.forEach(item => {
@@ -55,9 +70,11 @@ export default function CombosManager() {
                         }
                     });
                 }
+                // Calcula el ahorro y el porcentaje de descuento
                 const ahorro = precioTotal - value;
                 const descuento = precioTotal > 0 ? ((ahorro / precioTotal) * 100).toFixed(0) : 0;
                 
+                // Renderiza el precio del combo y el ahorro si corresponde
                 return (
                     <div>
                         <div className="font-bold text-green-700">
@@ -77,6 +94,7 @@ export default function CombosManager() {
             key: 'productos',
             label: 'Productos',
             render: (value) => {
+                // Muestra los productos incluidos en el combo
                 if (!value || value.length === 0) return <span className="text-gray-400">Sin productos</span>;
                 return (
                     <div className="text-xs">
@@ -96,6 +114,7 @@ export default function CombosManager() {
             key: 'fecha_inicio',
             label: 'Vigencia',
             render: (inicio, row) => {
+                // Muestra la vigencia del combo (fecha inicio y fin)
                 if (!inicio || !row.fecha_fin) return <span className="text-gray-400">Sin vigencia</span>;
                 const inicioDate = new Date(inicio).toLocaleDateString('es-AR');
                 const finDate = new Date(row.fecha_fin).toLocaleDateString('es-AR');
@@ -119,29 +138,33 @@ export default function CombosManager() {
         },
     ];
 
-    // Cargar datos al montar
+    // useEffect: carga los combos y productos al montar el componente
     useEffect(() => {
         cargarDatos();
     }, []);
 
+    // Función para cargar combos y productos desde la API
     async function cargarDatos() {
         try {
-            setLoading(true);
+            setLoading(true); // Muestra spinner
+            // Obtiene combos y productos en paralelo
             const [combosData, productosData] = await Promise.all([
                 combosService.obtenerTodos({ con_productos: true }),
                 productosService.obtenerTodos({ limit: 100 }),
             ]);
             
-            setCombos(combosData);
-            setProductos(productosData);
+            setCombos(combosData); // Actualiza combos
+            setProductos(productosData); // Actualiza productos
         } catch (error) {
+            // Si ocurre un error, lo muestra y alerta al usuario
             console.error('Error al cargar datos:', error);
             alert('Error al cargar los datos: ' + error.message);
         } finally {
-            setLoading(false);
+            setLoading(false); // Oculta spinner
         }
     }
 
+    // Maneja el cambio de los inputs del formulario
     function handleInputChange(e) {
         const { name, value, type, checked } = e.target;
         setFormData((prev) => ({ 
@@ -150,6 +173,7 @@ export default function CombosManager() {
         }));
     }
 
+    // Abre el modal para crear un nuevo combo
     function handleCreate() {
         setEditingCombo(null);
         setFormData({
@@ -165,6 +189,7 @@ export default function CombosManager() {
         setModalOpen(true);
     }
 
+    // Abre el modal para editar un combo existente
     function handleEdit(combo) {
         setEditingCombo(combo);
         setFormData({
@@ -177,7 +202,7 @@ export default function CombosManager() {
             fecha_fin: combo.fecha_fin ? combo.fecha_fin.split('T')[0] : ''
         });
         
-        // Cargar productos del combo
+        // Carga los productos del combo en el estado
         if (combo.productos && combo.productos.length > 0) {
             setProductosSeleccionados(
                 combo.productos.map(item => ({
@@ -193,10 +218,11 @@ export default function CombosManager() {
         setModalOpen(true);
     }
 
+    // Maneja el envío del formulario para crear/editar combo
     async function handleSubmit(e) {
         e.preventDefault();
 
-        // Validaciones
+        // Validaciones básicas
         if (!formData.nombre.trim()) {
             alert('El nombre es obligatorio');
             return;
@@ -211,6 +237,7 @@ export default function CombosManager() {
         }
 
         try {
+            // Prepara los datos para enviar a la API
             const data = {
                 ...formData,
                 precio_combo: parseFloat(formData.precio_combo),
@@ -221,36 +248,42 @@ export default function CombosManager() {
             };
 
             if (editingCombo) {
+                // Si se está editando, actualiza el combo
                 await combosService.actualizar(editingCombo.combo_id, data);
                 alert('Combo actualizado correctamente');
             } else {
+                // Si no, crea un nuevo combo
                 await combosService.crear(data);
                 alert('Combo creado correctamente');
             }
 
-            setModalOpen(false);
-            cargarDatos();
+            setModalOpen(false); // Cierra el modal
+            cargarDatos(); // Recarga la lista
         } catch (error) {
+            // Si ocurre un error, lo muestra y alerta al usuario
             console.error('Error al guardar combo:', error);
             alert('Error al guardar: ' + error.message);
         }
     }
 
+    // Maneja la eliminación de un combo
     async function handleDelete(combo) {
+        // Confirma con el usuario antes de eliminar
         if (!confirm(`¿Estás seguro de eliminar el combo "${combo.nombre}"?`)) {
             return;
         }
 
         try {
-            await combosService.eliminar(combo.combo_id);
+            await combosService.eliminar(combo.combo_id); // Llama al servicio para eliminar
             alert('Combo eliminado correctamente');
-            cargarDatos();
+            cargarDatos(); // Recarga la lista
         } catch (error) {
             console.error('Error al eliminar combo:', error);
             alert('Error al eliminar: ' + error.message);
         }
     }
 
+    // Agrega un nuevo producto al combo
     function handleAgregarProducto() {
         setProductosSeleccionados(prev => [
             ...prev,
@@ -258,10 +291,12 @@ export default function CombosManager() {
         ]);
     }
 
+    // Elimina un producto del combo
     function handleEliminarProducto(index) {
         setProductosSeleccionados(prev => prev.filter((_, i) => i !== index));
     }
 
+    // Maneja el cambio de producto o cantidad en el combo
     function handleProductoChange(index, field, value) {
         setProductosSeleccionados(prev => {
             const updated = [...prev];
@@ -279,6 +314,7 @@ export default function CombosManager() {
         });
     }
 
+    // Calcula el precio sugerido sumando los precios individuales de los productos seleccionados
     function calcularPrecioSugerido() {
         let total = 0;
         productosSeleccionados.forEach(item => {
@@ -290,6 +326,7 @@ export default function CombosManager() {
         return total;
     }
 
+    // Si está cargando, muestra spinner
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -298,18 +335,23 @@ export default function CombosManager() {
         );
     }
 
+    // Renderiza la interfaz principal de gestión de combos
     return (
-        <div>
-            <div className="mb-6 flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Gestión de Combos</h1>
-                    <p className="text-gray-600 mt-1">Crea y administra combos de productos con precios especiales</p>
-                </div>
-                <Button onClick={handleCreate}>
+        <div className="p-4 md:p-6">
+            {/* Header */}
+            <div className="mb-4 md:mb-6">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Gestión de Combos</h1>
+                <p className="text-sm md:text-base text-gray-600 mt-1">Crea y administra combos de productos con precios especiales</p>
+            </div>
+
+            {/* Botón de crear combo */}
+            <div className="mb-4 md:mb-6">
+                <Button onClick={handleCreate} className="w-full md:w-auto">
                     + Crear Combo
                 </Button>
             </div>
 
+            {/* Tabla de combos */}
             <DataTable
                 columns={columns}
                 data={combos}
@@ -317,10 +359,10 @@ export default function CombosManager() {
                 onDelete={handleDelete}
             />
 
-            {/* Modal de formulario */}
+            {/* Modal de formulario para crear/editar combo */}
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingCombo ? 'Editar Combo' : 'Crear Combo'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Nombre */}
+                    {/* Campo nombre */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Nombre del Combo *
@@ -335,7 +377,7 @@ export default function CombosManager() {
                         />
                     </div>
 
-                    {/* Descripción */}
+                    {/* Campo descripción */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Descripción
@@ -349,7 +391,7 @@ export default function CombosManager() {
                         />
                     </div>
 
-                    {/* Imagen */}
+                    {/* Campo imagen */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Imagen del Combo
@@ -376,6 +418,7 @@ export default function CombosManager() {
                             </button>
                         </div>
                         
+                        {/* Lista de productos seleccionados */}
                         {productosSeleccionados.length === 0 ? (
                             <p className="text-sm text-gray-500 italic">No hay productos agregados al combo</p>
                         ) : (
@@ -416,6 +459,7 @@ export default function CombosManager() {
                             </div>
                         )}
                         
+                        {/* Sugerencia de precio y ahorro */}
                         {productosSeleccionados.length > 0 && (() => {
                             const precioSugerido = calcularPrecioSugerido();
                             const precioCombo = parseFloat(formData.precio_combo) || 0;
@@ -450,7 +494,7 @@ export default function CombosManager() {
                         })()}
                     </div>
 
-                    {/* Precio del combo */}
+                    {/* Campo precio del combo */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Precio del Combo * (precio especial con descuento)
@@ -509,7 +553,7 @@ export default function CombosManager() {
                         </label>
                     </div>
 
-                    {/* Botones */}
+                    {/* Botones de acción */}
                     <div className="flex gap-3 pt-4">
                         <Button type="submit" className="flex-1">
                             {editingCombo ? 'Actualizar' : 'Crear'}

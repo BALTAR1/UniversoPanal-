@@ -1,0 +1,62 @@
+---
+import { whatsappConfig, buildWhatsappUrl } from '../config/whatsappMessages.js';
+---
+
+<section class="w-full py-8 md:py-12 bg-white">
+  <div class="px-4">
+    <h1 class="text-3xl font-black text-slate-400 mb-4 text-center tracking-tight leading-tight">
+      <span class="font-light text-slate-400">Venta</span> <span class="text-cyan-600 font-black">Mayorista</span> <span class="font-light text-slate-400">vs</span> <span class="text-pink-600 font-black">Minorista</span>
+    </h1>
+    <p class="text-base md:text-lg max-w-3xl mx-auto text-center mb-8 text-slate-500 font-semibold">
+      Soluciones flexibles para tu negocio o tu hogar.
+    </p>
+
+    <div class="space-y-6">
+      <!-- Card Mayorista Mobile -->
+      <div class="relative bg-white border-2 border-cyan-200 shadow-lg rounded-xl p-6 flex flex-col">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-100 rounded-br-xl rounded-tl-full opacity-40 -z-10"></div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-cyan-500/90 text-white p-3 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20z"/><path d="M8 12h8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-cyan-700 leading-tight">Mayorista</h2>
+            <p class="text-sm text-slate-400 font-semibold">Para tu negocio</p>
+          </div>
+        </div>
+        <p class="text-slate-600 text-sm mb-3 font-medium">Ideal para tiendas, farmacias y distribuidores que buscan los mejores precios.</p>
+        <ul class="mb-4 space-y-2 text-sm">
+          <li class="flex items-start gap-2"><span class="text-cyan-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg></span><span><b class="font-bold">Compra en Volumen</b> desde 50 unidades</span></li>
+          <li class="flex items-start gap-2"><span class="text-cyan-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M4 12h16"/></svg></span><span><b class="font-bold">Descuentos Exclusivos</b> hasta 40%</span></li>
+          <li class="flex items-start gap-2"><span class="text-cyan-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18"/><path d="M12 3v18"/></svg></span><span><b class="font-bold">Márgenes Competitivos</b></span></li>
+          <li class="flex items-start gap-2"><span class="text-cyan-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg></span><span><b class="font-bold">Asesoría Personalizada</b></span></li>
+          <li class="flex items-start gap-2"><span class="text-cyan-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v8"/><path d="M8 16h8"/></svg></span><span><b class="font-bold">Envíos Programados</b></span></li>
+        </ul>
+        <a href={buildWhatsappUrl(whatsappConfig.mayorista)} target="_blank" rel="noopener" class="w-full inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-center shadow-lg text-sm">Contactar</a>
+      </div>
+
+      <!-- Card Minorista Mobile -->
+      <div class="relative bg-white border-2 border-pink-200 shadow-lg rounded-xl p-6 flex flex-col">
+        <div class="absolute top-0 left-0 w-24 h-24 bg-pink-100 rounded-bl-xl rounded-tr-full opacity-40 -z-10"></div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-pink-500/90 text-white p-3 rounded-full flex items-center justify-center shadow-lg flex-shrink-0">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 1 0 20 10 10 0 0 1 0-20z"/><path d="M16 12h-8" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-black text-pink-700 leading-tight">Minorista</h2>
+            <p class="text-sm text-slate-400 font-semibold">Para tu hogar</p>
+          </div>
+        </div>
+        <p class="text-slate-600 text-sm mb-3 font-medium">Perfecto para padres y familias que buscan calidad y comodidad en cada compra.</p>
+        <ul class="mb-4 space-y-2 text-sm">
+          <li class="flex items-start gap-2"><span class="text-pink-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M16 12h-8"/></svg></span><span><b class="font-bold">Compra por Unidad</b> sin mínimos</span></li>
+          <li class="flex items-start gap-2"><span class="text-pink-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 19V5"/><path d="M5 12h14"/></svg></span><span><b class="font-bold">Entrega Rápida</b> 24-48 horas</span></li>
+          <li class="flex items-start gap-2"><span class="text-pink-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg></span><span><b class="font-bold">Variedad de Productos</b></span></li>
+          <li class="flex items-start gap-2"><span class="text-pink-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 17h16"/><path d="M4 21h16"/></svg></span><span><b class="font-bold">Promociones Semanales</b></span></li>
+          <li class="flex items-start gap-2"><span class="text-pink-400 flex-shrink-0"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 8v8"/><path d="M8 16h8"/></svg></span><span><b class="font-bold">Atención Personalizada</b></span></li>
+        </ul>
+        <a href="/productos" class="w-full inline-block bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-center shadow-lg text-sm">Comprar Ahora</a>
+      </div>
+    </div>
+  </div>
+</section>

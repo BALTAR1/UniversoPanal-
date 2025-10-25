@@ -1,19 +1,24 @@
+// Importa los hooks de React y componentes UI reutilizables
 import { useState, useEffect } from 'react';
-import DataTable from '../../ui/DataTable.jsx';
-import Modal from '../../ui/Modal.jsx';
-import Button from '../../ui/Button.jsx';
-import ImageUploader from '../../ui/ImageUploader.jsx';
-import { productosService, categoriasService, productoImagenesService } from '../../../services/apiServices.js';
+import DataTable from '../../ui/DataTable.jsx'; // Tabla para mostrar productos
+import Modal from '../../ui/Modal.jsx'; // Modal para formularios y vistas
+import Button from '../../ui/Button.jsx'; // Botón reutilizable
+import ImageUploader from '../../ui/ImageUploader.jsx'; // Componente para subir imágenes
+import { productosService, categoriasService, productoImagenesService } from '../../../services/apiServices.js'; // Servicios API para productos, categorías e imágenes
 
+// Componente principal para gestionar productos
 export default function ProductosManager() {
-    // Estados
-    const [productos, setProductos] = useState([]);
-    const [categorias, setCategorias] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [imageModalOpen, setImageModalOpen] = useState(false);
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [editingProducto, setEditingProducto] = useState(null);
+    // Estados para almacenar datos y controlar la UI
+    const [productos, setProductos] = useState([]); // Lista de productos
+    const [productosFiltrados, setProductosFiltrados] = useState([]); // Lista filtrada
+    const [busqueda, setBusqueda] = useState(''); // Término de búsqueda
+    const [categorias, setCategorias] = useState([]); // Lista de categorías
+    const [loading, setLoading] = useState(true); // Estado de carga
+    const [modalOpen, setModalOpen] = useState(false); // Modal de formulario abierto/cerrado
+    const [imageModalOpen, setImageModalOpen] = useState(false); // Modal de imagen abierto/cerrado
+    const [selectedImage, setSelectedImage] = useState(null); // Imagen seleccionada para vista previa
+    const [editingProducto, setEditingProducto] = useState(null); // Producto en edición
+    // Estado para el formulario de producto
     const [formData, setFormData] = useState({
         nombre: '',
         marca: '',
@@ -28,14 +33,15 @@ export default function ProductosManager() {
         activo: true,
         es_destacado: false,
     });
-    const [imagenesProducto, setImagenesProducto] = useState([]);
+    const [imagenesProducto, setImagenesProducto] = useState([]); // Imágenes asociadas al producto
 
-    // Columnas de la tabla
+    // Definición de columnas para la tabla de productos
     const columns = [
-        { key: 'producto_id', label: 'ID' },
+        { key: 'producto_id', label: 'ID' }, // Identificador único
         {
             key: 'imagen_url',
             label: 'Imagen',
+            // Renderiza la imagen principal y adicionales, permite vista previa
             render: (imageUrl, row) => {
                 if (!imageUrl) return <span className="text-gray-400">Sin imagen</span>;
                 
@@ -46,11 +52,11 @@ export default function ProductosManager() {
                 
                 return (
                     <div className="flex items-center gap-1">
-                        {todasLasImagenes.slice(0, 2).map((url, idx) => (
+                        {todasLasImagenes.slice(0, 2).map((url) => (
                             <img
-                                key={idx}
+                                key={url}
                                 src={url}
-                                alt={`Producto ${idx + 1}`}
+                                alt={`Producto ${url}`}
                                 className="h-10 w-10 object-cover rounded border border-gray-200 cursor-pointer hover:scale-150 transition-transform"
                                 onClick={() => {
                                     setSelectedImage(url);
@@ -67,17 +73,19 @@ export default function ProductosManager() {
                 );
             },
         },
-        { key: 'nombre', label: 'Nombre' },
-        { key: 'marca', label: 'Marca' },
-        { key: 'modelo', label: 'Modelo', render: (value) => value || '-' },
+        { key: 'nombre', label: 'Nombre' }, // Nombre del producto
+        { key: 'marca', label: 'Marca' }, // Marca
+        { key: 'modelo', label: 'Modelo', render: (value) => value || '-' }, // Modelo (opcional)
         { 
             key: 'precio', 
             label: 'Precio', 
+            // Formatea el precio en moneda local
             render: (value) => `$${parseFloat(value).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
         },
         { 
             key: 'stock', 
             label: 'Stock',
+            // Muestra el stock con color según cantidad
             render: (value) => {
                 const stock = parseInt(value);
                 let className = 'px-2 py-1 text-xs font-semibold rounded-full ';
@@ -87,10 +95,11 @@ export default function ProductosManager() {
                 return <span className={className}>{stock}</span>;
             }
         },
-        { key: 'sku', label: 'SKU' },
+        { key: 'sku', label: 'SKU' }, // Código SKU
         {
             key: 'activo',
             label: 'Estado',
+            // Indica si el producto está activo o inactivo
             render: (value) => (
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     value ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -102,6 +111,7 @@ export default function ProductosManager() {
         {
             key: 'es_destacado',
             label: 'Destacado',
+            // Indica si el producto es destacado
             render: (value) => (
                 <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
                     value ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-500'
@@ -112,20 +122,37 @@ export default function ProductosManager() {
         },
     ];
 
-    // Cargar datos al montar
+    // Carga los datos al montar el componente
     useEffect(() => {
         cargarDatos();
     }, []);
 
+    // Filtra productos cuando cambia la búsqueda
+    useEffect(() => {
+        if (!busqueda.trim()) {
+            setProductosFiltrados(productos);
+        } else {
+            const busquedaLower = busqueda.toLowerCase();
+            const filtrados = productos.filter(producto =>
+                producto.nombre?.toLowerCase().includes(busquedaLower) ||
+                producto.marca?.toLowerCase().includes(busquedaLower) ||
+                producto.modelo?.toLowerCase().includes(busquedaLower) ||
+                producto.sku?.toLowerCase().includes(busquedaLower)
+            );
+            setProductosFiltrados(filtrados);
+        }
+    }, [busqueda, productos]);
+
+    // Función para cargar productos y categorías desde la API
     async function cargarDatos() {
         try {
-            setLoading(true);
+            setLoading(true); // Muestra spinner de carga
             const [productosData, categoriasData] = await Promise.all([
-                productosService.obtenerTodos(),
-                categoriasService.obtenerTodas(),
+                productosService.obtenerTodos(), // Obtiene productos
+                categoriasService.obtenerTodas(), // Obtiene categorías
             ]);
             
-            // Cargar imágenes adicionales para cada producto
+            // Para cada producto, carga imágenes adicionales
             const productosConImagenes = await Promise.all(
                 productosData.map(async (producto) => {
                     try {
@@ -143,23 +170,25 @@ export default function ProductosManager() {
                 })
             );
             
-            setProductos(productosConImagenes);
-            setCategorias(categoriasData);
+            setProductos(productosConImagenes); // Actualiza estado de productos
+            setCategorias(categoriasData); // Actualiza estado de categorías
         } catch (error) {
             console.error('Error al cargar datos:', error);
             alert('Error al cargar los datos: ' + error.message);
         } finally {
-            setLoading(false);
+            setLoading(false); // Oculta spinner
         }
     }
 
+    // Maneja cambios en los inputs del formulario
     function handleInputChange(e) {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     }
 
+    // Abre el modal para crear un nuevo producto
     function handleCreate() {
-        setEditingProducto(null);
+        setEditingProducto(null); // No hay producto en edición
         setFormData({
             nombre: '',
             marca: '',
@@ -174,12 +203,13 @@ export default function ProductosManager() {
             activo: true,
             es_destacado: false,
         });
-        setImagenesProducto([]);
-        setModalOpen(true);
+        setImagenesProducto([]); // Limpia imágenes
+        setModalOpen(true); // Abre modal
     }
 
+    // Abre el modal para editar un producto existente
     function handleEdit(producto) {
-        setEditingProducto(producto);
+        setEditingProducto(producto); // Establece producto en edición
         setFormData({
             nombre: producto.nombre,
             marca: producto.marca || '',
@@ -195,7 +225,7 @@ export default function ProductosManager() {
             es_destacado: producto.es_destacado || false,
         });
         
-        // Cargar imágenes
+        // Carga imágenes principales y adicionales
         const imagenes = [];
         if (producto.imagen_url) {
             imagenes.push(producto.imagen_url);
@@ -203,30 +233,33 @@ export default function ProductosManager() {
         if (producto.imagenes_adicionales && producto.imagenes_adicionales.length > 0) {
             imagenes.push(...producto.imagenes_adicionales.map(img => img.url || img));
         }
-        setImagenesProducto(imagenes.filter(img => img));
-        setModalOpen(true);
+        setImagenesProducto(imagenes.filter(img => img)); // Actualiza estado de imágenes
+        setModalOpen(true); // Abre modal
     }
 
+    // Elimina un producto tras confirmación
     async function handleDelete(producto) {
         if (!confirm(`¿Estás seguro de eliminar el producto "${producto.nombre}"?`)) {
             return;
         }
         try {
-            await productosService.eliminar(producto.producto_id);
+            await productosService.eliminar(producto.producto_id); // Llama API para eliminar
             alert('Producto eliminado correctamente');
-            cargarDatos();
+            cargarDatos(); // Refresca lista
         } catch (error) {
             console.error('Error al eliminar producto:', error);
             alert('Error al eliminar el producto: ' + error.message);
         }
     }
 
+    // Envía el formulario para crear o actualizar producto
     async function handleSubmit(e) {
         e.preventDefault();
         try {
+            // Prepara datos para enviar
             const dataToSubmit = {
                 ...formData,
-                imagen_url: imagenesProducto[0] || formData.imagen_url,
+                imagen_url: imagenesProducto[0] || formData.imagen_url, // Imagen principal
                 precio: parseFloat(formData.precio),
                 stock: parseInt(formData.stock),
                 peso_kg: formData.peso_kg ? parseFloat(formData.peso_kg) : null,
@@ -236,10 +269,11 @@ export default function ProductosManager() {
             let productoId;
             
             if (editingProducto) {
+                // Actualiza producto existente
                 await productosService.actualizar(editingProducto.producto_id, dataToSubmit);
                 productoId = editingProducto.producto_id;
                 
-                // Eliminar imágenes adicionales existentes
+                // Elimina imágenes adicionales existentes
                 if (editingProducto.imagenes_adicionales && editingProducto.imagenes_adicionales.length > 0) {
                     await Promise.all(
                         editingProducto.imagenes_adicionales.map(img => 
@@ -248,6 +282,7 @@ export default function ProductosManager() {
                     );
                 }
             } else {
+                // Crea nuevo producto
                 const response = await productosService.crear(dataToSubmit);
                 productoId = response?.producto_id || 
                              response?.id || 
@@ -261,7 +296,7 @@ export default function ProductosManager() {
                 }
             }
             
-            // Guardar imágenes adicionales
+            // Guarda imágenes adicionales (excepto la principal)
             const imagenesAdicionales = imagenesProducto.slice(1);
             if (imagenesAdicionales.length > 0) {
                 await Promise.all(
@@ -276,31 +311,34 @@ export default function ProductosManager() {
             }
             
             alert(editingProducto ? 'Producto actualizado correctamente' : 'Producto creado correctamente');
-            setModalOpen(false);
-            cargarDatos();
+            setModalOpen(false); // Cierra modal
+            cargarDatos(); // Refresca lista
         } catch (error) {
             console.error('Error al guardar producto:', error);
             alert('Error al guardar el producto: ' + error.message);
         }
     }
 
+    // Agrega una imagen al estado cuando se sube
     function handleImagenAgregada(url) {
         setImagenesProducto(prev => [...prev, url]);
         if (imagenesProducto.length === 0) {
-            setFormData(prev => ({ ...prev, imagen_url: url }));
+            setFormData(prev => ({ ...prev, imagen_url: url })); // Establece imagen principal
         }
     }
 
+    // Elimina una imagen del estado
     function handleEliminarImagen(index) {
         const nuevasImagenes = imagenesProducto.filter((_, i) => i !== index);
         setImagenesProducto(nuevasImagenes);
         if (index === 0 && nuevasImagenes.length > 0) {
-            setFormData(prev => ({ ...prev, imagen_url: nuevasImagenes[0] }));
+            setFormData(prev => ({ ...prev, imagen_url: nuevasImagenes[0] })); // Actualiza imagen principal
         } else if (nuevasImagenes.length === 0) {
-            setFormData(prev => ({ ...prev, imagen_url: '' }));
+            setFormData(prev => ({ ...prev, imagen_url: '' })); // Limpia imagen principal
         }
     }
 
+    // Muestra spinner mientras carga datos
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -309,24 +347,60 @@ export default function ProductosManager() {
         );
     }
 
+    // Renderiza la UI principal
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800">Gestión de Productos</h2>
-                    <p className="text-gray-600 mt-1">Administra el catálogo completo de productos</p>
-                </div>
-                <Button onClick={handleCreate}>+ Nuevo Producto</Button>
+            {/* Encabezado */}
+            <div className="mb-4 md:mb-6">
+                <h2 className="text-xl md:text-2xl font-bold text-gray-800">Gestión de Productos</h2>
+                <p className="text-sm md:text-base text-gray-600 mt-1">Administra el catálogo completo de productos</p>
             </div>
 
+            {/* Barra de acciones: Botón y Buscador */}
+            <div className="flex flex-col md:flex-row gap-3 mb-4 md:mb-6">
+                <Button onClick={handleCreate} className="w-full md:w-auto">
+                    + Nuevo Producto
+                </Button>
+                
+                {/* Buscador */}
+                <div className="flex-1 relative">
+                    <input
+                        type="text"
+                        placeholder="Buscar por nombre, marca, modelo o SKU..."
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+                    />
+                    <svg 
+                        className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-gray-400" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    {busqueda && (
+                        <button
+                            onClick={() => setBusqueda('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Tabla de productos */}
             <DataTable
                 columns={columns}
-                data={productos}
+                data={productosFiltrados}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
             />
 
-            {/* Modal de formulario */}
+            {/* Modal de formulario para crear/editar producto */}
             <Modal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
@@ -340,6 +414,7 @@ export default function ProductosManager() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Campo nombre */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Nombre del Producto *
@@ -355,6 +430,7 @@ export default function ProductosManager() {
                             />
                         </div>
 
+                        {/* Campo marca */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Marca *
@@ -370,6 +446,7 @@ export default function ProductosManager() {
                             />
                         </div>
 
+                        {/* Campo modelo */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Modelo
@@ -384,6 +461,7 @@ export default function ProductosManager() {
                             />
                         </div>
 
+                        {/* Campo SKU */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 SKU (Código) *
@@ -400,6 +478,7 @@ export default function ProductosManager() {
                         </div>
                     </div>
 
+                    {/* Campo descripción */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Descripción
@@ -414,12 +493,13 @@ export default function ProductosManager() {
                         />
                     </div>
 
-                    {/* Precio e Inventario */}
+                    {/* Sección precio e inventario */}
                     <div className="bg-green-50 border-l-4 border-green-600 p-4 rounded mt-6">
                         <h4 className="font-semibold text-green-900 mb-2">Precio e Inventario</h4>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Campo precio */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Precio *
@@ -440,6 +520,7 @@ export default function ProductosManager() {
                             </div>
                         </div>
 
+                        {/* Campo stock */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Stock Disponible *
@@ -456,6 +537,7 @@ export default function ProductosManager() {
                             />
                         </div>
 
+                        {/* Campo peso */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Peso (kg)
@@ -473,7 +555,7 @@ export default function ProductosManager() {
                         </div>
                     </div>
 
-                    {/* Categoría */}
+                    {/* Campo categoría */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Categoría
@@ -493,19 +575,21 @@ export default function ProductosManager() {
                         </select>
                     </div>
 
-                    {/* Imágenes */}
+                    {/* Sección imágenes */}
                     <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded mt-6">
                         <h4 className="font-semibold text-purple-900 mb-2">Imágenes del Producto</h4>
                     </div>
 
+                    {/* Componente para subir y eliminar imágenes */}
                     <ImageUploader
                         onImageUploaded={handleImagenAgregada}
                         currentImages={imagenesProducto}
                         onDeleteImage={handleEliminarImagen}
                     />
 
-                    {/* Estado */}
+                    {/* Estado del producto */}
                     <div className="mt-4 space-y-3">
+                        {/* Checkbox activo */}
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
@@ -518,6 +602,7 @@ export default function ProductosManager() {
                             </span>
                         </label>
                         
+                        {/* Checkbox destacado */}
                         <label className="flex items-center gap-2 cursor-pointer">
                             <input
                                 type="checkbox"
@@ -531,7 +616,7 @@ export default function ProductosManager() {
                         </label>
                     </div>
 
-                    {/* Botones */}
+                    {/* Botones de acción */}
                     <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
                         <Button variant="outline" onClick={() => setModalOpen(false)} type="button">
                             Cancelar
@@ -543,7 +628,7 @@ export default function ProductosManager() {
                 </form>
             </Modal>
 
-            {/* Modal de visualización de imagen */}
+            {/* Modal para vista previa de imagen */}
             <Modal
                 isOpen={imageModalOpen}
                 onClose={() => setImageModalOpen(false)}

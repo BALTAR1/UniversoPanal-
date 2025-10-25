@@ -69,7 +69,20 @@ export const productosPublicosService = {
 
         if (busqueda && busqueda.trim() !== '') {
             // Búsqueda en nombre o descripción (case insensitive)
-            query = query.or(`nombre.ilike.%${busqueda}%,descripcion.ilike.%${busqueda}%`);
+            // Si busqueda contiene comas, dividir y crear múltiples condiciones OR
+            const palabras = busqueda.split(',').map(p => p.trim()).filter(p => p !== '');
+            
+            if (palabras.length > 1) {
+                // Múltiples palabras: crear condición OR para cada una
+                const condiciones = palabras.flatMap(palabra => [
+                    `nombre.ilike.%${palabra}%`,
+                    `descripcion.ilike.%${palabra}%`
+                ]);
+                query = query.or(condiciones.join(','));
+            } else {
+                // Una sola palabra
+                query = query.or(`nombre.ilike.%${busqueda}%,descripcion.ilike.%${busqueda}%`);
+            }
         }
 
         // Aplica ordenamiento

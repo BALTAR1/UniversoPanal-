@@ -2,34 +2,82 @@
 import Layout from '../layouts/Layout.astro';
 import '../styles/global.css';
 import Nav from '../components/ui/Nav.astro';
+
+// Componentes Desktop
 import Hero from '../components/desktop/Hero.astro';
 import Categorias from '../components/desktop/Categorias.astro';
 import Destacados from '../components/desktop/Destacados.astro';
 import Servicios from '../components/desktop/Servicios.astro';
 import Marcas from '../components/desktop/Marcas.astro';
 import Footer from '../components/desktop/Footer.astro';
+
+// Componentes Mobile
+import HeroMobile from '../mobile/HeroMobile.astro';
+import CategoriasMobile from '../mobile/CategoriasMobile.astro';
+import DestacadosMobile from '../mobile/DestacadosMobile.astro';
+import ServiciosMobile from '../mobile/ServiciosMobile.astro';
+import MarcasMobile from '../mobile/MarcasMobile.astro';
+import FooterMobile from '../mobile/FooterMobile.astro';
+import MenuBurger from '../mobile/MenuBurger.astro';
+import NavMobile from '../mobile/NavMobile.astro';
+
 import WhatsAppButton from "../components/ui/WhatsAppButton.astro";
 
 ---
 
 <Layout>
-    <Nav />
-    <Hero />
-    <div class="scroll-reveal">
-        <Categorias />
+    {/* Nav Desktop */}
+    <div class="hidden md:block">
+        <Nav />
     </div>
-    <div class="scroll-reveal">
-        <Destacados />
+    
+    {/* Nav Mobile */}
+    <div class="block md:hidden">
+        <NavMobile />
     </div>
-    <div class="scroll-reveal">
-        <Servicios />
+    
+    <MenuBurger />
+    
+    {/* Versión Desktop (oculta en mobile) */}
+    <div class="hidden md:block">
+        <Hero />
+        <div class="scroll-reveal">
+            <Categorias />
+        </div>
+        <div class="scroll-reveal">
+            <Destacados />
+        </div>
+        <div class="scroll-reveal">
+            <Servicios />
+        </div>
+        <div class="scroll-reveal">
+            <Marcas />
+        </div>
+        <div class="scroll-reveal">
+            <Footer />
+        </div>
     </div>
-    <div class="scroll-reveal">
-        <Marcas />
+
+    {/* Versión Mobile (oculta en desktop) */}
+    <div class="block md:hidden">
+        <HeroMobile />
+        <div class="scroll-reveal">
+            <CategoriasMobile />
+        </div>
+        <div class="scroll-reveal">
+            <DestacadosMobile />
+        </div>
+        <div class="scroll-reveal">
+            <MarcasMobile />
+        </div>
+        <div class="scroll-reveal">
+            <ServiciosMobile />
+        </div>
+        <div class="scroll-reveal">
+            <FooterMobile />
+        </div>
     </div>
-    <div class="scroll-reveal">
-        <Footer />
-    </div>
+
     <WhatsAppButton />
 </Layout>
 

@@ -320,12 +320,15 @@ export default function OfertasManager() {
     // ---------- JSX principal del componente (lista + modal) ----------
     return (
         <div>
-            <div className="mb-6 flex justify-between items-center">
-                <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Gestión de Ofertas</h1>
-                    <p className="text-gray-600 mt-1">Administra descuentos y promociones para productos</p>
-                </div>
-                <Button onClick={handleCreate}>
+            {/* Header */}
+            <div className="mb-4 md:mb-6">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-900">Gestión de Ofertas</h1>
+                <p className="text-sm md:text-base text-gray-600 mt-1">Administra descuentos y promociones para productos</p>
+            </div>
+
+            {/* Botón de crear oferta */}
+            <div className="mb-4 md:mb-6">
+                <Button onClick={handleCreate} className="w-full md:w-auto">
                     + Crear Oferta
                 </Button>
             </div>
@@ -364,7 +367,6 @@ export default function OfertasManager() {
                             onChange={handleInputChange}
                             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             required
-                            disabled={!!editingOferta}
                         >
                             <option value="">Seleccionar producto</option>
                             {productos.map(producto => (
@@ -374,7 +376,7 @@ export default function OfertasManager() {
                             ))}
                         </select>
                         {editingOferta && (
-                            <p className="text-xs text-gray-500 mt-1">No se puede cambiar el producto de una oferta existente</p>
+                            <p className="text-xs text-blue-500 mt-1">Puedes cambiar el producto de esta oferta si lo deseas</p>
                         )}
                     </div>
 

@@ -1,19 +1,20 @@
-/**
- * Componente Button reutilizable
- * Proporciona diferentes variantes de botones con estilos consistentes
- */
+// Componente Button reutilizable
+// Proporciona diferentes variantes de botones con estilos consistentes
 
+// Recibe props para personalizar el botón
 export default function Button({ 
-	children, 
-	onClick, 
-	variant = 'primary', 
-	type = 'button',
-	disabled = false,
-	className = '',
-	...props 
+	children, // Contenido del botón
+	onClick, // Función al hacer click
+	variant = 'primary', // Variante de estilo
+	type = 'button', // Tipo de botón (button, submit, etc)
+	disabled = false, // Si está deshabilitado
+	className = '', // Clases CSS extra
+	...props // Otros props
 }) {
+	// Estilos base para todos los botones
 	const baseStyles = 'px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed';
-	
+  
+	// Variantes de estilos según el tipo de botón
 	const variants = {
 		primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
 		secondary: 'bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-500',
@@ -22,9 +23,11 @@ export default function Button({
 		warning: 'bg-yellow-600 text-white hover:bg-yellow-700 focus:ring-yellow-500',
 		outline: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-blue-500',
 	};
-	
+  
+	// Selecciona los estilos según la variante
 	const variantStyles = variants[variant] || variants.primary;
-	
+  
+	// Renderiza el botón con los estilos y props correspondientes
 	return (
 		<button
 			type={type}
@@ -33,6 +36,7 @@ export default function Button({
 			className={`${baseStyles} ${variantStyles} ${className}`}
 			{...props}
 		>
+			{/* Contenido del botón */}
 			{children}
 		</button>
 	);
