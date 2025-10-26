@@ -12,6 +12,7 @@ export default function ProductosManager() {
     const [productos, setProductos] = useState([]); // Lista de productos
     const [productosFiltrados, setProductosFiltrados] = useState([]); // Lista filtrada
     const [busqueda, setBusqueda] = useState(''); // Término de búsqueda
+    const [ordenId, setOrdenId] = useState('desc'); // Estado para ordenar por ID (desc = más nuevos primero)
     const [categorias, setCategorias] = useState([]); // Lista de categorías
     const [loading, setLoading] = useState(true); // Estado de carga
     const [modalOpen, setModalOpen] = useState(false); // Modal de formulario abierto/cerrado
@@ -129,19 +130,30 @@ export default function ProductosManager() {
 
     // Filtra productos cuando cambia la búsqueda
     useEffect(() => {
-        if (!busqueda.trim()) {
-            setProductosFiltrados(productos);
-        } else {
+        let listaFiltrada = productos;
+        
+        // Aplicar búsqueda si hay texto
+        if (busqueda.trim()) {
             const busquedaLower = busqueda.toLowerCase();
-            const filtrados = productos.filter(producto =>
+            listaFiltrada = productos.filter(producto =>
                 producto.nombre?.toLowerCase().includes(busquedaLower) ||
                 producto.marca?.toLowerCase().includes(busquedaLower) ||
                 producto.modelo?.toLowerCase().includes(busquedaLower) ||
                 producto.sku?.toLowerCase().includes(busquedaLower)
             );
-            setProductosFiltrados(filtrados);
         }
-    }, [busqueda, productos]);
+        
+        // Aplicar ordenamiento por ID
+        const listaOrdenada = [...listaFiltrada].sort((a, b) => {
+            if (ordenId === 'desc') {
+                return b.producto_id - a.producto_id; // Descendente (más nuevos primero)
+            } else {
+                return a.producto_id - b.producto_id; // Ascendente (más antiguos primero)
+            }
+        });
+        
+        setProductosFiltrados(listaOrdenada);
+    }, [busqueda, productos, ordenId]);
 
     // Función para cargar productos y categorías desde la API
     async function cargarDatos() {
@@ -361,6 +373,19 @@ export default function ProductosManager() {
                 <Button onClick={handleCreate} className="w-full md:w-auto">
                     + Nuevo Producto
                 </Button>
+                
+                {/* Selector de ordenamiento por ID */}
+                <div className="flex items-center gap-2">
+                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Ordenar por ID:</label>
+                    <select
+                        value={ordenId}
+                        onChange={(e) => setOrdenId(e.target.value)}
+                        className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        <option value="desc">Descendente (más nuevos primero)</option>
+                        <option value="asc">Ascendente (más antiguos primero)</option>
+                    </select>
+                </div>
                 
                 {/* Buscador */}
                 <div className="flex-1 relative">

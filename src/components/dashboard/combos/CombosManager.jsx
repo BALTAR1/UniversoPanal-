@@ -37,6 +37,8 @@ export default function CombosManager() {
     });
     // Estado para los productos seleccionados en el combo
     const [productosSeleccionados, setProductosSeleccionados] = useState([]);
+    // Estado para las imágenes del combo
+    const [imagenesCombo, setImagenesCombo] = useState([]);
     
     // Definición de las columnas para la tabla de combos
     const columns = [
@@ -186,6 +188,7 @@ export default function CombosManager() {
             fecha_fin: ''
         });
         setProductosSeleccionados([]);
+        setImagenesCombo([]); // Limpia imágenes
         setModalOpen(true);
     }
 
@@ -201,6 +204,10 @@ export default function CombosManager() {
             fecha_inicio: combo.fecha_inicio ? combo.fecha_inicio.split('T')[0] : '',
             fecha_fin: combo.fecha_fin ? combo.fecha_fin.split('T')[0] : ''
         });
+        
+        // Carga las imágenes del combo
+        const imagenes = combo.imagen_url ? [combo.imagen_url] : [];
+        setImagenesCombo(imagenes);
         
         // Carga los productos del combo en el estado
         if (combo.productos && combo.productos.length > 0) {
@@ -326,6 +333,25 @@ export default function CombosManager() {
         return total;
     }
 
+    // Maneja cuando se sube una nueva imagen
+    function handleImagenAgregada(url) {
+        setImagenesCombo(prev => [...prev, url]);
+        // Si es la primera imagen, la establece como imagen_url principal
+        if (imagenesCombo.length === 0) {
+            setFormData(prev => ({ ...prev, imagen_url: url }));
+        }
+    }
+
+    // Elimina una imagen del estado
+    function handleEliminarImagen(index) {
+        const nuevasImagenes = imagenesCombo.filter((_, i) => i !== index);
+        setImagenesCombo(nuevasImagenes);
+        // Si se elimina la primera imagen, actualiza imagen_url
+        if (index === 0) {
+            setFormData(prev => ({ ...prev, imagen_url: nuevasImagenes[0] || '' }));
+        }
+    }
+
     // Si está cargando, muestra spinner
     if (loading) {
         return (
@@ -391,15 +417,16 @@ export default function CombosManager() {
                         />
                     </div>
 
-                    {/* Campo imagen */}
+                    {/* Imágenes del combo */}
+                    <div className="bg-purple-50 border-l-4 border-purple-600 p-4 rounded">
+                        <h4 className="font-semibold text-purple-900 mb-2">Imagen del Combo</h4>
+                    </div>
+                    
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Imagen del Combo
-                        </label>
                         <ImageUploader
-                            currentImageUrl={formData.imagen_url}
-                            onImageUrlChange={(url) => setFormData(prev => ({ ...prev, imagen_url: url }))}
-                            bucket="productos"
+                            onImageUploaded={handleImagenAgregada}
+                            currentImages={imagenesCombo}
+                            onDeleteImage={handleEliminarImagen}
                         />
                     </div>
 

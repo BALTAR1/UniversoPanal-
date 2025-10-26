@@ -31,22 +31,25 @@ export default function FilterSidebar({
         precio: true
     });
 
-    // Función para aplicar filtros
-    const aplicarFiltros = () => {
-        const nuevosFiltros = {
-            busqueda: busqueda.trim(),
-            categoria_id: categoriaSeleccionada,
-            marca: marcaSeleccionada,
-            precioMin: precioMin !== '' ? Number(precioMin) : null,
-            precioMax: precioMax !== '' ? Number(precioMax) : null,
-            ordenar: ordenamiento,
-            soloOfertas: soloOfertas,
-            soloCombos: soloCombos,
-            pagina: 1
-        };
+    // Aplicar filtros automáticamente cuando hay cambios
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            const nuevosFiltros = {
+                busqueda: busqueda.trim(),
+                categoria_id: categoriaSeleccionada,
+                marca: marcaSeleccionada,
+                precioMin: precioMin !== '' ? Number(precioMin) : null,
+                precioMax: precioMax !== '' ? Number(precioMax) : null,
+                ordenar: ordenamiento,
+                soloOfertas: soloOfertas,
+                soloCombos: soloCombos,
+                pagina: 1
+            };
+            onFiltrosChange(nuevosFiltros);
+        }, 500); // Espera 500ms después del último cambio
         
-        onFiltrosChange(nuevosFiltros);
-    };
+        return () => clearTimeout(timer);
+    }, [busqueda, categoriaSeleccionada, marcaSeleccionada, precioMin, precioMax, ordenamiento, soloOfertas, soloCombos]);
 
     // Limpiar filtros
     const limpiarFiltros = () => {
@@ -59,7 +62,7 @@ export default function FilterSidebar({
         setSoloOfertas(false);
         setSoloCombos(false);
         
-        onFiltrosChange({
+        const filtrosLimpios = {
             busqueda: '',
             categoria_id: null,
             marca: null,
@@ -69,7 +72,8 @@ export default function FilterSidebar({
             soloOfertas: false,
             soloCombos: false,
             pagina: 1
-        });
+        };
+        onFiltrosChange(filtrosLimpios);
     };
 
     // Toggle sección
@@ -100,7 +104,7 @@ export default function FilterSidebar({
                 </div>
             )}
 
-            <div className={`p-4 space-y-5 ${isMobile ? '' : 'max-h-[70vh]'} overflow-y-auto`}>
+            <div className={`p-4 space-y-4 ${isMobile ? 'max-h-[60vh]' : 'max-h-[calc(100vh-200px)]'} overflow-y-auto`}>
                 {/* Búsqueda */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -111,7 +115,6 @@ export default function FilterSidebar({
                             type="text"
                             value={busqueda}
                             onChange={(e) => setBusqueda(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && aplicarFiltros()}
                             placeholder="Buscar productos..."
                             className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         />
@@ -338,10 +341,7 @@ export default function FilterSidebar({
                     </label>
                     <select
                         value={ordenamiento}
-                        onChange={(e) => {
-                            setOrdenamiento(e.target.value);
-                            setTimeout(() => aplicarFiltros(), 0);
-                        }}
+                        onChange={(e) => setOrdenamiento(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                         <option value="relevancia">Más relevantes</option>
@@ -352,23 +352,13 @@ export default function FilterSidebar({
                     </select>
                 </div>
 
-                {/* Botón aplicar */}
+                {/* Botón limpiar filtros */}
                 <button
-                    onClick={aplicarFiltros}
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                    onClick={limpiarFiltros}
+                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
                 >
-                    Aplicar filtros
+                    Limpiar todos los filtros
                 </button>
-
-                {/* Botón limpiar filtros - Solo en mobile */}
-                {isMobile && (
-                    <button
-                        onClick={limpiarFiltros}
-                        className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
-                    >
-                        Limpiar todos los filtros
-                    </button>
-                )}
             </div>
         </aside>
     );
