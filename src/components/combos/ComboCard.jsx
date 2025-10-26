@@ -49,12 +49,12 @@ export default function ComboCard({ combo }) {
         // `article` actúa como contenedor semántico de la tarjeta
         <article className="group bg-white rounded-lg border border-gray-200 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
             {/* Contenedor de imagen - clickeable para ir al detalle */}
-            <a href={urlDetalle} className="relative bg-gray-50 overflow-hidden aspect-square block">
+            <a href={urlDetalle} className="relative bg-white overflow-hidden aspect-square flex items-center justify-center">
                 {/* Imagen principal: se muestra la actual del array de imágenes */}
                 <img
                     src={imagenPrincipal}
                     alt={combo.nombre} // texto alternativo accesible
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
                     loading="lazy" // carga diferida para mejorar performance
                 />
 
