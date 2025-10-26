@@ -42,58 +42,38 @@ export default function LoginForm() {
 	async function handleSubmit(e) {
     // Previene el comportamiento por defecto del formulario (evita recarga)
 		e.preventDefault();
-		console.log("🔍 [DEBUG] Iniciando proceso de autenticación...");
-		console.log("📧 [DEBUG] Email ingresado:", email);
-		console.log("🔑 [DEBUG] Contraseña ingresada:", password ? "***" + password.slice(-3) : "vacía");
     // Limpia estados y muestra loading
 		setLoading(true);
 		setMensaje("");
 		try {
 			if (mode === "login") {
-				console.log("🔐 [DEBUG] Intentando iniciar sesión con Supabase...");
 				// Inicia sesión con Supabase usando email y password
 				const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 				
-				console.log("📦 [DEBUG] Respuesta de Supabase:", { data, error });
-				
 				if (error) {
-					console.error("❌ [ERROR] Error de Supabase:", error);
 					throw error; // Lanza el error para ser capturado abajo
 				}
-				
-				console.log("✅ [SUCCESS] Login exitoso!");
-				console.log("🎫 [DEBUG] Token recibido:", data?.session?.access_token ? "Token presente" : "No hay token");
 				
 				// Si el login fue exitoso, guarda el token JWT en localStorage
 				if (data && data.session && data.session.access_token) {
 					localStorage.setItem("supabase_token", data.session.access_token);
-					console.log("💾 [DEBUG] Token guardado en localStorage");
 				}
 				// Redirige al usuario al dashboard
-				console.log("🔄 [DEBUG] Redirigiendo al dashboard...");
 				window.location.href = "/dashboard";
 			} else {
-				console.log("📝 [DEBUG] Intentando registrar usuario...");
 				// Registra un nuevo usuario en Supabase
 				const { error } = await supabase.auth.signUp({ email, password });
 				if (error) {
-					console.error("❌ [ERROR] Error al registrar:", error);
 					throw error;
 				}
-				console.log("✅ [SUCCESS] Registro exitoso!");
 				setMensaje("Revisa tu correo para verificar la cuenta.");
 			}
 		} catch (err) {
 			// Captura y muestra cualquier error ocurrido en login o registro
-			console.error("❌ [ERROR FINAL] Error capturado:", err);
-			console.error("📝 [ERROR DETAILS] Mensaje:", err.message);
-			console.error("📝 [ERROR DETAILS] Código:", err.code);
-			console.error("📝 [ERROR DETAILS] Status:", err.status);
 			setMensaje(err.message || "Ocurrió un error");
 		} finally {
 			// Finaliza el proceso y quita el estado de loading
 			setLoading(false);
-			console.log("🏁 [DEBUG] Proceso de autenticación finalizado");
 		}
 	}
 

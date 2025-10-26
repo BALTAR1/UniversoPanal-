@@ -94,7 +94,6 @@ export default function CatalogoProductos({
                     }));
                 }
             } catch (err) {
-                console.error('Error al cargar datos iniciales:', err);
                 setError('Error al cargar categorías y precios');
             }
         };
@@ -159,7 +158,6 @@ export default function CatalogoProductos({
                 }));
             }
         } catch (err) {
-            console.error('Error al cargar items:', err);
             setError('Error al cargar los items. Por favor, intenta de nuevo.');
         } finally {
             setLoading(false);

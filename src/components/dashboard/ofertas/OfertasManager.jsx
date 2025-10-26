@@ -176,7 +176,6 @@ export default function OfertasManager() {
             setOfertas(ofertasData);
             setProductos(productosData);
         } catch (error) {
-            console.error('Error al cargar datos:', error);
             alert('Error al cargar los datos: ' + error.message);
         } finally {
             setLoading(false);
@@ -258,7 +257,6 @@ export default function OfertasManager() {
             setModalOpen(false);
             cargarDatos();
         } catch (error) {
-            console.error('Error al guardar oferta:', error);
             alert('Error al guardar: ' + error.message);
         }
     }
@@ -276,7 +274,6 @@ export default function OfertasManager() {
             alert('Oferta eliminada correctamente');
             cargarDatos();
         } catch (error) {
-            console.error('Error al eliminar oferta:', error);
             alert('Error al eliminar: ' + error.message);
         }
     }
@@ -287,7 +284,6 @@ export default function OfertasManager() {
             await ofertasService.toggle(oferta.oferta_id);
             cargarDatos();
         } catch (error) {
-            console.error('Error al cambiar estado:', error);
             alert('Error al cambiar estado: ' + error.message);
         }
     }

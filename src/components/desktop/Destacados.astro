@@ -16,11 +16,9 @@ try {
   const response = await fetch(`${API_URL}/productos/destacados?limit=8`);
   if (response.ok) {
     productos = await response.json();
-  } else {
-    console.error('Error al cargar productos destacados:', response.statusText);
   }
 } catch (error) {
-  console.error('Error al conectar con la API:', error);
+  // Error silencioso
 }
 
 // Formatear precio

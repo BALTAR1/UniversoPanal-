@@ -13,7 +13,6 @@ export const obtenerBannersActivos = async () => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };
@@ -32,7 +31,6 @@ export const obtenerTodosBanners = async (token) => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };
@@ -51,7 +49,6 @@ export const obtenerBannerPorId = async (bannerId, token) => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };
@@ -72,7 +69,6 @@ export const crearBanner = async (bannerData, token) => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };
@@ -93,7 +89,6 @@ export const actualizarBanner = async (bannerId, bannerData, token) => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };
@@ -113,7 +108,6 @@ export const eliminarBanner = async (bannerId, token) => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };
@@ -121,13 +115,8 @@ export const eliminarBanner = async (bannerId, token) => {
 // Subir imagen de banner
 export const subirImagenBanner = async (file, token) => {
   try {
-    console.log('🔧 [SERVICE] Preparando FormData para subir imagen...');
     const formData = new FormData();
     formData.append('file', file);
-    console.log('📦 [SERVICE] FormData creado, archivo:', file.name, 'tamaño:', file.size);
-
-    console.log('🌐 [SERVICE] Enviando petición a:', `${API_URL}/banner/upload`);
-    console.log('🎫 [SERVICE] Token:', token ? 'Presente' : 'No encontrado');
     
     const response = await fetch(`${API_URL}/banner/upload`, {
       method: 'POST',
@@ -137,20 +126,14 @@ export const subirImagenBanner = async (file, token) => {
       body: formData
     });
     
-    console.log('📊 [SERVICE] Status de respuesta:', response.status);
-    console.log('📊 [SERVICE] Response OK:', response.ok);
-    
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
-      console.error('❌ [SERVICE] Error en respuesta:', errorData);
       throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
     }
     
     const result = await response.json();
-    console.log('✅ [SERVICE] Respuesta exitosa:', result);
     return result;
   } catch (error) {
-    console.error('❌ [SERVICE] Excepción capturada:', error);
     throw error;
   }
 };
@@ -171,7 +154,6 @@ export const reordenarBanners = async (banners, token) => {
     }
     return await response.json();
   } catch (error) {
-    console.error('Error:', error);
     throw error;
   }
 };

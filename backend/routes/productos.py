@@ -185,11 +185,9 @@ def filtrar_productos():
             query = query.order(args['sort_by'], desc=(order == 'desc'))
 
         response = query.execute()
-        print("DEBUG: Respuesta de Supabase:", response.data)  # Log para verificar datos
 
         return jsonify(response.data), 200
     except Exception as e:
-        print("ERROR:", str(e))  # Log para errores
         return jsonify({'error': str(e)}), 500
 
 # =========================
@@ -207,5 +205,4 @@ def obtener_productos_destacados():
         response = query.execute()
         return jsonify(response.data), 200
     except Exception as e:
-        print("ERROR:", str(e))
         return jsonify({'error': str(e)}), 500

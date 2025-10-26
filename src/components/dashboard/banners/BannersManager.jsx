@@ -50,7 +50,6 @@ export default function BannersManager() {
       setBanners(data); // Actualiza el estado con los banners recibidos
     } catch (error) {
       // Si ocurre un error, lo muestra y alerta al usuario
-      console.error('Error al cargar banners:', error);
       alert('Error al cargar los banners');
     } finally {
       setLoading(false); // Oculta el spinner de carga
@@ -99,19 +98,14 @@ export default function BannersManager() {
   // Maneja la subida de imagen al backend
   const handleImageUpload = async (file) => {
     try {
-      console.log('📤 [FRONTEND] Iniciando subida de imagen...', file);
       setUploadingImage(true); // Muestra spinner
       const token = localStorage.getItem('supabase_token');
-      console.log('🎫 [FRONTEND] Token obtenido:', token ? 'Presente' : 'No encontrado');
       // Llama al servicio para subir la imagen
       const result = await subirImagenBanner(file, token);
-      console.log('✅ [FRONTEND] Imagen subida exitosamente:', result);
       // Actualiza el campo imagen_url del formulario con la URL recibida
       setFormData({ ...formData, imagen_url: result.url });
     } catch (error) {
       // Si ocurre un error, lo muestra y alerta al usuario
-      console.error('❌ [FRONTEND] Error al subir imagen:', error);
-      console.error('❌ [FRONTEND] Detalles del error:', error.message);
       alert(`Error al subir la imagen: ${error.message || 'Error desconocido'}`);
     } finally {
       setUploadingImage(false); // Oculta spinner
@@ -140,7 +134,6 @@ export default function BannersManager() {
       handleCloseModal();
     } catch (error) {
       // Si ocurre un error, lo muestra y alerta al usuario
-      console.error('Error al guardar banner:', error);
       alert('Error al guardar el banner');
     }
   };
@@ -154,7 +147,6 @@ export default function BannersManager() {
       await eliminarBanner(bannerId, token); // Llama al servicio para eliminar
       await cargarBanners(); // Recarga la lista
     } catch (error) {
-      console.error('Error al eliminar banner:', error);
       alert('Error al eliminar el banner');
     }
   };
@@ -170,7 +162,6 @@ export default function BannersManager() {
       );
       await cargarBanners();
     } catch (error) {
-      console.error('Error al actualizar estado:', error);
       alert('Error al actualizar el estado del banner');
     }
   };
@@ -191,7 +182,6 @@ export default function BannersManager() {
       await reordenarBanners(bannersConOrden, token); // Llama al servicio para actualizar orden
       await cargarBanners(); // Recarga la lista
     } catch (error) {
-      console.error('Error al reordenar:', error);
       alert('Error al reordenar los banners');
     }
   };
@@ -212,7 +202,6 @@ export default function BannersManager() {
       await reordenarBanners(bannersConOrden, token); // Llama al servicio para actualizar orden
       await cargarBanners(); // Recarga la lista
     } catch (error) {
-      console.error('Error al reordenar:', error);
       alert('Error al reordenar los banners');
     }
   };

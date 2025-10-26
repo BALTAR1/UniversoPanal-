@@ -95,7 +95,6 @@ export const productosPublicosService = {
         const { data, error, count } = await query;
 
         if (error) {
-            console.error('Error al obtener productos:', error);
             throw error;
         }
 
@@ -218,7 +217,6 @@ export const productosPublicosService = {
             .single();
 
         if (error) {
-            console.error('Error al obtener producto:', error);
             throw error;
         }
 
@@ -268,7 +266,6 @@ export const productosPublicosService = {
             .limit(limite);
 
         if (error) {
-            console.error('Error al obtener productos destacados:', error);
             throw error;
         }
 
@@ -301,7 +298,6 @@ export const categoriasPublicasService = {
             .order('nombre', { ascending: true });
 
         if (error) {
-            console.error('Error al obtener categorías:', error);
             throw error;
         }
 
@@ -322,7 +318,6 @@ export const categoriasPublicasService = {
             .single();
 
         if (error) {
-            console.error('Error al obtener categoría:', error);
             throw error;
         }
 
@@ -362,7 +357,6 @@ export const categoriasPublicasService = {
             .eq('activo', true);
 
         if (error || !data) {
-            console.error('Error al obtener marcas:', error);
             return [];
         }
 
@@ -426,7 +420,6 @@ export const combosPublicosService = {
             .range(desde, hasta);
 
         if (error) {
-            console.error('Error al obtener combos:', error);
             throw error;
         }
 
@@ -470,7 +463,6 @@ export const combosPublicosService = {
             .single();
 
         if (error) {
-            console.error('Error al obtener combo:', error);
             throw error;
         }
 
@@ -522,7 +514,6 @@ export const ofertasPublicasService = {
             .order('descuento', { ascending: false });
 
         if (error) {
-            console.error('Error al obtener ofertas:', error);
             throw error;
         }
 

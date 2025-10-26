@@ -57,7 +57,6 @@ export default function DetalleCombo({ comboId }) {
             const data = await combosPublicosService.obtenerPorId(comboId);
             setCombo(data); // guardamos la respuesta en el estado
         } catch (err) {
-            console.error('Error al cargar combo:', err);
             setError('No se pudo cargar el combo'); // mensaje legible para el usuario
         } finally {
             setLoading(false); // desactivamos indicador de carga

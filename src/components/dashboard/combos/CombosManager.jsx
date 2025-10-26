@@ -159,7 +159,6 @@ export default function CombosManager() {
             setProductos(productosData); // Actualiza productos
         } catch (error) {
             // Si ocurre un error, lo muestra y alerta al usuario
-            console.error('Error al cargar datos:', error);
             alert('Error al cargar los datos: ' + error.message);
         } finally {
             setLoading(false); // Oculta spinner
@@ -268,7 +267,6 @@ export default function CombosManager() {
             cargarDatos(); // Recarga la lista
         } catch (error) {
             // Si ocurre un error, lo muestra y alerta al usuario
-            console.error('Error al guardar combo:', error);
             alert('Error al guardar: ' + error.message);
         }
     }
@@ -285,7 +283,6 @@ export default function CombosManager() {
             alert('Combo eliminado correctamente');
             cargarDatos(); // Recarga la lista
         } catch (error) {
-            console.error('Error al eliminar combo:', error);
             alert('Error al eliminar: ' + error.message);
         }
     }

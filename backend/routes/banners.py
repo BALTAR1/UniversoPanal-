@@ -152,17 +152,12 @@ def eliminar_banner(banner_id):
 @supabase_token_required
 def subir_imagen_banner():
     try:
-        print("📤 [DEBUG] Iniciando subida de imagen de banner...")
-        
         if 'file' not in request.files:
-            print("❌ [ERROR] No se encontró archivo en la petición")
             return jsonify({'error': 'No se envió ningún archivo'}), 400
         
         file = request.files['file']
-        print(f"📁 [DEBUG] Archivo recibido: {file.filename}, tipo: {file.content_type}")
         
         if file.filename == '':
-            print("❌ [ERROR] Nombre de archivo vacío")
             return jsonify({'error': 'No se seleccionó ningún archivo'}), 400
         
         # Validar tipo de archivo
@@ -170,17 +165,13 @@ def subir_imagen_banner():
         file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
         
         if file_ext not in allowed_extensions:
-            print(f"❌ [ERROR] Extensión no permitida: {file_ext}")
             return jsonify({'error': 'Tipo de archivo no permitido'}), 400
         
         # Generar nombre único
         unique_filename = f"{uuid.uuid4()}.{file_ext}"
-        print(f"🎯 [DEBUG] Nombre único generado: {unique_filename}")
         
         # Subir a Supabase Storage
         file_bytes = file.read()
-        print(f"📊 [DEBUG] Tamaño del archivo: {len(file_bytes)} bytes")
-        print(f"☁️ [DEBUG] Subiendo a Supabase Storage bucket 'banners'...")
         
         try:
             response = supabase.storage.from_('banners').upload(
@@ -191,16 +182,11 @@ def subir_imagen_banner():
                     'upsert': 'false'
                 }
             )
-            print(f"✅ [DEBUG] Respuesta de Supabase: {response}")
         except Exception as storage_error:
-            print(f"❌ [ERROR STORAGE] Error al subir a Supabase: {str(storage_error)}")
-            print(f"❌ [ERROR DETAILS] Tipo: {type(storage_error)}")
             raise storage_error
         
         # Obtener URL pública
-        print(f"🔗 [DEBUG] Obteniendo URL pública...")
         public_url = supabase.storage.from_('banners').get_public_url(unique_filename)
-        print(f"✅ [SUCCESS] URL pública generada: {public_url}")
         
         return jsonify({
             'url': public_url,
@@ -208,10 +194,6 @@ def subir_imagen_banner():
         }), 201
         
     except Exception as e:
-        print(f"❌ [ERROR GENERAL] Error en endpoint: {str(e)}")
-        print(f"❌ [ERROR TYPE] Tipo de error: {type(e)}")
-        import traceback
-        print(f"❌ [TRACEBACK] {traceback.format_exc()}")
         return jsonify({'error': str(e)}), 500
 
 # =========================

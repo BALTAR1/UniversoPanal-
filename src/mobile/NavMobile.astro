@@ -49,9 +49,8 @@
   // También escuchar cambios en localStorage (por si otros tabs se actualizan)
   window.addEventListener('storage', updateCartCount);
   
-  // Para debugging
+  // Actualizar cuando se agrega producto
   window.addEventListener('mp_cart_added', () => {
-    console.log('Producto agregado al carrito');
     updateCartCount();
   });
 </script>

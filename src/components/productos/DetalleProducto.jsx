@@ -40,7 +40,6 @@ export default function DetalleProducto({ productoId }) {
                 setTallaSeleccionada(tallasDisponibles[0]);
             }
         } catch (err) {
-            console.error('Error al cargar producto:', err);
             setError('No se pudo cargar el producto');
         } finally {
             setLoading(false);
