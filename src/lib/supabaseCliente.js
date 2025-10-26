@@ -4,15 +4,8 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY;
 
-console.log("🔧 [DEBUG] Inicializando cliente de Supabase...");
-console.log("🌐 [DEBUG] SUPABASE_URL:", supabaseUrl);
-console.log("🔑 [DEBUG] SUPABASE_ANON_KEY:", supabaseAnonKey ? "Presente (longitud: " + supabaseAnonKey.length + ")" : "No configurada");
-
 // Validación de variables de entorno
 if (!supabaseUrl || !supabaseAnonKey) {
-	console.error('❌ [ERROR] Variables de entorno de Supabase no configuradas');
-	console.error('PUBLIC_SUPABASE_URL:', supabaseUrl);
-	console.error('PUBLIC_SUPABASE_ANON_KEY:', supabaseAnonKey ? 'Configurada' : 'No configurada');
 	throw new Error('Variables de entorno de Supabase requeridas: PUBLIC_SUPABASE_URL y PUBLIC_SUPABASE_ANON_KEY');
 }
 
@@ -27,5 +20,3 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 		detectSessionInUrl: true,
 	},
 });
-
-console.log("✅ [SUCCESS] Cliente de Supabase creado exitosamente");

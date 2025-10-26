@@ -50,7 +50,6 @@ export default function ImageUploader({ onImageUploaded, currentImages = [], onD
 				});
 
 			if (error) {
-				console.error('Error al subir imagen:', error);
 				throw error;
 			}
 
@@ -72,7 +71,6 @@ export default function ImageUploader({ onImageUploaded, currentImages = [], onD
 			e.target.value = '';
 
 		} catch (error) {
-			console.error('Error:', error);
 			alert('Error al subir la imagen: ' + error.message);
 		} finally {
 			setUploading(false); // Oculta spinner

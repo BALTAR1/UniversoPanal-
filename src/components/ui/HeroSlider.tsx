@@ -37,7 +37,7 @@ export default function HeroSlider() {
           setBanners(data); // Guarda banners en estado
         }
       } catch (error) {
-        console.error('Error al cargar banners:', error);
+        // Error silencioso
       } finally {
         setLoading(false); // Oculta spinner
       }

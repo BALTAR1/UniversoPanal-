@@ -83,7 +83,6 @@ export default function CategoriasManager() {
             const data = await categoriasService.obtenerTodas(); // Obtiene todas las categorías desde el backend
             setCategorias(data); // Actualiza el estado con los datos obtenidos
         } catch (error) {
-            console.error('Error al cargar categorías:', error); // Muestra el error en consola
             alert('Error al cargar las categorías: ' + error.message); // Alerta al usuario
         } finally {
             setLoading(false); // Desactiva el spinner
@@ -129,7 +128,6 @@ export default function CategoriasManager() {
             alert('Categoría eliminada correctamente'); // Mensaje de éxito
             cargarDatos(); // Recarga los datos
         } catch (error) {
-            console.error('Error al eliminar categoría:', error); // Error en consola
             alert('Error al eliminar la categoría: ' + error.message); // Alerta al usuario
         }
     }
@@ -149,7 +147,6 @@ export default function CategoriasManager() {
             setModalOpen(false); // Cierra el modal
             cargarDatos(); // Recarga los datos
         } catch (error) {
-            console.error('Error al guardar categoría:', error); // Error en consola
             alert('Error al guardar la categoría: ' + error.message); // Alerta al usuario
         }
     }

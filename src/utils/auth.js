@@ -14,21 +14,17 @@ export async function requireAuth() {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-            console.error('❌ Error al verificar sesión:', error);
             window.location.href = '/login';
             return null;
         }
 
         if (!session) {
-            console.log('⚠️ No hay sesión activa, redirigiendo a login...');
             window.location.href = '/login';
             return null;
         }
 
-        console.log('✅ Usuario autenticado:', session.user.email);
         return session;
     } catch (error) {
-        console.error('❌ Error en requireAuth:', error);
         window.location.href = '/login';
         return null;
     }
@@ -39,8 +35,6 @@ export async function requireAuth() {
  */
 export async function logout() {
     try {
-        console.log('🔓 Cerrando sesión...');
-        
         // Limpiar token del localStorage
         localStorage.removeItem('supabase_token');
         
@@ -48,16 +42,12 @@ export async function logout() {
         const { error } = await supabase.auth.signOut();
         
         if (error) {
-            console.error('❌ Error al cerrar sesión:', error);
             throw error;
         }
-
-        console.log('✅ Sesión cerrada exitosamente');
         
         // Redirigir a la página de login
         window.location.href = '/login';
     } catch (error) {
-        console.error('❌ Error en logout:', error);
         alert('Error al cerrar sesión. Inténtalo de nuevo.');
     }
 }
@@ -71,13 +61,11 @@ export async function getSession() {
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-            console.error('❌ Error al obtener sesión:', error);
             return null;
         }
 
         return session;
     } catch (error) {
-        console.error('❌ Error en getSession:', error);
         return null;
     }
 }
@@ -91,13 +79,11 @@ export async function getCurrentUser() {
         const { data: { user }, error } = await supabase.auth.getUser();
         
         if (error) {
-            console.error('❌ Error al obtener usuario:', error);
             return null;
         }
 
         return user;
     } catch (error) {
-        console.error('❌ Error en getCurrentUser:', error);
         return null;
     }
 }
@@ -120,7 +106,6 @@ export async function isAdmin() {
         
         return user.email === adminEmail;
     } catch (error) {
-        console.error('❌ Error en isAdmin:', error);
         return false;
     }
 }
@@ -131,7 +116,6 @@ export async function isAdmin() {
  */
 export function onAuthStateChange(callback) {
     return supabase.auth.onAuthStateChange((event, session) => {
-        console.log('🔄 Estado de autenticación cambió:', event);
         callback(event, session);
     });
 }

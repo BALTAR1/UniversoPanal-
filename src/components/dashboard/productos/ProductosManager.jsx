@@ -185,7 +185,6 @@ export default function ProductosManager() {
             setProductos(productosConImagenes); // Actualiza estado de productos
             setCategorias(categoriasData); // Actualiza estado de categorías
         } catch (error) {
-            console.error('Error al cargar datos:', error);
             alert('Error al cargar los datos: ' + error.message);
         } finally {
             setLoading(false); // Oculta spinner
@@ -259,7 +258,6 @@ export default function ProductosManager() {
             alert('Producto eliminado correctamente');
             cargarDatos(); // Refresca lista
         } catch (error) {
-            console.error('Error al eliminar producto:', error);
             alert('Error al eliminar el producto: ' + error.message);
         }
     }
@@ -326,7 +324,6 @@ export default function ProductosManager() {
             setModalOpen(false); // Cierra modal
             cargarDatos(); // Refresca lista
         } catch (error) {
-            console.error('Error al guardar producto:', error);
             alert('Error al guardar el producto: ' + error.message);
         }
     }

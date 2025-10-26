@@ -10,10 +10,8 @@ categoria_bp = Blueprint('categoria', __name__)
 def listar_categorias():
     try:
         response = supabase.table('categorias').select('*').execute()
-        print("DEBUG: Respuesta de Supabase (categorias):", response.data)  # Log para verificar datos
         return jsonify(response.data), 200
     except Exception as e:
-        print("ERROR (categorias):", str(e))  # Log para errores
         return jsonify({'error': str(e)}), 500
 
 # =========================

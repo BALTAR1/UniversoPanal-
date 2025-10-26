@@ -4,9 +4,9 @@ import '../styles/global.css';
 import Nav from '../components/ui/Nav.astro';
 import NavMobile from '../mobile/NavMobile.astro';
 import MenuBurger from '../mobile/MenuBurger.astro';
-import Hero from '../components/desktop/Hero.astro';
-import Footer from '../components/desktop/Footer.astro';
+import HeroProductos from '../components/desktop/HeroProductos.astro';
 import CatalogoCombos from '../components/combos/CatalogoCombos.jsx';
+import WhatsAppButton from "../components/ui/WhatsAppButton.astro";
 ---
 
 <Layout title="Combos - Universo Pañal">
@@ -22,16 +22,15 @@ import CatalogoCombos from '../components/combos/CatalogoCombos.jsx';
     
     <MenuBurger />
     
-    <!-- Hero Section -->
-    <Hero />
+    <!-- Hero de la página de combos -->
+    <HeroProductos />
     
     <!-- Catálogo de Combos -->
     <section class="bg-gray-50 py-12">
         <CatalogoCombos client:only="react" />
+        <WhatsAppButton />
     </section>
     
-    <!-- Footer -->
-    <Footer />
 </Layout>
 
 <style>

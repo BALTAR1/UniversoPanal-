@@ -92,18 +92,14 @@ import '../styles/global.css';
 		const { data: { session }, error } = await supabase.auth.getSession();
 		
 		if (error) {
-			console.error('Error al verificar sesión:', error);
 			window.location.href = '/login';
 			return;
 		}
 
 		if (!session) {
-			console.log('No hay sesión activa, redirigiendo a login...');
 			window.location.href = '/login';
 			return;
 		}
-
-		console.log('✅ Usuario autenticado:', session.user.email);
 	}
 
 	// Ejecutar verificación al cargar la página

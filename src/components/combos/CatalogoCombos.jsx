@@ -54,7 +54,6 @@ export default function CatalogoCombos() {
             }));
         } catch (err) {
             // Si ocurre un error, lo muestra en pantalla
-            console.error('Error al cargar combos:', err);
             setError('Error al cargar los combos. Por favor, intenta de nuevo.');
         } finally {
             setLoading(false); // Oculta el spinner de carga

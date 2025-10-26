@@ -37,7 +37,6 @@ export function getCart() {
       totalPrice: Math.round(totalPrice)
     };
   } catch (e) {
-    console.error('Error al obtener carrito:', e);
     return { items: [], totalItems: 0, totalPrice: 0 };
   }
 }
@@ -52,7 +51,7 @@ function saveCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(cart));
     window.dispatchEvent(new CustomEvent(CART_EVENT, { detail: { cart } }));
   } catch (e) {
-    console.error('Error al guardar carrito:', e);
+    // Error silencioso
   }
 }
 
@@ -61,7 +60,6 @@ function saveCart(cart) {
  */
 export function addToCart(item) {
   if (!item || !item.nombre) {
-    console.error('Producto inválido');
     return;
   }
 
