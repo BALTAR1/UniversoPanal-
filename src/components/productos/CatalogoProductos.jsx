@@ -32,6 +32,7 @@ export default function CatalogoProductos({
     // Estados para modales mobile
     const [mostrarModalOrdenar, setMostrarModalOrdenar] = useState(false);
     const [mostrarModalFiltrar, setMostrarModalFiltrar] = useState(false);
+    const [filtrosTemporales, setFiltrosTemporales] = useState(null); // Para mobile
     
     // Estado de paginación y filtros
     const [paginacion, setPaginacion] = useState({
@@ -246,7 +247,10 @@ export default function CatalogoProductos({
                                 
                                 {/* Botón Filtrar */}
                                 <button 
-                                    onClick={() => setMostrarModalFiltrar(true)}
+                                    onClick={() => {
+                                        setFiltrosTemporales(filtros); // Inicializar con filtros actuales
+                                        setMostrarModalFiltrar(true);
+                                    }}
                                     className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -385,13 +389,19 @@ export default function CatalogoProductos({
 
             {/* Modal de Filtros - Mobile */}
             {mostrarModalFiltrar && (
-                <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50" onClick={() => setMostrarModalFiltrar(false)}>
+                <div className="lg:hidden fixed inset-0 z-50 flex items-end justify-center bg-black bg-opacity-50" onClick={() => {
+                    setFiltrosTemporales(null);
+                    setMostrarModalFiltrar(false);
+                }}>
                     <div className="bg-white rounded-t-2xl w-full max-w-lg max-h-[85vh] flex flex-col animate-slide-up" onClick={(e) => e.stopPropagation()}>
                         {/* Header fijo */}
                         <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
                             <h3 className="text-lg font-semibold text-gray-900">Filtros</h3>
                             <button 
-                                onClick={() => setMostrarModalFiltrar(false)}
+                                onClick={() => {
+                                    setFiltrosTemporales(null);
+                                    setMostrarModalFiltrar(false);
+                                }}
                                 className="text-gray-400 hover:text-gray-600"
                             >
                                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,13 +416,54 @@ export default function CatalogoProductos({
                                 categorias={categorias}
                                 marcas={marcas}
                                 rangoPrecios={rangoPrecios}
-                                filtrosActuales={filtros}
+                                filtrosActuales={filtrosTemporales || filtros}
                                 onFiltrosChange={(nuevosFiltros) => {
-                                    handleFiltrosChange(nuevosFiltros);
-                                    setMostrarModalFiltrar(false);
+                                    // En mobile, guardar en estado temporal, NO aplicar inmediatamente
+                                    setFiltrosTemporales(nuevosFiltros);
                                 }}
                                 isMobile={true}
                             />
+                        </div>
+                        
+                        {/* Footer con botones - Fijo en la parte inferior */}
+                        <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-white">
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        // Limpiar filtros temporales y aplicar filtros limpios
+                                        const filtrosLimpios = {
+                                            busqueda: '',
+                                            categoria_id: null,
+                                            marca: null,
+                                            precioMin: null,
+                                            precioMax: null,
+                                            ordenar: 'relevancia',
+                                            soloOfertas: false,
+                                            soloCombos: false,
+                                            pagina: 1
+                                        };
+                                        setFiltrosTemporales(null);
+                                        handleFiltrosChange(filtrosLimpios);
+                                        setMostrarModalFiltrar(false);
+                                    }}
+                                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-3 px-4 rounded-lg transition-colors"
+                                >
+                                    Limpiar
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        // Aplicar filtros temporales y cerrar modal
+                                        if (filtrosTemporales) {
+                                            handleFiltrosChange(filtrosTemporales);
+                                        }
+                                        setFiltrosTemporales(null);
+                                        setMostrarModalFiltrar(false);
+                                    }}
+                                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition-colors"
+                                >
+                                    Ver resultados
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -31,6 +31,18 @@ export default function FilterSidebar({
         precio: true
     });
 
+    // Sincronizar estados locales con filtros actuales (importante para mobile)
+    useEffect(() => {
+        setBusqueda(filtrosActuales.busqueda || '');
+        setCategoriaSeleccionada(filtrosActuales.categoria_id || null);
+        setMarcaSeleccionada(filtrosActuales.marca || null);
+        setPrecioMin(filtrosActuales.precioMin || '');
+        setPrecioMax(filtrosActuales.precioMax || '');
+        setOrdenamiento(filtrosActuales.ordenar || 'relevancia');
+        setSoloOfertas(filtrosActuales.soloOfertas || false);
+        setSoloCombos(filtrosActuales.soloCombos || false);
+    }, [filtrosActuales]);
+
     // Aplicar filtros automáticamente cuando hay cambios
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -46,10 +58,11 @@ export default function FilterSidebar({
                 pagina: 1
             };
             onFiltrosChange(nuevosFiltros);
-        }, 500); // Espera 500ms después del último cambio
+        }, isMobile ? 0 : 500); // En mobile aplicar inmediatamente a filtrosTemporales, en desktop con debounce
         
         return () => clearTimeout(timer);
-    }, [busqueda, categoriaSeleccionada, marcaSeleccionada, precioMin, precioMax, ordenamiento, soloOfertas, soloCombos]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [busqueda, categoriaSeleccionada, marcaSeleccionada, precioMin, precioMax, ordenamiento, soloOfertas, soloCombos, isMobile]);
 
     // Limpiar filtros
     const limpiarFiltros = () => {
