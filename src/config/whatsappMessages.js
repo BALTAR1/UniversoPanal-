@@ -2,7 +2,7 @@
 
 export const whatsappConfig = {
   mayorista: {
-    number: '5492646615213',
+    number: '5492645318221',
     message: 'Hola, estoy interesado en comprar al por mayor y me gustaría recibir asesoramiento personalizado. ¿Pueden ayudarme?'
   },
 };
