@@ -13,7 +13,12 @@ export default defineConfig({
   adapter: node({
     mode: 'standalone'
   }),
-  
+
+  server: {
+    host: '0.0.0.0',
+    port: process.env.PORT ? Number(process.env.PORT) : 4321
+  },
+
   vite: {
     plugins: [tailwindcss()]
   },
