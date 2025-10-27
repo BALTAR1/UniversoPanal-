@@ -4,33 +4,39 @@ import CartIcon from './CartIcon.jsx';
 
 <nav class="bg-white shadow-md">
     <div class="container mx-auto px-6 py-3">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                {/* Logo al lado del texto "Universo Pañal" */}
-                <img src="/images/logo.jpg" alt="Logo Universo Pañal" class="w-12 h-12 rounded-full" />
-                <div class="text-2xl font-bold text-amber-500">
+        <div class="flex items-center justify-between w-full">
+            {/* Logo y título */}
+            <div class="flex items-center gap-2 min-w-[180px]">
+                <img src="/images/logo.jpg" alt="Logo Universo Pañal" class="w-10 h-10 rounded-full" />
+                <div class="text-xl md:text-2xl font-bold text-amber-500 whitespace-nowrap">
                     <a href="/">Universo Pañal</a>
                 </div>
             </div>
-            <div class="hidden items-center space-x-6 md:flex">
-                <a href="/productos" class="relative group text-gray-800 hover:text-blue-600">
+            {/* Menú centrado y responsivo */}
+            <div class="hidden md:flex flex-1 justify-center items-center space-x-4 md:space-x-6">
+                <a href="/" class="relative group text-gray-800 hover:text-blue-600 text-base md:text-lg">
+                    <span>Inicio</span>
+                    <span class="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-blue-600 transition-transform duration-300 ease-in-out group-hover:scale-x-100"></span>
+                </a>
+                <a href="/productos" class="relative group text-gray-800 hover:text-blue-600 text-base md:text-lg">
                     <span>Productos</span>
                     <span class="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-blue-600 transition-transform duration-300 ease-in-out group-hover:scale-x-100"></span>
                 </a>
-                <a href="/nosotros" class="relative group text-gray-800 hover:text-blue-600">
-                    <span>Nosotros</span>
+                <a href="/#marcas" class="relative group text-gray-800 hover:text-blue-600 text-base md:text-lg">
+                    <span>Marcas</span>
                     <span class="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-blue-600 transition-transform duration-300 ease-in-out group-hover:scale-x-100"></span>
                 </a>
-                <a href="/servicios" class="relative group text-gray-800 hover:text-blue-600">
-                    <span>Servicios</span>
-                    <span class="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-blue-600 transition-transform duration-300 ease-in-out group-hover:scale-x-100"></span>
-                </a>
-                <a href="/servicios" class="relative group text-gray-800 hover:text-blue-600">
+                <a href="/#mayorista" class="relative group text-gray-800 hover:text-blue-600 text-base md:text-lg">
                     <span>Mayorista</span>
                     <span class="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-blue-600 transition-transform duration-300 ease-in-out group-hover:scale-x-100"></span>
                 </a>
+                <a href="/#contacto" class="relative group text-gray-800 hover:text-blue-600 text-base md:text-lg">
+                    <span>Contacto</span>
+                    <span class="absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform bg-blue-600 transition-transform duration-300 ease-in-out group-hover:scale-x-100"></span>
+                </a>
             </div>
-            <div class="flex items-center gap-8">
+            {/* Carrito */}
+            <div class="flex items-center gap-6 min-w-[60px] justify-end">
                 <CartIcon client:load />
             </div>
         </div>
