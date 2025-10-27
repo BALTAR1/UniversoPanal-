@@ -7,7 +7,7 @@ Flask==3.0.0
 flask-cors==4.0.0
 
 # Cliente de Supabase para interactuar con la base de datos - versión compatible
-supabase==2.0.5
+supabase==2.0.3
 
 # Manejo de variables de entorno
 python-dotenv==1.0.0
@@ -19,5 +19,5 @@ gunicorn==21.2.0
 requests==2.31.0
 
 # Dependencias específicas para compatibilidad
-httpx==0.24.1
-gotrue==2.8.4
+httpx==0.23.3
+gotrue==1.3.0
