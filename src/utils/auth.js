@@ -45,8 +45,8 @@ export async function logout() {
             throw error;
         }
         
-        // Redirigir a la página de login
-        window.location.href = '/login';
+    // Redirigir a la página de loginAM
+    window.location.href = '/loginAM';
     } catch (error) {
         alert('Error al cerrar sesión. Inténtalo de nuevo.');
     }
