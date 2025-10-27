@@ -109,7 +109,7 @@ import SocialMedias from '../ui/SocialMedias.jsx';
         <p class="text-lg md:text-xl text-slate-600 text-center mb-12 font-semibold" style="letter-spacing:-0.01em;">Visítanos en nuestra tienda física</p>
         <div class="w-full h-96 rounded-2xl overflow-hidden shadow-lg border-2 border-cyan-200 mb-8">
           <iframe
-            src="https://www.google.com/maps?q=-31.5375,-68.5364&z=16&output=embed"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3374.916766900915!2d-68.5957154!3d-31.510674199999993!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x968141f4c017e381%3A0x437a74894192fb56!2sUniverso%20Pa%C3%B1al!5e1!3m2!1ses-419!2sar!4v1761582047900!5m2!1ses-419!2sar"
             width="100%"
             height="100%"
             style="border:0; min-height:384px;"
@@ -156,40 +156,50 @@ import SocialMedias from '../ui/SocialMedias.jsx';
       <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         
         <!-- Columna 1: Logo y descripción -->
-        <div>
-          <h3 class="text-2xl font-black mb-3">Universo Pañal</h3>
-          <p class="text-slate-500 text-sm mb-4">
+        <div class="flex flex-col items-center">
+          <img src="/images/logo.jpg" alt="Logo Universo Pañal" class="w-14 h-14 rounded-full mb-3 shadow-lg bg-white object-cover" />
+          <h3 class="text-2xl font-black mb-3 text-center">Universo Pañal</h3>
+          <p class="text-slate-500 text-sm mb-4 text-center">
             El cuidado que tu bebé merece, la confianza que vos necesitás.
           </p>
         </div>
 
         <!-- Columna 2: Enlaces rápidos -->
-        <div>
-          <h4 class="text-lg font-bold mb-3">Enlaces Rápidos</h4>
-          <ul class="space-y-2 text-slate-500 text-sm">
-            <li><a href="#" class="hover:text-black transition">Inicio</a></li>
-            <li><a href="#" class="hover:text-black transition">Productos</a></li>
-            <li><a href="#" class="hover:text-black transition">Servicios</a></li>
-            <li><a href="#" class="hover:text-black transition">Mayorista</a></li>
+        <div class="flex flex-col items-center">
+          <h4 class="text-lg font-bold mb-4 text-center">Enlaces Rápidos</h4>
+          <ul class="space-y-3 text-slate-500 text-sm text-center">
+            <li><a href="/" class="hover:text-black transition">Inicio</a></li>
+            <li><a href="/productos" class="hover:text-black transition">Productos</a></li>
+            <li><a href="/#marcas" class="hover:text-black transition">Marcas</a></li>
+            <li><a href="/#mayorista" class="hover:text-black transition">Mayorista</a></li>
+            <li><a href="/#contacto" class="hover:text-black transition">Contacto</a></li>
           </ul>
         </div>
 
         <!-- Columna 3: Categorías -->
-        <div>
-          <h4 class="text-lg font-bold mb-3">Categorías</h4>
-          <ul class="space-y-2 text-slate-500 text-sm">
-            <li><a href="#" class="hover:text-black transition">Pañales</a></li>
-            <li><a href="#" class="hover:text-black transition">Nutricion</a></li>
-            <li><a href="#" class="hover:text-black transition">Higiene</a></li>
-            <li><a href="#" class="hover:text-black transition">Adultos</a></li>
-             <li><a href="#" class="hover:text-black transition">Accesorios</a></li>
+        <div class="flex flex-col items-center">
+          <h4 class="text-lg font-bold mb-4 text-center">Categorías</h4>
+          <ul class="space-y-3 text-slate-500 text-sm text-center">
+            <li><a href="/categoria/pañales" class="hover:text-black transition">Pañales</a></li>
+            <li><a href="/categoria/nutrición" class="hover:text-black transition">Nutrición</a></li>
+            <li><a href="/categoria/higiene" class="hover:text-black transition">Higiene</a></li>
+            <li><a href="/categoria/adultos" class="hover:text-black transition">Adultos</a></li>
+            <li><a href="/categoria/accesorios" class="hover:text-black transition">Accesorios</a></li>
           </ul>
         </div>
 
         <!-- Columna 4: Redes sociales -->
-        <div>
+        <div class="flex flex-col items-center">
           <h4 class="text-lg font-bold mb-6 text-center">Síguenos</h4>
-          <SocialMedias client:load />
+          <div class="flex items-center justify-center gap-4 mb-4">
+            <a href="https://facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
+              <img src="/images/facebook.png" alt="Facebook" class="w-12 h-12 rounded-full shadow hover:scale-110 transition" />
+            </a>
+            <a href="https://www.instagram.com/universo_panal?igsh=MWRyN3g5czhwd21jaw==" target="_blank" rel="noopener" aria-label="Instagram">
+              <img src="/images/instagram.png" alt="Instagram" class="w-12 h-12 rounded-full shadow hover:scale-110 transition" />
+            </a>
+          </div>
+          <!-- Íconos personalizados, SocialMedias removido -->
         </div>
 
       </div>
