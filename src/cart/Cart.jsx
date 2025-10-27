@@ -6,7 +6,7 @@ export default function Cart() {
   const [toast, setToast] = useState(null);
 
   // Número de WhatsApp de la tienda (formato: código de país + número sin espacios)
-  const WHATSAPP_NUMBER = '5491123456789';
+  const WHATSAPP_NUMBER = '5492645318221';
 
   // Formatear moneda
   const formatCurrency = (amount) => {

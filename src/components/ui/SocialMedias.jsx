@@ -7,15 +7,22 @@ const SocialMedias = () => {
   return (
     <ul className="flex justify-center items-center gap-4 list-none">
       {/* Ícono Facebook */}
-      <li className="group relative bg-white/10 rounded-full w-12 h-12 flex justify-center items-center shadow-lg cursor-pointer transition-all duration-200 hover:bg-[#1877f2] hover:scale-110">
-        {/* Tooltip al pasar el mouse */}
-        <span className="absolute -top-10 bg-white text-gray-800 px-2 py-1 rounded text-sm opacity-0 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:-top-12">
-          Facebook
-        </span>
-        {/* SVG de Facebook */}
-        <svg viewBox="0 0 320 512" className="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
-        </svg>
+      <li className="group relative">
+        <a 
+          href="https://www.facebook.com/agustin.munoz.144734/" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="bg-white/10 rounded-full w-12 h-12 flex justify-center items-center shadow-lg cursor-pointer transition-all duration-200 hover:bg-[#1877f2] hover:scale-110"
+        >
+          {/* Tooltip al pasar el mouse */}
+          <span className="absolute -top-10 bg-white text-gray-800 px-2 py-1 rounded text-sm opacity-0 pointer-events-none transition-all duration-300 group-hover:opacity-100 group-hover:-top-12">
+            Facebook
+          </span>
+          {/* SVG de Facebook */}
+          <svg viewBox="0 0 320 512" className="w-5 h-5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+          </svg>
+        </a>
       </li>
       {/* Ícono Instagram */}
       <li className="group relative bg-white/10 rounded-full w-12 h-12 flex justify-center items-center shadow-lg cursor-pointer transition-all duration-200 hover:bg-[#e4405f] hover:scale-110">
