@@ -56,12 +56,12 @@ function formatearPrecio(precio: number): string {
               <p class="text-xs text-gray-500 text-center mb-3 line-clamp-2">
                 {producto.descripcion || 'Sin descripción'}
               </p>
-              <div class="text-xl font-black text-blue-600 text-center mb-3">
+              <div class="text-xl font-black text-[#ff792b] text-center mb-3">
                 {formatearPrecio(producto.precio)}
               </div>
               <a 
                 href={`/producto/${producto.producto_id}`}
-                class="block w-full py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg text-center hover:bg-blue-700 transition-colors"
+                class="block w-full py-2 bg-cyan-600 text-white text-sm font-semibold rounded-lg text-center hover:bg-cyan-800 transition-colors"
               >
                 Ver producto
               </a>
