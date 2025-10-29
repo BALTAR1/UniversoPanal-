@@ -56,7 +56,7 @@ function formatearPrecio(precio: number): string {
               <p class="text-xs text-gray-500 text-center mb-3 line-clamp-2">
                 {producto.descripcion || 'Sin descripción'}
               </p>
-              <div class="text-xl font-black text-[#ff792b] text-center mb-3">
+              <div class="text-xl font-semibold text-[#ff792b] text-center mb-3" style="font-family: 'Montserrat', sans-serif;">
                 {formatearPrecio(producto.precio)}
               </div>
               <a 
@@ -77,7 +77,7 @@ function formatearPrecio(precio: number): string {
     <div class="flex flex-col gap-3 mt-6 max-w-xs mx-auto">
       <a 
         href="/productos" 
-        class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full text-center hover:bg-blue-700 transition-colors"
+        class="px-6 py-3 bg-blue-800 text-white font-semibold rounded-full text-center hover:bg-blue-900 transition-colors"
       >
         Explorar catálogo
       </a>
