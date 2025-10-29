@@ -2,6 +2,99 @@
 // Footer Mobile - Versión compacta y optimizada
 ---
 
+<style>
+  .faq-mobile details {
+    border: 2px solid #e0f2fe;
+    background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 100%);
+    border-radius: 1rem;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+  }
+  
+  .faq-mobile details:active {
+    border-color: #38bdf8;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.2);
+  }
+  
+  .faq-mobile details[open] {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+    border-color: #38bdf8;
+    box-shadow: 0 4px 16px rgba(56, 189, 248, 0.25);
+  }
+  
+  .faq-mobile summary {
+    outline: none;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #1e293b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    padding-right: 1.5rem;
+    line-height: 1.4;
+  }
+  
+  .faq-mobile summary::marker {
+    display: none;
+  }
+  
+  .faq-mobile summary::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%) rotate(0deg);
+    width: 1.25rem;
+    height: 1.25rem;
+    background: url('data:image/svg+xml;utf8,<svg fill="%23ff792b" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 111.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z"/></svg>') no-repeat center/contain;
+    transition: transform 0.3s ease;
+  }
+  
+  .faq-mobile details[open] summary::after {
+    transform: translateY(-50%) rotate(180deg);
+  }
+  
+  .faq-mobile p {
+    color: #475569;
+    font-size: 0.8125rem;
+    margin-top: 0.75rem;
+    line-height: 1.6;
+    padding-right: 0.5rem;
+  }
+</style>
+
+{/* Sección de Preguntas Frecuentes */}
+<section class="w-full bg-gradient-to-b from-white to-gray-50 py-10 px-4">
+  <div class="max-w-md mx-auto">
+    <h2 class="text-2xl font-black text-center text-cyan-600 mb-2">
+      Preguntas Frecuentes
+    </h2>
+    <p class="text-sm text-center text-gray-600 mb-6 font-medium">
+      Todo lo que necesitas saber
+    </p>
+    
+    <div class="faq-mobile">
+      <details>
+        <summary>¿Cómo realizo una compra?</summary>
+        <p>Selecciona los productos que deseas, agrégalos al carrito y sigue los pasos para completar tu pedido. Si tienes dudas, puedes contactarnos por WhatsApp.</p>
+      </details>
+      
+      <details>
+        <summary>¿Cuáles son los métodos de pago?</summary>
+        <p>Aceptamos tarjetas de crédito, débito, transferencias y pagos en efectivo.</p>
+      </details>
+      
+      <details>
+        <summary>¿Qué garantía ofrecen en los productos?</summary>
+        <p>Todos nuestros productos cuentan con garantía de calidad. Si hay algún defecto o problema, nos comprometemos a reemplazarlo sin costo adicional dentro de los primeros 30 días.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <footer class="w-full bg-gray-900 text-white py-8">
   <div class="px-4 max-w-md mx-auto">
     {/* Logo y descripción */}
@@ -17,23 +110,34 @@
       </p>
     </div>
 
-    {/* Enlaces rápidos */}
-    <div class="grid grid-cols-2 gap-4 mb-6 text-center">
+    {/* Enlaces de Productos centrados */}
+    <div class="mb-6 text-center">
+      <h4 class="text-sm font-semibold mb-3 text-[#ff792b]">Productos</h4>
+      <ul class="space-y-2 text-xs text-gray-400">
+        <li><a href="/productos" class="hover:text-white transition-colors">Catálogo</a></li>
+        <li><a href="/combos" class="hover:text-white transition-colors">Combos</a></li>
+        <li><a href="/categoria/ofertas" class="hover:text-white transition-colors">Ofertas</a></li>
+      </ul>
+    </div>
+
+    {/* Dirección y Horarios */}
+    <div class="mb-6 text-center space-y-4 border-t border-gray-700 pt-6">
+      {/* Dirección */}
       <div>
-        <h4 class="text-sm font-semibold mb-2 text-[#ff792b]">Productos</h4>
-        <ul class="space-y-1 text-xs text-gray-400">
-          <li><a href="/productos" class="hover:text-white transition-colors">Catálogo</a></li>
-          <li><a href="/combos" class="hover:text-white transition-colors">Combos</a></li>
-          <li><a href="/categoria/ofertas" class="hover:text-white transition-colors">Ofertas</a></li>
-        </ul>
+        <h4 class="text-sm font-semibold mb-2 text-cyan-400">📍 Dirección</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Av. Nazario Benavidez Oeste 6195, Chimbas<br/>
+          San Juan, Argentina
+        </p>
       </div>
+
+      {/* Horarios */}
       <div>
-        <h4 class="text-sm font-semibold mb-2 text-cyan-400">Contacto</h4>
-        <ul class="space-y-1 text-xs text-gray-400">
-          <li><a href="tel:+123456789" class="hover:text-white transition-colors">Teléfono</a></li>
-          <li><a href="mailto:info@universopañal.com" class="hover:text-white transition-colors">Email</a></li>
-          <li><a href="#" class="hover:text-white transition-colors">WhatsApp</a></li>
-        </ul>
+        <h4 class="text-sm font-semibold mb-2 text-pink-400">🕒 Horarios</h4>
+        <p class="text-xs text-gray-400 leading-relaxed">
+          Lun-Sáb: 10:00-14:00 y 18:00-22:00 hs<br/>
+          Dom: 10:00-14:00
+        </p>
       </div>
     </div>
 
@@ -50,7 +154,7 @@
     {/* Copyright */}
     <div class="text-center pt-6 border-t border-gray-700">
       <p class="text-xs text-gray-500">
-        © {new Date().getFullYear()} Universo Pañal. Todos los derechos reservados.
+        © {new Date().getFullYear()} Universo Pañal. Todos los derechos reservados por KLP.
       </p>
     </div>
   </div>
