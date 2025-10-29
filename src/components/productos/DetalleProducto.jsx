@@ -235,7 +235,7 @@ export default function DetalleProducto({ productoId }) {
                     <div className="flex flex-col">
 
                         {/* Título */}
-                        <h1 className="text-xl md:text-3xl font-bold text-gray-900 mb-1 md:mb-2">
+                        <h1 className="text-xl md:text-3xl font-bold mb-1 md:mb-2" style={{ color: '#ff792b' }}>
                             {producto.nombre}
                         </h1>
 
