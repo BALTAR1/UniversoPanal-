@@ -1,6 +1,8 @@
 ---
 // Banner de envíos con efecto marquee infinito
-const mensaje = "Comprá desde donde estés | Envíos a todo el país + ofertas únicas esta semana! ";
+const mensaje = "Comprá desde donde estés | Envíos a todo el país + ofertas únicas esta semana!";
+// Repetir el mensaje varias veces para efecto continuo con separación
+const mensajeRepetido = Array(10).fill(mensaje).join(" • • • ");
 ---
 
 
@@ -8,18 +10,21 @@ const mensaje = "Comprá desde donde estés | Envíos a todo el país + ofertas 
 <div class="w-full bg-[#fff79a] h-8 flex items-center overflow-hidden select-none relative">
   <div class="absolute left-0 top-0 w-full h-full flex items-center">
     <div class="marquee font-semibold text-sm text-gray-600 px-4 whitespace-nowrap min-w-max">
-      {mensaje}
+      {mensajeRepetido}
     </div>
   </div>
 </div>
 
 <style>
   .marquee {
-  animation: marquee 22s linear infinite;
+    animation: marquee 60s linear infinite;
     will-change: transform;
   }
+  .marquee:hover {
+    animation-play-state: paused;
+  }
   @keyframes marquee {
-    0%   { transform: translateX(100vw); }
-    100% { transform: translateX(-100vw); }
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 </style>
