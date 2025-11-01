@@ -53,18 +53,26 @@ def actualizar_producto(producto_id):
 @producto_bp.route('/producto/<int:producto_id>', methods=['DELETE'])
 def eliminar_producto(producto_id):
     try: 
-        # Hard delete: elimina completamente el producto y sus imágenes asociadas
-        # Primero eliminamos las imágenes asociadas
+        # Hard delete: elimina completamente el producto y sus relaciones
+        
+        # 1. Eliminar ofertas asociadas
+        supabase.table('ofertas').delete().eq('producto_id', producto_id).execute()
+        
+        # 2. Eliminar relaciones de combos (combo_productos)
+        supabase.table('combo_productos').delete().eq('producto_id', producto_id).execute()
+        
+        # 3. Eliminar imágenes asociadas
         supabase.table('producto_imagenes').delete().eq('producto_id', producto_id).execute()
         
-        # Luego eliminamos el producto
+        # 4. Finalmente eliminar el producto
         response = supabase.table('productos').delete().eq('producto_id', producto_id).execute()
+        
         if response.data:
-            return jsonify({'message': 'Producto eliminado correctamente'}), 200
+            return jsonify({'message': 'Producto y todas sus relaciones eliminadas correctamente'}), 200
         else:
             return jsonify({'error': 'Producto no encontrado'}), 404
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        return jsonify({'error': f'Error al eliminar el producto: {str(e)}'}), 500
 
 # =========================
 # Endpoint: Crear producto

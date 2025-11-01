@@ -32,12 +32,14 @@ def supabase_token_required(f):
             if user_response.status_code != 200:
                 return jsonify({'error': 'Token inválido o expirado'}), 401
 
-            # Verificamos si el usuario es admin (aquí asumimos que el admin es el primer usuario creado)
+            # Verificamos si el usuario es admin
             user = user_response.json()
             
-            admin_email = os.getenv('ADMIN_EMAIL')
+            # Obtenemos la lista de emails de administradores (separados por coma)
+            admin_emails = os.getenv('ADMIN_EMAIL', '')
+            admin_list = [email.strip() for email in admin_emails.split(',') if email.strip()]
             
-            if not admin_email or user.get('email') != admin_email:
+            if not admin_list or user.get('email') not in admin_list:
                 return jsonify({'error': 'No autorizado'}), 403
 
         except requests.exceptions.RequestException as e:
