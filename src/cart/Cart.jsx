@@ -35,40 +35,40 @@ export default function Cart() {
     if (!cart || !cart.items || cart.items.length === 0) return '#';
 
     const lines = [];
-    lines.push('Hola, quiero realizar el siguiente pedido:');
+    lines.push('Hola! me gustaría coordinar la siguiente compra:');
     lines.push('');
-    lines.push('DETALLE DEL PEDIDO');
-    lines.push('─────────────────');
-    
+    lines.push('RESUMEN DEL PEDIDO');
+    lines.push('-------------------');
+    lines.push('');
+
     cart.items.forEach((item, index) => {
       const price = Number(item.precio || 0);
       const qty = Number(item.cantidad || 0);
       const subtotal = price * qty;
-      
+
       lines.push(`${index + 1}. ${item.nombre}`);
-      lines.push(`   Cantidad: ${qty}`);
-      
-      if (item.caracteristicas) {
-        const chars = formatCharacteristics(item.caracteristicas);
-        if (chars) lines.push(`   ${chars}`);
-      }
-      
-      lines.push(`   Subtotal: ${formatCurrency(subtotal)}`);
+      lines.push(`Cantidad solicitada: ${qty}`);
+
+      lines.push(`Subtotal: ${formatCurrency(subtotal)}`);
       lines.push('');
     });
-    
-    lines.push('─────────────────');
-    lines.push(`TOTAL: ${formatCurrency(cart.totalPrice || 0)}`);
+
+    lines.push('-------------------');
+    lines.push(`TOTAL ESTIMADO: ${formatCurrency(cart.totalPrice || 0)}`);
     lines.push('');
-    lines.push('Datos de envío:');
-    lines.push('• Nombre completo:');
-    lines.push('• Dirección:');
-    lines.push('• Teléfono:');
-    lines.push('• Observaciones:');
+    lines.push('Quedo atento a la confirmación de disponibilidad y próximos pasos para el pago.');
+    lines.push('Muchas gracias.');
 
     const text = lines.join('\n');
     const encoded = encodeURIComponent(text);
-    return `https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`;
+    const phone = WHATSAPP_NUMBER.replace(/[^0-9]/g, '');
+    const isMobile = typeof navigator !== 'undefined' && /android|iphone|ipad|ipod|windows phone|mobile/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      return `https://wa.me/${phone}?text=${encoded}`;
+    }
+
+    return `https://web.whatsapp.com/send?phone=${phone}&text=${encoded}`;
   };
 
   useEffect(() => {

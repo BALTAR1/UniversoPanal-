@@ -397,7 +397,7 @@ export const combosPublicosService = {
 
         const now = new Date().toISOString();
         
-        const { data, error, count } = await supabase
+        let query = supabase
             .from('combos')
             .select(`
                 *,
@@ -414,10 +414,14 @@ export const combosPublicosService = {
                 )
             `, { count: 'exact' })
             .eq('activo', true)
-            .lte('fecha_inicio', now)
-            .gte('fecha_fin', now)
             .order('created_at', { ascending: false })
             .range(desde, hasta);
+
+        // Incluir combos vigentes aunque no tengan fecha fin definida
+        query = query.or(`fecha_inicio.is.null,fecha_inicio.lte.${now}`);
+        query = query.or(`fecha_fin.is.null,fecha_fin.gte.${now}`);
+
+        const { data, error, count } = await query;
 
         if (error) {
             throw error;
