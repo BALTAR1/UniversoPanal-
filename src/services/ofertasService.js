@@ -10,8 +10,12 @@ export const ofertasService = {
      * @returns {Promise<Array>} - Array de ofertas
      */
     obtenerTodas: async (filtros = {}) => {
+        // Si no se especifica limit, establecer un valor alto para obtener todas las ofertas
+        if (!filtros.limit) {
+            filtros.limit = 1000;
+        }
         const params = new URLSearchParams(filtros).toString();
-        const endpoint = params ? `/ofertas?${params}` : '/ofertas';
+        const endpoint = params ? `/ofertas?${params}` : '/ofertas?limit=1000';
         return api.get(endpoint);
     },
 

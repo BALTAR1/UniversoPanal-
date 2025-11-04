@@ -13,11 +13,15 @@ export const productosService = {
      * @returns {Promise<Array>} - Una promesa que se resuelve con un array de productos.
      */
     obtenerTodos: async (filtros = {}) => {
+        // Si no se especifica limit, establecer un valor alto para obtener todos los productos
+        if (!filtros.limit) {
+            filtros.limit = 1000; // Límite alto para obtener todos los productos
+        }
         // Convierte el objeto de filtros en una cadena de consulta URL (query string).
         // Ejemplo: { categoria: 1, stock_min: 10 } se convierte en "categoria=1&stock_min=10".
         const params = new URLSearchParams(filtros).toString();
         // Construye el endpoint. Si hay parámetros, los añade a la URL.
-        const endpoint = params ? `/productos?${params}` : '/productos';
+        const endpoint = params ? `/productos?${params}` : '/productos?limit=1000';
         // Llama al método GET del objeto 'api' con el endpoint construido.
         return api.get(endpoint);
     },
@@ -83,7 +87,7 @@ export const categoriasService = {
      * @returns {Promise<Array>} - Una promesa que se resuelve con un array de categorías.
      */
     obtenerTodas: async () => {
-        return api.get('/categorias');
+        return api.get('/categorias?limit=1000');
     },
 
     /**

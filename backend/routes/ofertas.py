@@ -57,8 +57,8 @@ def obtener_ofertas():
         try:
             limit = int(args.get('limit', 50))
             offset = int(args.get('offset', 0))
-            if limit < 1 or limit > 100:
-                return jsonify({'error': 'El limit debe estar entre 1 y 100'}), 400
+            if limit < 1 or limit > 1000:
+                return jsonify({'error': 'El limit debe estar entre 1 y 1000'}), 400
             if offset < 0:
                 return jsonify({'error': 'El offset no puede ser negativo'}), 400
         except ValueError:
