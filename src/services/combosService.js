@@ -10,8 +10,12 @@ export const combosService = {
      * @returns {Promise<Array>} - Array de combos
      */
     obtenerTodos: async (filtros = {}) => {
+        // Si no se especifica limit, establecer un valor alto para obtener todos los combos
+        if (!filtros.limit) {
+            filtros.limit = 1000;
+        }
         const params = new URLSearchParams(filtros).toString();
-        const endpoint = params ? `/combos?${params}` : '/combos';
+        const endpoint = params ? `/combos?${params}` : '/combos?limit=1000';
         return api.get(endpoint);
     },
 
