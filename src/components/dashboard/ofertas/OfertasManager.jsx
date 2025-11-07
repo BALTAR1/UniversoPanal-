@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import DataTable from '../../ui/DataTable.jsx';
 import Modal from '../../ui/Modal.jsx';
 import Button from '../../ui/Button.jsx';
@@ -31,6 +31,13 @@ export default function OfertasManager() {
         activo: true, // booleano para activar/desactivar la oferta
         tipo_oferta: '' // string que indica el tipo (temporada, liquidacion, etc.)
     });
+    
+    // Estados para el buscador de productos
+    const [busquedaProducto, setBusquedaProducto] = useState('');
+    const [mostrarListaProductos, setMostrarListaProductos] = useState(false);
+    const [productosVisibles, setProductosVisibles] = useState(50); // Mostrar solo 50 inicialmente
+    const searchRef = useRef(null);
+    const listRef = useRef(null);
 
     // ---------- Catálogo de tipos de oferta ----------
     // Array con valores y etiquetas para mostrar en el select del formulario
@@ -161,6 +168,18 @@ export default function OfertasManager() {
     useEffect(() => {
         cargarDatos();
     }, []);
+    
+    // Efecto para cerrar el dropdown cuando se hace clic fuera
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setMostrarListaProductos(false);
+            }
+        }
+        
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     // Función que consulta el backend para obtener ofertas y productos
     async function cargarDatos() {
@@ -168,8 +187,8 @@ export default function OfertasManager() {
             setLoading(true);
             // Llamadas paralelas para optimizar tiempo de carga
             const [ofertasData, productosData] = await Promise.all([
-                ofertasService.obtenerTodas({ limit: 100 }),
-                productosService.obtenerTodos({ limit: 100 }),
+                ofertasService.obtenerTodas({ limit: 1000 }),
+                productosService.obtenerTodos({ limit: 1000 }),
             ]);
             
             // Actualizamos estados con la data recibida
@@ -203,6 +222,7 @@ export default function OfertasManager() {
             activo: true,
             tipo_oferta: ''
         });
+        setBusquedaProducto('');
         setModalOpen(true);
     }
 
@@ -217,6 +237,11 @@ export default function OfertasManager() {
             activo: oferta.activo !== undefined ? oferta.activo : true,
             tipo_oferta: oferta.tipo_oferta || ''
         });
+        // Precargar el nombre del producto en la búsqueda
+        const producto = productos.find(p => p.producto_id === oferta.producto_id);
+        if (producto) {
+            setBusquedaProducto(`${producto.nombre} - $${producto.precio} (${producto.marca})`);
+        }
         setModalOpen(true);
     }
 
@@ -303,6 +328,50 @@ export default function OfertasManager() {
             ahorro: producto.precio - precioFinal
         };
     }
+    
+    // Filtrar productos según búsqueda con memoización
+    const productosFiltrados = useMemo(() => {
+        if (!busquedaProducto.trim()) {
+            // Si no hay búsqueda, devolver solo los primeros productos (lazy loading)
+            return productos.slice(0, productosVisibles);
+        }
+        
+        const termino = busquedaProducto.toLowerCase();
+        const filtrados = productos.filter(p => 
+            p.nombre.toLowerCase().includes(termino) ||
+            p.marca.toLowerCase().includes(termino) ||
+            p.modelo?.toLowerCase().includes(termino) ||
+            p.producto_id.toString().includes(termino)
+        );
+        
+        // Limitar también los resultados filtrados para mejor rendimiento
+        return filtrados.slice(0, productosVisibles);
+    }, [busquedaProducto, productos, productosVisibles]);
+    
+    // Manejar scroll para cargar más productos
+    function handleScrollProductos(e) {
+        const element = e.target;
+        const scrolledToBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 50;
+        
+        if (scrolledToBottom && productosVisibles < productos.length) {
+            // Cargar 50 productos más
+            setProductosVisibles(prev => Math.min(prev + 50, productos.length));
+        }
+    }
+    
+    // Seleccionar un producto
+    function seleccionarProducto(producto) {
+        setFormData(prev => ({ ...prev, producto_id: producto.producto_id }));
+        setBusquedaProducto(`${producto.nombre} - $${producto.precio} (${producto.marca})`);
+        setMostrarListaProductos(false);
+        setProductosVisibles(50); // Reset para la próxima vez
+    }
+    
+    // Abrir lista de productos
+    function abrirListaProductos() {
+        setMostrarListaProductos(true);
+        setProductosVisibles(50); // Reset al abrir
+    }
 
     // ---------- Render condicional por estado de carga ----------
     if (loading) {
@@ -352,26 +421,115 @@ export default function OfertasManager() {
             {/* Modal de formulario: reutilizable para crear y editar */}
             <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)} title={editingOferta ? 'Editar Oferta' : 'Crear Oferta'}>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Seleccionar producto */}
-                    <div>
+                    {/* Seleccionar producto con buscador */}
+                    <div ref={searchRef}>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Producto *
+                            Producto * 
+                            <span className="ml-2 text-xs text-gray-500 font-normal">
+                                ({productos.length} productos disponibles)
+                            </span>
                         </label>
-                        <select
-                            name="producto_id"
-                            value={formData.producto_id}
-                            onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                        >
-                            <option value="">Seleccionar producto</option>
-                            {productos.map(producto => (
-                                <option key={producto.producto_id} value={producto.producto_id}>
-                                    {producto.nombre} - ${producto.precio} ({producto.marca})
-                                </option>
-                            ))}
-                        </select>
-                        {editingOferta && (
+                        <div className="relative">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={busquedaProducto}
+                                    onChange={(e) => {
+                                        setBusquedaProducto(e.target.value);
+                                        setMostrarListaProductos(true);
+                                        setProductosVisibles(50); // Reset al buscar
+                                        // Si se borra el texto, limpiar selección
+                                        if (!e.target.value) {
+                                            setFormData(prev => ({ ...prev, producto_id: '' }));
+                                        }
+                                    }}
+                                    onFocus={abrirListaProductos}
+                                    placeholder="Buscar producto por nombre, marca o ID..."
+                                    className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                                <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            {/* Lista de productos filtrados */}
+                            {mostrarListaProductos && (
+                                <div 
+                                    ref={listRef}
+                                    onScroll={handleScrollProductos}
+                                    className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+                                >
+                                    {productosFiltrados.length > 0 ? (
+                                        <>
+                                            <div className="px-3 py-2 text-xs text-gray-500 bg-gray-50 border-b sticky top-0">
+                                                {busquedaProducto ? (
+                                                    <>Mostrando {productosFiltrados.length} de {productos.filter(p => {
+                                                        const termino = busquedaProducto.toLowerCase();
+                                                        return p.nombre.toLowerCase().includes(termino) ||
+                                                               p.marca.toLowerCase().includes(termino) ||
+                                                               p.modelo?.toLowerCase().includes(termino) ||
+                                                               p.producto_id.toString().includes(termino);
+                                                    }).length} productos</>
+                                                ) : (
+                                                    <>Mostrando {productosFiltrados.length} de {productos.length} productos</>
+                                                )}
+                                            </div>
+                                            {productosFiltrados.map(producto => (
+                                                <button
+                                                    key={producto.producto_id}
+                                                    type="button"
+                                                    onClick={() => seleccionarProducto(producto)}
+                                                    className={`w-full text-left px-3 py-2 hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-0 ${
+                                                        formData.producto_id === producto.producto_id ? 'bg-blue-100' : ''
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        {producto.imagen_url && (
+                                                            <img 
+                                                                src={producto.imagen_url} 
+                                                                alt={producto.nombre}
+                                                                className="w-10 h-10 object-cover rounded border border-gray-200"
+                                                            />
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="text-sm font-medium text-gray-900 truncate">
+                                                                {producto.nombre}
+                                                            </div>
+                                                            <div className="text-xs text-gray-500">
+                                                                {producto.marca} • ${parseFloat(producto.precio).toLocaleString('es-AR')}
+                                                            </div>
+                                                        </div>
+                                                        <div className="text-xs text-gray-400">
+                                                            ID: {producto.producto_id}
+                                                        </div>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                            {/* Indicador de carga más productos */}
+                                            {productosVisibles < productos.length && !busquedaProducto && (
+                                                <div className="px-3 py-2 text-xs text-center text-gray-400 bg-gray-50 border-t">
+                                                    Desplázate para cargar más productos...
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div className="px-3 py-8 text-center text-gray-500">
+                                            <svg className="w-12 h-12 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p className="text-sm">No se encontraron productos</p>
+                                            <p className="text-xs mt-1">Intenta con otro término de búsqueda</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                        {!formData.producto_id && (
+                            <p className="text-xs text-red-500 mt-1">Debes seleccionar un producto</p>
+                        )}
+                        {editingOferta && formData.producto_id && (
                             <p className="text-xs text-blue-500 mt-1">Puedes cambiar el producto de esta oferta si lo deseas</p>
                         )}
                     </div>
