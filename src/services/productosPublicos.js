@@ -40,6 +40,46 @@ export const productosPublicosService = {
         const desde = (pagina - 1) * porPagina;
         const hasta = desde + porPagina - 1;
 
+        // Si soloOfertas es true, primero obtenemos las ofertas vigentes
+        let productosIdsConOferta = [];
+        if (soloOfertas) {
+            // Obtener ofertas activas
+            const { data: ofertasActivas } = await supabase
+                .from('ofertas')
+                .select('*')
+                .eq('activo', true);
+
+            // Filtrar ofertas vigentes por fecha
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            
+            const ofertasVigentes = (ofertasActivas || []).filter(oferta => {
+                if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
+                
+                const fechaInicio = new Date(oferta.fecha_inicio);
+                fechaInicio.setHours(0, 0, 0, 0);
+                
+                const fechaFin = new Date(oferta.fecha_fin);
+                fechaFin.setHours(23, 59, 59, 999);
+                
+                return fechaInicio <= now && fechaFin >= now;
+            });
+            
+            // Extraer IDs de productos con ofertas
+            productosIdsConOferta = ofertasVigentes.map(o => o.producto_id);
+            
+            if (productosIdsConOferta.length === 0) {
+                // No hay ofertas vigentes, retornar vacío
+                return {
+                    productos: [],
+                    total: 0,
+                    paginas: 0,
+                    paginaActual: pagina,
+                    porPagina
+                };
+            }
+        }
+
         // Construye la consulta base
         let query = supabase
             .from('productos')
@@ -49,6 +89,11 @@ export const productosPublicosService = {
                 imagenes:producto_imagenes(imagen_id, url, descripcion)
             `, { count: 'exact' })
             .eq('activo', true);
+
+        // Si soloOfertas, filtrar por los IDs de productos con ofertas
+        if (soloOfertas && productosIdsConOferta.length > 0) {
+            query = query.in('producto_id', productosIdsConOferta);
+        }
 
         // Aplica filtros
         if (categoria_id) {
@@ -98,14 +143,49 @@ export const productosPublicosService = {
             throw error;
         }
 
-        // Obtener ofertas activas para todos los productos
-        const now = new Date().toISOString();
-        const { data: ofertasActivas } = await supabase
-            .from('ofertas')
-            .select('*')
-            .eq('activo', true)
-            .lte('fecha_inicio', now)
-            .gte('fecha_fin', now);
+        // Obtener ofertas activas para todos los productos (si no se hizo antes)
+        let ofertasVigentes = [];
+        if (!soloOfertas) {
+            // Solo obtener ofertas si no se filtraron antes
+            const { data: ofertasActivas } = await supabase
+                .from('ofertas')
+                .select('*')
+                .eq('activo', true);
+
+            // Filtrar ofertas vigentes por fecha en JavaScript
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            
+            ofertasVigentes = (ofertasActivas || []).filter(oferta => {
+                if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
+                
+                const fechaInicio = new Date(oferta.fecha_inicio);
+                fechaInicio.setHours(0, 0, 0, 0);
+                
+                const fechaFin = new Date(oferta.fecha_fin);
+                fechaFin.setHours(23, 59, 59, 999);
+                
+                return fechaInicio <= now && fechaFin >= now;
+            });
+        } else {
+            // Si soloOfertas, ya tenemos las ofertas vigentes, solo necesitamos recargarlas
+            const { data: ofertasActivas } = await supabase
+                .from('ofertas')
+                .select('*')
+                .eq('activo', true);
+                
+            const now = new Date();
+            now.setHours(0, 0, 0, 0);
+            
+            ofertasVigentes = (ofertasActivas || []).filter(oferta => {
+                if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
+                const fechaInicio = new Date(oferta.fecha_inicio);
+                fechaInicio.setHours(0, 0, 0, 0);
+                const fechaFin = new Date(oferta.fecha_fin);
+                fechaFin.setHours(23, 59, 59, 999);
+                return fechaInicio <= now && fechaFin >= now;
+            });
+        }
 
         // Obtener combos activos
         const { data: combosActivos } = await supabase
@@ -124,7 +204,7 @@ export const productosPublicosService = {
 
         // Crear mapa de ofertas por producto_id
         const ofertasMap = {};
-        (ofertasActivas || []).forEach(oferta => {
+        ofertasVigentes.forEach(oferta => {
             ofertasMap[oferta.producto_id] = oferta;
         });
 
@@ -181,19 +261,10 @@ export const productosPublicosService = {
             };
         });
 
-        // Filtrar por ofertas si se solicita
-        if (soloOfertas) {
-            productosFormateados = productosFormateados.filter(p => p.tiene_oferta);
-        }
-
-        // Calcular el total después de filtros adicionales
-        const totalFiltrado = productosFormateados.length;
-        const totalPaginas = Math.ceil(totalFiltrado / porPagina);
-
         return {
             productos: productosFormateados,
-            total: soloOfertas ? totalFiltrado : (count || 0),
-            paginas: soloOfertas ? totalPaginas : (count ? Math.ceil(count / porPagina) : 0),
+            total: count || productosFormateados.length,
+            paginas: count ? Math.ceil(count / porPagina) : Math.ceil(productosFormateados.length / porPagina),
             paginaActual: pagina,
             porPagina
         };
@@ -226,16 +297,29 @@ export const productosPublicosService = {
         }
 
         // Obtener ofertas activas para el producto
-        const now = new Date().toISOString();
-        const { data: ofertas } = await supabase
+        const { data: ofertasData } = await supabase
             .from('ofertas')
             .select('*')
             .eq('producto_id', id)
-            .eq('activo', true)
-            .lte('fecha_inicio', now)
-            .gte('fecha_fin', now)
-            .limit(1)
-            .single();
+            .eq('activo', true);
+
+        // Filtrar ofertas vigentes por fecha en JavaScript
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        const ofertasVigentes = (ofertasData || []).filter(oferta => {
+            if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
+            
+            const fechaInicio = new Date(oferta.fecha_inicio);
+            fechaInicio.setHours(0, 0, 0, 0);
+            
+            const fechaFin = new Date(oferta.fecha_fin);
+            fechaFin.setHours(23, 59, 59, 999);
+            
+            return fechaInicio <= now && fechaFin >= now;
+        });
+        
+        const ofertas = ofertasVigentes.length > 0 ? ofertasVigentes[0] : null;
 
         // Si hay oferta activa, calcular precio con descuento
         if (ofertas) {
@@ -496,8 +580,6 @@ export const ofertasPublicasService = {
      * @returns {Promise<Array>}
      */
     obtenerActivas: async () => {
-        const now = new Date().toISOString();
-        
         const { data, error } = await supabase
             .from('ofertas')
             .select(`
@@ -513,16 +595,30 @@ export const ofertasPublicasService = {
                 )
             `)
             .eq('activo', true)
-            .lte('fecha_inicio', now)
-            .gte('fecha_fin', now)
             .order('descuento', { ascending: false });
 
         if (error) {
             throw error;
         }
 
+        // Filtrar ofertas vigentes por fecha en JavaScript
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        const ofertasVigentes = (data || []).filter(oferta => {
+            if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
+            
+            const fechaInicio = new Date(oferta.fecha_inicio);
+            fechaInicio.setHours(0, 0, 0, 0);
+            
+            const fechaFin = new Date(oferta.fecha_fin);
+            fechaFin.setHours(23, 59, 59, 999);
+            
+            return fechaInicio <= now && fechaFin >= now;
+        });
+
         // Calcular precio con descuento
-        return (data || []).map(oferta => {
+        return ofertasVigentes.map(oferta => {
             if (oferta.productos) {
                 oferta.productos.precio_original = oferta.productos.precio;
                 oferta.productos.precio_con_descuento = oferta.productos.precio * (1 - oferta.descuento / 100);
@@ -538,24 +634,33 @@ export const ofertasPublicasService = {
      * @returns {Promise<Object|null>}
      */
     obtenerPorProducto: async (productoId) => {
-        const now = new Date().toISOString();
-        
         const { data, error } = await supabase
             .from('ofertas')
             .select('*')
             .eq('producto_id', productoId)
             .eq('activo', true)
-            .lte('fecha_inicio', now)
-            .gte('fecha_fin', now)
-            .order('descuento', { ascending: false })
-            .limit(1)
-            .single();
+            .order('descuento', { ascending: false });
 
-        if (error) {
-            // No hay oferta activa, no es un error crítico
+        if (error || !data || data.length === 0) {
             return null;
         }
 
-        return data;
+        // Filtrar ofertas vigentes por fecha en JavaScript
+        const now = new Date();
+        now.setHours(0, 0, 0, 0);
+        
+        const ofertasVigentes = data.filter(oferta => {
+            if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
+            
+            const fechaInicio = new Date(oferta.fecha_inicio);
+            fechaInicio.setHours(0, 0, 0, 0);
+            
+            const fechaFin = new Date(oferta.fecha_fin);
+            fechaFin.setHours(23, 59, 59, 999);
+            
+            return fechaInicio <= now && fechaFin >= now;
+        });
+
+        return ofertasVigentes.length > 0 ? ofertasVigentes[0] : null;
     }
 };

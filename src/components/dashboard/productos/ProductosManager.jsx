@@ -1,5 +1,5 @@
 // Importa los hooks de React y componentes UI reutilizables
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import DataTable from '../../ui/DataTable.jsx'; // Tabla para mostrar productos
 import Modal from '../../ui/Modal.jsx'; // Modal para formularios y vistas
 import Button from '../../ui/Button.jsx'; // Botón reutilizable
@@ -19,6 +19,11 @@ export default function ProductosManager() {
     const [imageModalOpen, setImageModalOpen] = useState(false); // Modal de imagen abierto/cerrado
     const [selectedImage, setSelectedImage] = useState(null); // Imagen seleccionada para vista previa
     const [editingProducto, setEditingProducto] = useState(null); // Producto en edición
+    
+    // Estados para paginación
+    const [paginaActual, setPaginaActual] = useState(1);
+    const [productosPorPagina] = useState(20); // Mostrar 20 productos por página
+    
     // Estado para el formulario de producto
     const [formData, setFormData] = useState({
         nombre: '',
@@ -128,7 +133,7 @@ export default function ProductosManager() {
         cargarDatos();
     }, []);
 
-    // Filtra productos cuando cambia la búsqueda
+    // Filtra productos cuando cambia la búsqueda (con memoización para mejor rendimiento)
     useEffect(() => {
         let listaFiltrada = productos;
         
@@ -153,7 +158,18 @@ export default function ProductosManager() {
         });
         
         setProductosFiltrados(listaOrdenada);
+        setPaginaActual(1); // Resetear a página 1 cuando cambian los filtros
     }, [busqueda, productos, ordenId]);
+    
+    // Calcular productos de la página actual con useMemo para optimizar
+    const productosPaginados = useMemo(() => {
+        const inicio = (paginaActual - 1) * productosPorPagina;
+        const fin = inicio + productosPorPagina;
+        return productosFiltrados.slice(inicio, fin);
+    }, [productosFiltrados, paginaActual, productosPorPagina]);
+    
+    // Calcular total de páginas
+    const totalPaginas = Math.ceil(productosFiltrados.length / productosPorPagina);
 
     // Función para cargar productos y categorías desde la API
     async function cargarDatos() {
@@ -414,10 +430,57 @@ export default function ProductosManager() {
                 </div>
             </div>
 
+            {/* Información de productos y paginación */}
+            <div className="mb-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="text-sm text-gray-600">
+                    Mostrando <span className="font-semibold">{productosPaginados.length}</span> de{' '}
+                    <span className="font-semibold">{productosFiltrados.length}</span> productos
+                    {busqueda && <span> (filtrados de {productos.length} totales)</span>}
+                </div>
+                
+                {/* Controles de paginación */}
+                {totalPaginas > 1 && (
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setPaginaActual(prev => Math.max(1, prev - 1))}
+                            disabled={paginaActual === 1}
+                            className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                        >
+                            ← Anterior
+                        </button>
+                        
+                        {/* Selector de página directa */}
+                        <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-600">Página</span>
+                            <select
+                                value={paginaActual}
+                                onChange={(e) => setPaginaActual(Number(e.target.value))}
+                                className="px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            >
+                                {Array.from({ length: totalPaginas }, (_, i) => i + 1).map(page => (
+                                    <option key={page} value={page}>
+                                        {page}
+                                    </option>
+                                ))}
+                            </select>
+                            <span className="text-sm text-gray-600">de {totalPaginas}</span>
+                        </div>
+                        
+                        <button
+                            onClick={() => setPaginaActual(prev => Math.min(totalPaginas, prev + 1))}
+                            disabled={paginaActual === totalPaginas}
+                            className="px-3 py-1 rounded border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
+                        >
+                            Siguiente →
+                        </button>
+                    </div>
+                )}
+            </div>
+
             {/* Tabla de productos */}
             <DataTable
                 columns={columns}
-                data={productosFiltrados}
+                data={productosPaginados}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
             />
