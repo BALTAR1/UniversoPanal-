@@ -180,23 +180,12 @@ export default function ProductosManager() {
                 categoriasService.obtenerTodas(), // Obtiene categorías
             ]);
             
-            // Para cada producto, carga imágenes adicionales
-            const productosConImagenes = await Promise.all(
-                productosData.map(async (producto) => {
-                    try {
-                        const imagenes = await productoImagenesService.obtenerPorProducto(producto.producto_id);
-                        return {
-                            ...producto,
-                            imagenes_adicionales: imagenes || []
-                        };
-                    } catch (error) {
-                        return {
-                            ...producto,
-                            imagenes_adicionales: []
-                        };
-                    }
-                })
-            );
+            // Ya NO cargamos las imágenes adicionales aquí para mejorar performance
+            // Las imágenes se cargarán on-demand cuando se necesiten (al editar o ver)
+            const productosConImagenes = productosData.map(producto => ({
+                ...producto,
+                imagenes_adicionales: [] // Inicializar vacío, se carga después si es necesario
+            }));
             
             setProductos(productosConImagenes); // Actualiza estado de productos
             setCategorias(categoriasData); // Actualiza estado de categorías
@@ -235,7 +224,7 @@ export default function ProductosManager() {
     }
 
     // Abre el modal para editar un producto existente
-    function handleEdit(producto) {
+    async function handleEdit(producto) {
         setEditingProducto(producto); // Establece producto en edición
         setFormData({
             nombre: producto.nombre,
@@ -252,15 +241,25 @@ export default function ProductosManager() {
             es_destacado: producto.es_destacado || false,
         });
         
-        // Carga imágenes principales y adicionales
-        const imagenes = [];
-        if (producto.imagen_url) {
-            imagenes.push(producto.imagen_url);
+        // Carga imágenes adicionales SOLO cuando se va a editar (lazy loading)
+        try {
+            const imagenesAdicionales = await productoImagenesService.obtenerPorProducto(producto.producto_id);
+            
+            // Carga imágenes principales y adicionales
+            const imagenes = [];
+            if (producto.imagen_url) {
+                imagenes.push(producto.imagen_url);
+            }
+            if (imagenesAdicionales && imagenesAdicionales.length > 0) {
+                imagenes.push(...imagenesAdicionales.map(img => img.url || img));
+            }
+            setImagenesProducto(imagenes.filter(img => img)); // Actualiza estado de imágenes
+        } catch (error) {
+            // Si falla la carga de imágenes adicionales, solo usa la principal
+            const imagenes = producto.imagen_url ? [producto.imagen_url] : [];
+            setImagenesProducto(imagenes);
         }
-        if (producto.imagenes_adicionales && producto.imagenes_adicionales.length > 0) {
-            imagenes.push(...producto.imagenes_adicionales.map(img => img.url || img));
-        }
-        setImagenesProducto(imagenes.filter(img => img)); // Actualiza estado de imágenes
+        
         setModalOpen(true); // Abre modal
     }
 
