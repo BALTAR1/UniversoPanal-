@@ -1,3 +1,6 @@
+# =========================
+# Importaciones principales
+# =========================
 from flask import Flask, jsonify
 # Blueprints para las diferentes rutas, su funcion es organizar el codigo en modulos
 from routes.admin import admin_bp
@@ -14,14 +17,20 @@ import os
 # Importar dotenv para cargar variables de entorno desde un archivo .env
 from dotenv import load_dotenv
 # Cargar variables de entorno desde .env
-load_dotenv()  
+load_dotenv()  # Esto permite usar variables como MP_ACCESS_TOKEN, SUPABASE_URL, etc.
 
+
+# =========================
+# Inicialización de la app Flask
+# =========================
 app = Flask(__name__)
 
 # Configurar la llave secreta de Flask desde una variable de entorno
 app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'supersecretkey')
 
-# Registrar los blueprints (sin prefijos para que las rutas funcionen correctamente)
+
+# Registrar los blueprints
+# Cada blueprint maneja un módulo de la API (productos, combos, banners, etc.)
 app.register_blueprint(admin_bp)
 app.register_blueprint(producto_bp)
 app.register_blueprint(categoria_bp)
@@ -31,6 +40,7 @@ app.register_blueprint(oferta_bp)
 app.register_blueprint(banner_bp)
 
 # Configurar CORS para permitir solicitudes desde el frontend
+# Esto permite que el frontend (Astro/React) se comunique con la API sin problemas de seguridad
 CORS(app, resources={
     r"/*": {
         "origins": "*",
@@ -39,17 +49,24 @@ CORS(app, resources={
     }
 })
 
-#Ruta raiz para verificar que el servidor este corriendo
+
+# =========================
+# Rutas básicas y utilitarias
+# =========================
+# Ruta raiz para verificar que el servidor este corriendo
 @app.route('/')
 def home():
     return "API de E-commerce Electro está corriendo"
 
-#Ruta para diagnosticar CORS
+
+# Ruta para diagnosticar CORS
 @app.route('/test-cors')
 def test_cors():
     return "CORS está funcionando"
 
+
 # Manejador global para peticiones OPTIONS (CORS preflight)
+# Esto permite que navegadores y clientes puedan hacer solicitudes seguras a la API
 @app.before_request
 def handle_preflight():
     from flask import request
@@ -61,9 +78,11 @@ def handle_preflight():
         response.headers.add("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
         return response
 
+
 # =========================
 # Manejo de errores global
 # =========================
+# Respuestas personalizadas para errores comunes
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'error': 'Recurso no encontrado'}), 404
@@ -76,5 +95,9 @@ def internal_error(error):
 def method_not_allowed(error):
     return jsonify({'error': 'Método no permitido'}), 405
 
+
+# =========================
+# Ejecución principal
+# =========================
 if __name__ == '__main__':
     app.run(debug=True)

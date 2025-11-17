@@ -23,7 +23,7 @@ export default function FilterSidebar({
     const [soloOfertas, setSoloOfertas] = useState(filtrosActuales.soloOfertas || false);
     const [soloCombos, setSoloCombos] = useState(filtrosActuales.soloCombos || false);
 
-    // Estado para secciones colapsables
+    // Estado para secciones colapsables - Todas abiertas por defecto para mejor UX
     const [seccionesAbiertas, setSeccionesAbiertas] = useState({
         promociones: true,
         categorias: true,
@@ -117,7 +117,7 @@ export default function FilterSidebar({
                 </div>
             )}
 
-            <div className={`p-4 space-y-4 ${isMobile ? 'max-h-[60vh]' : 'max-h-[calc(100vh-200px)]'} overflow-y-auto`}>
+            <div className={`p-4 space-y-4 ${isMobile ? 'max-h-[60vh] overflow-y-auto' : ''}`}>
                 {/* Búsqueda */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -368,7 +368,7 @@ export default function FilterSidebar({
                 {/* Botón limpiar filtros */}
                 <button
                     onClick={limpiarFiltros}
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-md transition-colors text-sm"
+                    className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 px-4 rounded-md transition-all duration-200 text-sm hover:shadow-lg active:scale-95"
                 >
                     Limpiar todos los filtros
                 </button>

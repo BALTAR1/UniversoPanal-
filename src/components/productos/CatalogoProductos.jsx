@@ -54,6 +54,8 @@ export default function CatalogoProductos({
         soloCombos: false
     });
 
+    const [categoriasListas, setCategoriasListas] = useState(false);
+
     // Carga inicial de categorías, marcas y rango de precios
     useEffect(() => {
         const cargarDatosIniciales = async () => {
@@ -94,8 +96,12 @@ export default function CatalogoProductos({
                         busqueda: busquedaInicial
                     }));
                 }
+                
+                // Marcar que las categorías están listas
+                setCategoriasListas(true);
             } catch (err) {
                 setError('Error al cargar categorías y precios');
+                setCategoriasListas(true); // Permitir continuar incluso si hay error
             }
         };
 
@@ -103,9 +109,12 @@ export default function CatalogoProductos({
     }, [categoriaInicial, busquedaInicial]);
 
     // Carga de productos cuando cambian los filtros o la página
+    // Solo ejecutar si las categorías ya se cargaron
     useEffect(() => {
-        cargarProductos();
-    }, [filtros, paginacion.paginaActual]);
+        if (categoriasListas) {
+            cargarProductos();
+        }
+    }, [filtros, paginacion.paginaActual, categoriasListas]);
 
     // Función para cargar productos
     const cargarProductos = async () => {
@@ -187,7 +196,7 @@ export default function CatalogoProductos({
 
     return (
         <div className="w-full">
-            <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto px-2 md:px-4 py-4 md:py-8">
+            <div className="flex flex-col lg:flex-row gap-6 max-w-7xl lg:mx-auto px-4 md:px-4 py-4 md:py-8">
                 {/* Sidebar de filtros - Solo visible en desktop */}
                 <div className="hidden lg:block lg:w-1/4">
                     <FilterSidebar
