@@ -65,7 +65,7 @@ export default function Pagination({
     };
 
     return (
-        <div className="flex items-center justify-center gap-2 mt-8 mb-4">
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-8 mb-4 px-2">
             {/* Botón Anterior */}
             <button
                 onClick={() => handleCambioPagina(paginaActual - 1)}
@@ -85,7 +85,7 @@ export default function Pagination({
             </button>
 
             {/* Números de página */}
-            <div className="flex items-center gap-1">
+            <div className="flex flex-wrap items-center justify-center gap-1">
                 {paginas.map((pagina, index) => {
                     if (pagina === '...') {
                         return (
@@ -136,7 +136,7 @@ export default function Pagination({
             </button>
 
             {/* Información de página actual */}
-            <span className="ml-4 text-sm text-gray-600">
+            <span className="ml-2 md:ml-4 text-xs md:text-sm text-gray-600 whitespace-nowrap">
                 Página {paginaActual} de {totalPaginas}
             </span>
         </div>

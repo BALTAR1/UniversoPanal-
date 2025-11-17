@@ -1,0 +1,21 @@
+---
+// BannersMobile - Slider de banners optimizado para móviles (estilo Mercado Libre)
+import BannerSliderMobile from '../components/ui/BannerSliderMobile';
+---
+
+<!-- Contenedor de banners móviles que se mostrará después de los combos -->
+<div class="hidden-on-desktop">
+  <BannerSliderMobile client:load />
+</div>
+
+<style>
+  .hidden-on-desktop {
+    display: block;
+  }
+  
+  @media (min-width: 768px) {
+    .hidden-on-desktop {
+      display: none;
+    }
+  }
+</style>

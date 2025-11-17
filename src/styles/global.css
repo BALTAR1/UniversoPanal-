@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Prevenir overflow horizontal en móvil */
+html {
+  overflow-x: hidden;
+}
+
+body {
+  overflow-x: hidden;
+}
+
 /* Animación para modales bottom sheet */
 @keyframes slide-up {
   from {
