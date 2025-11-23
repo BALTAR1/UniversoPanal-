@@ -1,21 +1,6 @@
 ---
 /**
  * CategoriasMobile Component
- * 
- * Carrusel horizontal de categorías optimizado para dispositivos móviles.
- * Muestra 8 categorías principales del e-commerce con scroll horizontal.
- * 
- * Características:
- * - Scroll horizontal suave con snap para mejor UX en táctil
- * - Tarjetas de ancho fijo (128px) para mantener simetría
- * - Alto fijo del texto (h-12) para evitar diferencias de altura
- * - Oculta scrollbar para apariencia limpia
- * - Redirección a páginas de categoría con slugs URL-friendly
- * 
- * Notas:
- * - Las categorías deben existir en el backend para mostrar productos
- * - Si una categoría no existe, la página mostrará lista vacía (no error)
- * - Los slugs se generan automáticamente (ej: "Toallitas Húmedas" → "toallitas-húmedas")
  */
 
 const categorias = [
@@ -24,8 +9,8 @@ const categorias = [
   { id: 3, nombre: 'Higiene', imagen: '/images/CatHigiene.png' },
   { id: 4, nombre: 'Adultos', imagen: '/images/CatAdultos.png' },
   { id: 5, nombre: 'Accesorios', imagen: '/images/CatAccesorios.png' },
-  { id: 6, nombre: 'Toallitas humedas', imagen: '/images/CatHigiene.png' },
-  { id: 7, nombre: 'Mama', imagen: '/images/CatAccesorios.png' },
+  { id: 6, nombre: 'Toallitas humedas', imagen: '/images/CatToallitas.png' },
+  { id: 7, nombre: 'Mama', imagen: '/images/CatMama.png' },
   { id: 8, nombre: 'Ofertas', imagen: '/images/CatOferta.jpg' },
 ];
 ---
@@ -48,11 +33,11 @@ const categorias = [
             {/* Tarjeta de categoría con dimensiones fijas */}
             <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition-all overflow-hidden border border-gray-100">
               {/* Contenedor de imagen con altura fija */}
-              <div class="relative h-32 bg-gray-50">
+              <div class="relative h-32 bg-gray-50 flex items-center justify-center p-2">
                 <img 
                   src={categoria.imagen} 
                   alt={categoria.nombre}
-                  class="w-full h-full object-cover"
+                  class="w-full h-full object-contain"
                 />
               </div>
               {/* Contenedor de texto con altura fija para mantener simetría */}
