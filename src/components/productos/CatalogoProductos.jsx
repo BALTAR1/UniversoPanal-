@@ -56,6 +56,18 @@ export default function CatalogoProductos({
 
     const [categoriasListas, setCategoriasListas] = useState(false);
 
+    // Calcular cantidad de filtros activos
+    const contarFiltrosActivos = () => {
+        let count = 0;
+        if (filtros.busqueda) count++;
+        if (filtros.categoria_id) count++;
+        if (filtros.marca) count++;
+        if (filtros.precioMin !== null || filtros.precioMax !== null) count++;
+        if (filtros.soloOfertas) count++;
+        if (filtros.soloCombos) count++;
+        return count;
+    };
+
     // Carga inicial de categorías, marcas y rango de precios
     useEffect(() => {
         const cargarDatosIniciales = async () => {
@@ -260,12 +272,17 @@ export default function CatalogoProductos({
                                         setFiltrosTemporales(filtros); // Inicializar con filtros actuales
                                         setMostrarModalFiltrar(true);
                                     }}
-                                    className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100"
+                                    className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-md px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 active:bg-gray-100 relative"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/>
                                     </svg>
                                     <span>Filtrar</span>
+                                    {contarFiltrosActivos() > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg">
+                                            {contarFiltrosActivos()}
+                                        </span>
+                                    )}
                                 </button>
                             </div>
                         </div>

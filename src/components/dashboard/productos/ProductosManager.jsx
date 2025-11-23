@@ -13,6 +13,7 @@ export default function ProductosManager() {
     const [productosFiltrados, setProductosFiltrados] = useState([]); // Lista filtrada
     const [busqueda, setBusqueda] = useState(''); // Término de búsqueda
     const [ordenId, setOrdenId] = useState('desc'); // Estado para ordenar por ID (desc = más nuevos primero)
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(''); // Categoría seleccionada para filtrar
     const [categorias, setCategorias] = useState([]); // Lista de categorías
     const [loading, setLoading] = useState(true); // Estado de carga
     const [modalOpen, setModalOpen] = useState(false); // Modal de formulario abierto/cerrado
@@ -148,6 +149,13 @@ export default function ProductosManager() {
             );
         }
         
+        // Aplicar filtro por categoría si hay una seleccionada
+        if (categoriaSeleccionada) {
+            listaFiltrada = listaFiltrada.filter(producto => 
+                producto.categoria_id === parseInt(categoriaSeleccionada)
+            );
+        }
+        
         // Aplicar ordenamiento por ID
         const listaOrdenada = [...listaFiltrada].sort((a, b) => {
             if (ordenId === 'desc') {
@@ -159,7 +167,7 @@ export default function ProductosManager() {
         
         setProductosFiltrados(listaOrdenada);
         setPaginaActual(1); // Resetear a página 1 cuando cambian los filtros
-    }, [busqueda, productos, ordenId]);
+    }, [busqueda, productos, ordenId, categoriaSeleccionada]);
     
     // Calcular productos de la página actual con useMemo para optimizar
     const productosPaginados = useMemo(() => {
@@ -427,6 +435,53 @@ export default function ProductosManager() {
                         </button>
                     )}
                 </div>
+            </div>
+
+            {/* Filtro por categoría */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-3">Filtrar por Categoría</h3>
+                <div className="flex flex-wrap gap-2">
+                    {/* Botón "Todas" para limpiar filtro */}
+                    <button
+                        onClick={() => setCategoriaSeleccionada('')}
+                        className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                            categoriaSeleccionada === ''
+                                ? 'bg-blue-600 text-white shadow-md'
+                                : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                        }`}
+                    >
+                        Todas
+                    </button>
+                    
+                    {/* Botones para cada categoría */}
+                    {categorias
+                        .filter(cat => cat.activo)
+                        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                        .map(categoria => (
+                            <button
+                                key={categoria.categoria_id}
+                                onClick={() => setCategoriaSeleccionada(categoria.categoria_id.toString())}
+                                className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                                    categoriaSeleccionada === categoria.categoria_id.toString()
+                                        ? 'bg-blue-600 text-white shadow-md'
+                                        : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
+                                }`}
+                            >
+                                {categoria.nombre}
+                            </button>
+                        ))
+                    }
+                </div>
+                
+                {/* Información de productos filtrados por categoría */}
+                {categoriaSeleccionada && (
+                    <div className="mt-3 text-sm text-gray-600">
+                        Mostrando productos de la categoría:{' '}
+                        <span className="font-semibold">
+                            {categorias.find(cat => cat.categoria_id === parseInt(categoriaSeleccionada))?.nombre || 'Desconocida'}
+                        </span>
+                    </div>
+                )}
             </div>
 
             {/* Información de productos y paginación */}
