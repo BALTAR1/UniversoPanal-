@@ -3,6 +3,38 @@
 import { supabase } from '../lib/supabaseCliente.js';
 
 /**
+ * Función auxiliar para obtener ofertas vigentes
+ * Centraliza la lógica de filtrado de ofertas por fecha
+ * @returns {Promise<Array>} Ofertas vigentes
+ */
+const obtenerOfertasVigentes = async () => {
+    const { data: ofertasActivas } = await supabase
+        .from('ofertas')
+        .select('*')
+        .eq('activo', true);
+
+    if (!ofertasActivas || ofertasActivas.length === 0) {
+        return [];
+    }
+
+    // Filtrar ofertas vigentes por fecha
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    
+    return ofertasActivas.filter(oferta => {
+        if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
+        
+        const fechaInicio = new Date(oferta.fecha_inicio);
+        fechaInicio.setHours(0, 0, 0, 0);
+        
+        const fechaFin = new Date(oferta.fecha_fin);
+        fechaFin.setHours(23, 59, 59, 999);
+        
+        return fechaInicio <= now && fechaFin >= now;
+    });
+};
+
+/**
  * Servicio para consultas públicas de productos
  * No requiere autenticación, ideal para el catálogo público
  */
@@ -43,27 +75,7 @@ export const productosPublicosService = {
         // Si soloOfertas es true, primero obtenemos las ofertas vigentes
         let productosIdsConOferta = [];
         if (soloOfertas) {
-            // Obtener ofertas activas
-            const { data: ofertasActivas } = await supabase
-                .from('ofertas')
-                .select('*')
-                .eq('activo', true);
-
-            // Filtrar ofertas vigentes por fecha
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            
-            const ofertasVigentes = (ofertasActivas || []).filter(oferta => {
-                if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
-                
-                const fechaInicio = new Date(oferta.fecha_inicio);
-                fechaInicio.setHours(0, 0, 0, 0);
-                
-                const fechaFin = new Date(oferta.fecha_fin);
-                fechaFin.setHours(23, 59, 59, 999);
-                
-                return fechaInicio <= now && fechaFin >= now;
-            });
+            const ofertasVigentes = await obtenerOfertasVigentes();
             
             // Extraer IDs de productos con ofertas
             productosIdsConOferta = ofertasVigentes.map(o => o.producto_id);
@@ -101,7 +113,8 @@ export const productosPublicosService = {
         }
 
         if (marca && marca.trim() !== '') {
-            query = query.eq('marca', marca);
+            // Usar ilike para búsqueda case-insensitive
+            query = query.ilike('marca', marca);
         }
 
         if (precioMin !== null && precioMin > 0) {
@@ -113,20 +126,22 @@ export const productosPublicosService = {
         }
 
         if (busqueda && busqueda.trim() !== '') {
-            // Búsqueda en nombre o descripción (case insensitive)
-            // Si busqueda contiene comas, dividir y crear múltiples condiciones OR
+            // Búsqueda mejorada: nombre, descripción, marca, modelo y SKU
             const palabras = busqueda.split(',').map(p => p.trim()).filter(p => p !== '');
             
             if (palabras.length > 1) {
-                // Múltiples palabras: crear condición OR para cada una
+                // Múltiples palabras: crear condición OR para cada una en múltiples campos
                 const condiciones = palabras.flatMap(palabra => [
                     `nombre.ilike.%${palabra}%`,
-                    `descripcion.ilike.%${palabra}%`
+                    `descripcion.ilike.%${palabra}%`,
+                    `marca.ilike.%${palabra}%`,
+                    `modelo.ilike.%${palabra}%`,
+                    `sku.ilike.%${palabra}%`
                 ]);
                 query = query.or(condiciones.join(','));
             } else {
-                // Una sola palabra
-                query = query.or(`nombre.ilike.%${busqueda}%,descripcion.ilike.%${busqueda}%`);
+                // Una sola palabra - buscar en todos los campos relevantes
+                query = query.or(`nombre.ilike.%${busqueda}%,descripcion.ilike.%${busqueda}%,marca.ilike.%${busqueda}%,modelo.ilike.%${busqueda}%,sku.ilike.%${busqueda}%`);
             }
         }
 
@@ -143,49 +158,8 @@ export const productosPublicosService = {
             throw error;
         }
 
-        // Obtener ofertas activas para todos los productos (si no se hizo antes)
-        let ofertasVigentes = [];
-        if (!soloOfertas) {
-            // Solo obtener ofertas si no se filtraron antes
-            const { data: ofertasActivas } = await supabase
-                .from('ofertas')
-                .select('*')
-                .eq('activo', true);
-
-            // Filtrar ofertas vigentes por fecha en JavaScript
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            
-            ofertasVigentes = (ofertasActivas || []).filter(oferta => {
-                if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
-                
-                const fechaInicio = new Date(oferta.fecha_inicio);
-                fechaInicio.setHours(0, 0, 0, 0);
-                
-                const fechaFin = new Date(oferta.fecha_fin);
-                fechaFin.setHours(23, 59, 59, 999);
-                
-                return fechaInicio <= now && fechaFin >= now;
-            });
-        } else {
-            // Si soloOfertas, ya tenemos las ofertas vigentes, solo necesitamos recargarlas
-            const { data: ofertasActivas } = await supabase
-                .from('ofertas')
-                .select('*')
-                .eq('activo', true);
-                
-            const now = new Date();
-            now.setHours(0, 0, 0, 0);
-            
-            ofertasVigentes = (ofertasActivas || []).filter(oferta => {
-                if (!oferta.fecha_inicio || !oferta.fecha_fin) return false;
-                const fechaInicio = new Date(oferta.fecha_inicio);
-                fechaInicio.setHours(0, 0, 0, 0);
-                const fechaFin = new Date(oferta.fecha_fin);
-                fechaFin.setHours(23, 59, 59, 999);
-                return fechaInicio <= now && fechaFin >= now;
-            });
-        }
+        // Obtener ofertas activas para todos los productos
+        const ofertasVigentes = await obtenerOfertasVigentes();
 
         // Obtener combos activos
         const { data: combosActivos } = await supabase
@@ -432,23 +406,41 @@ export const categoriasPublicasService = {
 
     /**
      * Obtiene todas las marcas únicas disponibles
+     * Extrae marcas inteligentemente del nombre si no están en la columna marca
      * @returns {Promise<Array<string>>}
      */
     obtenerMarcas: async () => {
         const { data, error } = await supabase
             .from('productos')
-            .select('marca')
+            .select('marca, nombre')
             .eq('activo', true);
 
         if (error || !data) {
             return [];
         }
 
+        // Marcas conocidas para extracción inteligente
+        const marcasConocidas = ['Huggies', 'Pampers', 'Babysec', 'Chicco', 'Fisher-Price', 'Johnsons'];
+
         // Extrae marcas únicas y cuenta productos por marca
         const marcasMap = {};
         data.forEach(p => {
-            if (p.marca) {
-                marcasMap[p.marca] = (marcasMap[p.marca] || 0) + 1;
+            let marcaFinal = p.marca;
+            
+            // Si no hay marca o está vacía, intentar extraer del nombre
+            if (!marcaFinal || marcaFinal.trim() === '') {
+                // Buscar si el nombre contiene alguna marca conocida
+                const nombreLower = (p.nombre || '').toLowerCase();
+                for (const marcaConocida of marcasConocidas) {
+                    if (nombreLower.includes(marcaConocida.toLowerCase())) {
+                        marcaFinal = marcaConocida;
+                        break;
+                    }
+                }
+            }
+            
+            if (marcaFinal) {
+                marcasMap[marcaFinal] = (marcasMap[marcaFinal] || 0) + 1;
             }
         });
 

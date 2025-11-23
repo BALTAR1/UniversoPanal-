@@ -365,13 +365,15 @@ export default function FilterSidebar({
                     </select>
                 </div>
 
-                {/* Botón limpiar filtros */}
-                <button
-                    onClick={limpiarFiltros}
-                    className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 px-4 rounded-md transition-all duration-200 text-sm hover:shadow-lg active:scale-95"
-                >
-                    Limpiar todos los filtros
-                </button>
+                {/* Botón limpiar filtros - Solo en desktop */}
+                {!isMobile && (
+                    <button
+                        onClick={limpiarFiltros}
+                        className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-2.5 px-4 rounded-md transition-all duration-200 text-sm hover:shadow-lg active:scale-95"
+                    >
+                        Limpiar todos los filtros
+                    </button>
+                )}
             </div>
         </aside>
     );
