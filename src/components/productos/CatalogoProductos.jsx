@@ -248,10 +248,20 @@ export default function CatalogoProductos({
 
                         {/* Mobile Header con botones de Ordenar y Filtrar */}
                         <div className="md:hidden">
-                            <p className="text-sm text-gray-600 mb-3">
+                            <h2 className="text-3xl font-bold text-[#ff792b] mb-2">
+                                {filtros.soloOfertas 
+                                    ? 'Ofertas Activas' 
+                                    : filtros.soloCombos 
+                                    ? 'Combos Especiales'
+                                    : filtros.categoria_id 
+                                    ? categorias.find(c => c.categoria_id === filtros.categoria_id)?.nombre 
+                                    : 'Todos los productos'
+                                }
+                            </h2>
+                            <p className="text-gray-700 font-semibold mb-3">
                                 {loading 
                                     ? 'Cargando...' 
-                                    : `${paginacion.total} ${paginacion.total === 1 ? 'resultado' : 'resultados'}`
+                                    : `${paginacion.total} ${paginacion.total === 1 ? 'resultado encontrado' : 'resultados encontrados'}`
                                 }
                             </p>
                             <div className="flex gap-2">
