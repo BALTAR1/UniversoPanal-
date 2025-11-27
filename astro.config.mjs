@@ -2,26 +2,18 @@
 import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
-
 import react from '@astrojs/react';
 
-import node from '@astrojs/node';
-
-// https://astro.build/config
+// 🚀 CONFIG PARA STATIC SITE (Render)
+// NO usa SSR
+// NO usa @astrojs/node
 export default defineConfig({
-  output: 'server', // SSR habilitado
-  adapter: node({
-    mode: 'standalone'
-  }),
-
-  server: {
-    host: '0.0.0.0',
-    port: process.env.PORT ? Number(process.env.PORT) : 4321
-  },
-
+  output: 'static',            // 🔥 obligatorio para static hosting
+  integrations: [react()],
+  
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
   },
 
-  integrations: [react()]
+  // No hace falta configurar puerto porque NO se ejecuta como servidor.
 });
