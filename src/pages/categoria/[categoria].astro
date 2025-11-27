@@ -9,11 +9,15 @@ import Footer from '../../components/desktop/Footer.astro';
 import CatalogoProductos from '../../components/productos/CatalogoProductos.jsx';
 import WhatsAppButton from "../../components/ui/WhatsAppButton.astro";
 
-// Obtener el parámetro de la categoría desde la URL
-const { categoria } = Astro.params;
+// Generar rutas estáticas para todas las categorías
+export function getStaticPaths() {
+  const categorias = ['pañales', 'nutrición', 'higiene', 'adultos', 'accesorios', 'toallitas-humedas', 'mama', 'ofertas'];
+  return categorias.map(categoria => ({
+    params: { categoria }
+  }));
+}
 
 // Mapeo de categorías URL a nombres para mostrar y buscar
-// La búsqueda es opcional, se usa como filtro adicional si no hay categoría en BD
 const categoriasMap: Record<string, { nombre: string; busqueda?: string; tipo?: string }> = {
   'pañales': { nombre: 'Pañales', busqueda: 'pañal' },
   'nutrición': { nombre: 'Nutrición', busqueda: 'leche,formula,nutricion' },
@@ -24,6 +28,9 @@ const categoriasMap: Record<string, { nombre: string; busqueda?: string; tipo?: 
   'mama': { nombre: 'Mama', busqueda: 'mama,materna,lactancia' },
   'ofertas': { nombre: 'Ofertas', tipo: 'ofertas' }
 };
+
+// Obtener el parámetro de la categoría desde la URL
+const { categoria } = Astro.params;
 
 const categoriaKey = categoria?.toLowerCase() || 'productos';
 const categoriaInfo = categoriasMap[categoriaKey] || { nombre: 'Productos' };

@@ -5,9 +5,22 @@ import NavMobile from '../../mobile/NavMobile.astro';
 import MenuBurger from '../../mobile/MenuBurger.astro';
 import Footer from '../../components/ui/Footer.astro';
 import DetalleCombo from '../../components/combos/DetalleCombo.jsx';
+import { supabase } from '../../lib/supabaseCliente.js';
 
-// Hacer que esta página sea renderizada del lado del servidor (SSR)
-export const prerender = false;
+// Pre-renderizar todas las páginas de combos
+export const prerender = true;
+
+// Generar rutas estáticas para todos los combos
+export async function getStaticPaths() {
+    const { data: combos } = await supabase
+        .from('combos')
+        .select('combo_id')
+        .eq('activo', true);
+    
+    return combos?.map(combo => ({
+        params: { id: combo.combo_id.toString() }
+    })) || [];
+}
 
 // Obtener el ID del combo de la URL
 const { id } = Astro.params;

@@ -5,9 +5,22 @@ import NavMobile from '../../mobile/NavMobile.astro';
 import MenuBurger from '../../mobile/MenuBurger.astro';
 import Footer from '../../components/ui/Footer.astro';
 import DetalleProducto from '../../components/productos/DetalleProducto.jsx';
+import { supabase } from '../../lib/supabaseCliente.js';
 
-// Hacer que esta página sea renderizada del lado del servidor (SSR)
-export const prerender = false;
+// Pre-renderizar todas las páginas de productos
+export const prerender = true;
+
+// Generar rutas estáticas para todos los productos
+export async function getStaticPaths() {
+    const { data: productos } = await supabase
+        .from('productos')
+        .select('producto_id')
+        .eq('activo', true);
+    
+    return productos?.map(producto => ({
+        params: { id: producto.producto_id.toString() }
+    })) || [];
+}
 
 // Obtener el ID del producto de la URL
 const { id } = Astro.params;
